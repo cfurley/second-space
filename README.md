@@ -1,2 +1,2 @@
 # Software-Engineering-Group-D
-Software Engineering (group d) project repository.
+This is the repository for Group-D in Software Engineering.
