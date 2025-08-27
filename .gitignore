@@ -1,0 +1,6 @@
+# Add any other files or directories you would like to omit from the repository here..
+
+.vscode/
+*.env
+*.exe
+*.out
