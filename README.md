@@ -2,8 +2,13 @@ CS3203 Group D
 
 # Second Space
 
-This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving and creating boards with media from the users device or social media profiles.
+<img src='./resources/stock_image_01.png'>
 
+
+
+## Summary
+
+This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving and creating boards with media from the users device or social media profiles. Feel free to expand upon this summary.
 
 ## Project Structure
 
@@ -26,7 +31,7 @@ This is the database for the second space application. This can either be a <b>M
 It's worth noting that if we are storing data such as images or gifs or other unstructured data, it might be worth using MongoDB. There are AWS, Google, and Microsoft server hosts for MongoDB, but I think local would be better since its free.
 
 ### Resources
-This directory can be a place to store resources for the website such as <b>images</b> or <b>icons</b>.
+This directory can be a place to store resources for the website such as <b>images</b> or <b>icons</b>. Currently it contains one of the stock images Riley had in the presentation.
 
 ## Editing Code & Branching
 * Before altering code, please <b>create a new branch</b> to develop on. 
