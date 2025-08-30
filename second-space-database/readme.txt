@@ -1,0 +1,1 @@
+This directory is where we could implement the database for second space.
