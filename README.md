@@ -34,6 +34,4 @@ It's worth noting that if we are storing data such as images or gifs or other un
 This directory can be a place to store resources for the website such as <b>images</b> or <b>icons</b>. Currently it contains one of the stock images Riley had in the presentation.
 
 ## Editing Code & Branching
-* Before altering code, please <b>create a new branch</b> to develop on. 
-* Once you have finished your feature or patch, <b>merge</b> your branch with <b>dev</b>.
-* When the team agrees, we can <b>merge</b> all code in the <b>dev</b> branch to <b>main</b> which is our live application.
+Please push code to the <b>dev</b> branch, that way main is our stable application branch.
