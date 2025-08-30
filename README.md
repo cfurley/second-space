@@ -1,7 +1,5 @@
-# Software Engineering Group D
-This is the repository for our group project in Software Engineering.
-<br><br>
-Once we have a project idea, we can explain the project here..
+# Second Space
+This is the repository for <b>Second Space</b>, our group project in software engineering.
 <br><br>
 
 ## Working with the Repository
