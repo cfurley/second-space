@@ -10,11 +10,11 @@ CS3203 Group D
 
 This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving and creating boards with media from the users device or social media profiles. Feel free to expand upon this summary.
 
-## Project Structure
+## Project Architecture
 
 ### AI
 
-This is the main feature of the software product. <b>Second Space AI</b> could help to build the <b>Spaces</b> where users can collect their media too. <b>Second Space AI</b> could also gather media from other websites for the users. For example if they logged into those sites through the app, or a web scaper. But this would be hard to build and might be a privacy risk since we are accessing user data? <- even though microsoft has all our data anyways..
+This is the main feature of the software product. <b>Second Space AI</b> could help to build the <b>Spaces</b> where users can collect their media too. <b>Second Space AI</b> could also gather media from other websites or google images for the users. think of the search for media thats built into modern powerpoint.
 
 ### Frontend
 
