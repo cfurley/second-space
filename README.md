@@ -22,13 +22,13 @@ This is the frontend of the second space application. I copied over the demo tha
 
 ### API
 
-This is the api for the application. This can be built in either <b>PHP</b> or <b>NodeJS</b>. This should ideally be stateless, and be used for handling POST and GET reqeuest, and interacting with the database on a seperate port than the frontend for security.
+This is the api for the application. This can be built in either <b>PHP</b> or <b>NodeJS</b>. This should ideally be stateless, and be used for handling POST and GET requests, and interacting with the database on a seperate port than the frontend for security.
 
 ### Database
 
 This is the database for the second space application. This can either be a <b>MySQL</b>, <b>Postgres</b>, or <b>MongoDB</b> database. 
 
-It's worth noting that if we are storing data such as images or gifs or other unstructured data, it might be worth using MongoDB. There are AWS, Google, and Microsoft server hosts for MongoDB, but I think local would be better since its free.
+It's worth noting that if we are storing data such as images or gifs or other unstructured data, it might be worth using MongoDB. this is because it stores data in json format do its more flexibly than a SQL table. There are AWS, Google, and Microsoft server hosts for MongoDB, but I think local would be better since its free.
 
 ### Resources
 This directory can be a place to store resources for the website such as <b>images</b> or <b>icons</b>. Currently it contains one of the stock images Riley had in the presentation.
