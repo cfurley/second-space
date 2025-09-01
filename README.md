@@ -8,10 +8,10 @@ CS3203 Group D
 This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving and creating think/mood boards with media from the users device or social media profiles. **Feel free to expand upon this summary.
 
 ## Project Architecture
-<img src='./resources/second_space_architecture_01.png' width="420"> <br>
+<img src='./resources/second_space_architecture_01.png' width="720"> <br>
 Single Server Architecture: Diagram 1
 
-<img src='./resources/second_space_architecture_02.png' width='300'> <br>
+<img src='./resources/second_space_architecture_02.png' width='720'> <br>
 Multi Service Architecture: Diagram 2 (from textbook)
 
 ### AI
