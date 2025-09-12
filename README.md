@@ -18,9 +18,6 @@ From here, run the container from within vscode, docker desktop or cli.
 <img src='./resources/second_space_architecture_01.png' width="720"> <br>
 Single Server Architecture: Diagram 1
 
-<img src='./resources/second_space_architecture_02.png' width='720'> <br>
-Multi Service Architecture: Diagram 2 (from textbook)
-
 ## AI
 
 This is the main feature of the software product. <b>Second Space AI</b> could help to build the <b>Spaces</b> where users can collect their media too. <b>Second Space AI</b> could also gather media from other websites or google images for the users. think of the search for media thats built into modern powerpoint. **Again Feel Free To Edit This.
