@@ -3,7 +3,7 @@ CS3203 Group D
 # Second Space
 <img src='./resources/stock_image_01.png'>
 
-## Summary
+# Summary
 
 This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving and creating think/mood boards with media from the users device or social media profiles. **Feel free to expand upon this summary.
 
