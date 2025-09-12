@@ -7,6 +7,13 @@ CS3203 Group D
 
 This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving and creating think/mood boards with media from the users device or social media profiles. **Feel free to expand upon this summary.
 
+# Installation
+Install Docker Desktop
+Clonse into the repository
+run "docker build frontend -t frontend-server:0.0; docker build backend -t backend-server:0.0;"
+^once database and ai-server setup will add to build command
+From here, run the container from within vscode, docker desktop or cli.
+
 ## Project Architecture
 <img src='./resources/second_space_architecture_01.png' width="720"> <br>
 Single Server Architecture: Diagram 1
