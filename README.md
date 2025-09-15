@@ -9,18 +9,7 @@ CS3203 Group D
 
 This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving and creating think/mood boards with media from the users device or social media profiles.
 
-<br><br>
-
-# Feature Ideas
-* AI: Help scrape media for the spaces, as well as help format and create spaces.
-* Customization: Bitmoji, Profile Picture, Themes(monkey-type), Custom Themes, ..
-* Spaces: think/mood boards for users to create and add media
-* Data Sharing: Upload media such as videos, images, text, gifs, ..
-* Promo Events: Special Bit Mojos, or special themes for certain events.
-* Collaberation: Multiple users able to share and work on the same mood board at the same time.
-* Time Capsule: Create time capsule spaces which shows what you did a year ago, or five years ago.
-
-<br><br>
+<br>
 
 # Installation
 1. Install Docker Desktop from https://www.docker.com/products/docker-desktop/
@@ -34,7 +23,18 @@ This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving 
 6. To stop the servers run:<br>
    "docker compose down"
 
-<br><br>
+<br>
+
+# Feature Ideas
+* AI: Help scrape media for the spaces, as well as help format and create spaces.
+* Customization: Bitmoji, Profile Picture, Themes(monkey-type), Custom Themes, ..
+* Spaces: think/mood boards for users to create and add media
+* Data Sharing: Upload media such as videos, images, text, gifs, ..
+* Promo Events: Special Bit Mojos, or special themes for certain events.
+* Collaberation: Multiple users able to share and work on the same mood board at the same time.
+* Time Capsule: Create time capsule spaces which shows what you did a year ago, or five years ago.
+
+<br>
 
 # Project Architecture
 <img src='./resources/second_space_architecture.png' width="720"> <br>
@@ -60,13 +60,13 @@ This is the database for the application. The database will hold user account in
 ### Resources
 This directory is the place to store resources for the website such as <b>images</b> or <b>icons</b>.
 
-<br><br>
+<br>
 
 # Editing Code & Branching
 
 We need to make a standard for code editing, branching, mergine, pull requests, etc..
 
-<br><br>
+<br>
 
 # Testing
 
