@@ -31,7 +31,7 @@ This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving 
    second-space-ai & second-space database are WIP..
 7. In your web browser visit: "localhost:80" for the frontend.<br>
    In your web browser visit: "localhost:8080" for the backend.<br>
-   ...ai & database are WIP...
+   second-space-ai & second-space-database are WIP..
 
 # Project Architecture
 <img src='./resources/second_space_architecture_01.png' width="720"> <br>
