@@ -19,11 +19,11 @@ This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving 
 # Installation
 1. Install Docker Desktop..
 2. Clone into the repository..
-4. Run the command: "docker build frontend -t frontend-server:0.1;<br>
-   Run the command: "docker build backend -t backend-server:0.1;<br>
+4. Run the command: "docker build -t frontend-server:0.1 frontend"<br>
+   Run the command: "docker build -t backend-server:0.1 backend"<br>
    ai & database are WIP..
-6. Run the command: "docker run frontend-server:0.1 -d -p 80:80<br>
-   Run the command: "docker run backend-server:0.1 -d -p 8080:8080<br>
+6. Run the command: "docker run -d -p 80:80 frontend-server:0.1"<br>
+   Run the command: "docker run -d -p 8080:8080 backend-server:0.1"<br>
    ai & database are WIP..
 7. In your web browser visit: "localhost:80" for the frontend.<br>
    In your web browser visit: "localhost:8080" for the backend.<br>
