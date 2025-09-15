@@ -24,11 +24,11 @@ This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving 
 5. Build the docker images:<br>
    Run the command: "docker build -t second-space-frontend ./frontend"<br>
    Run the command: "docker build -t second-space-backend ./backend"<br>
-   ai & database are WIP..
+   second-space-ai & second-space-database are WIP..
 6. Run the docker containers:<br>
    Run the command: "docker run -d -p 80:80 second-space-frontend"<br>
    Run the command: "docker run -d -p 8080:8080 second-space-backend"<br>
-   ...ai & database are WIP...
+   second-space-ai & second-space database are WIP..
 7. In your web browser visit: "localhost:80" for the frontend.<br>
    In your web browser visit: "localhost:8080" for the backend.<br>
    ...ai & database are WIP...
