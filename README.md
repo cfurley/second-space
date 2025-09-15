@@ -13,7 +13,7 @@ This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving 
 
 # Installation
 1. Install Docker Desktop from https://www.docker.com/products/docker-desktop/
-2. Clone into this repository from https://github.com/cfurley/software-engineering-group-d
+2. Clone into this repository
 3. Open the project in your IDE..
 4. In your IDE terminal run the command:<br>
    "docker compose up -d"
