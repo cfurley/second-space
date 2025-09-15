@@ -7,12 +7,27 @@ CS3203 Group D
 
 This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving and creating think/mood boards with media from the users device or social media profiles. **Feel free to expand upon this summary.
 
+# Feature Ideas
+* AI: Help scrape media for the spaces, as well as help format and create spaces.
+* Customization: Bitmoji, Profile Picture, Themes(monkey-type), Custom Themes, ..
+* Spaces: think/mood boards for users to create and add media
+* Data Sharing: Upload media such as videos, images, text, gifs, ..
+* Promo Events: Special Bit Mojos, or special themes for certain events.
+* Collaberation: Multiple users able to share and work on the same mood board at the same time.
+* Time Capsule: Create time capsule spaces which shows what you did a year ago, or five years ago.
+
 # Installation
-Install Docker Desktop
-Clonse into the repository
-run "docker build frontend -t frontend-server:0.0; docker build backend -t backend-server:0.0;"
-^once database and ai-server setup will add to build command
-From here, run the container from within vscode, docker desktop or cli.
+1. Install Docker Desktop..
+2. Clone into the repository..
+4. Run the command: "docker build frontend -t frontend-server:0.1;<br>
+   Run the command: "docker build backend -t backend-server:0.1;<br>
+   ai & database are WIP..
+6. Run the command: "docker run frontend-server:0.1 -d -p 80:80<br>
+   Run the command: "docker run backend-server:0.1 -d -p 8080:8080<br>
+   ai & database are WIP..
+7. In your web browser visit: "localhost:80" for the frontend.<br>
+   In your web browser visit: "localhost:8080" for the backend.<br>
+   ai & database are WIP..
 
 # Project Architecture
 <img src='./resources/second_space_architecture_01.png' width="720"> <br>
@@ -24,9 +39,7 @@ This is the main feature of the software product. <b>Second Space AI</b> could h
 
 ## Frontend
 
-This is the frontend of the second space application. I copied over the demo that LightTurtle made. Use the command -> <b>"npm i; npm run dev;"</b> to run the program. (You must have nodejs and npm installed.)
-
-The frontend of the application is what the users will interact with, this can be the <b>web application</b>, or even the <b>mobile application.</b> For web, frameworks lite VueJS or React can be used. For mobile there is Swift, and Java im pretty sure for Android.
+This is the part of the application which the users will interact with. The frontend will be built in ReactJS and will interact directly with the backend api
 
 ## API
 
@@ -50,10 +63,3 @@ Please push code to the <b>dev</b> branch, that way main is our stable applicati
 
 # Testing
 We can try to use testing through github, or write our own test. Im not very familiar with this process..
-
-# Anything Else Please Add!
-Im serious, add to this readme!<br>
-Images are easy to put in, just add the image to resources then in the document where you want to use it just type: <br>
-'< img src='./resources/$YOU_IMAGE_NAME' width='300'>'
-<br>
-If we all put our mind to it we can build something cool, that is actually functional, and hopefully find a way to incorporate AI, that might need to be someone job tbh.
