@@ -8,7 +8,7 @@
   "main": "server.js",
   "scripts": {
     "test": "test",
-    "start": "node server.js"
+    "start": "node app.js"
   },
   "dependencies": {
     "express": "^5.1.0",

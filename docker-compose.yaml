@@ -7,7 +7,15 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
-  
+    depends_on:
+      - database
+    environment:
+      - DB_HOST=database # the service name below..
+      - DB_PORT=5432
+      - DB_USER=myuser
+      - DB_PASSWORD=mypassword
+      - DB_NAME=mydatabase
+
   frontend:
     build:
       context: ./frontend
@@ -16,3 +24,20 @@ services:
       - "80:80"
     depends_on:
       - backend
+
+  database:
+      image: "postgres:16-alpine"
+      container_name: second-space-database
+      restart: always
+      environment:
+        - POSTGRES_USER=myuser          # Should update this to use .env
+        - POSTGRES_PASSWORD=mypassword  # Should update this to use .env
+        - POSTGRES_DB=mydatabase        # Should update this to use .env
+      ports:
+        - "5432:5432"
+      volumes:
+        - second_space_data:/var/lib/postgresql/data
+        - ./database/init:/docker-entrypoint-initdb.d
+      
+volumes:
+  second_space_data:
