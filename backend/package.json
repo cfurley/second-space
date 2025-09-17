@@ -9,10 +9,5 @@
   "scripts": {
     "test": "test",
     "start": "node app.js"
-  },
-  "dependencies": {
-    "express": "^5.1.0",
-    "nodemon": "^3.1.10",
-    "pg": "^8.16.3"
   }
 }
