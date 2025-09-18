@@ -25,6 +25,7 @@ app.get('/', (req, res) => {
 
 // === API Routes for CRUD operations ===
 
+/*
 // Endpoint to retrieve all todo items
 app.get('/api/todos', async (req, res) => {
   try {
@@ -36,8 +37,10 @@ app.get('/api/todos', async (req, res) => {
     res.status(500).json({ error: 'Failed to retrieve todo items.' });
   }
 });
+*/
 
 // Endpoint to create a new todo item
+/*
 app.post('/api/test', async (req, res) => {
   try {
     const { description } = req.body;
@@ -49,6 +52,7 @@ app.post('/api/test', async (req, res) => {
     res.status(500).json({ error: 'Failed to create todo item.' });
   }
 });
+*/
 
 // Start the server and listen for connections
 app.listen(PORT, HOST, () => {
