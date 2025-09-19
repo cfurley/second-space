@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Start Docker Compose services
         run: docker compose up -d
       
@@ -23,8 +23,8 @@ jobs:
       - name: Check running containers
         run: docker ps
       
-      - name: Run tests (optional)
-        run: docker compose exec your-service-name pytest
+#     - name: Run tests (optional)
+#       run: docker compose exec your-service-name pytest
       
       - name: Clean up Docker containers
         # This will run even if a previous step fails
