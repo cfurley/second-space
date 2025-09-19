@@ -1,3 +1,5 @@
+[![Docker Compose CI](https://github.com/cfurley/second-space/actions/workflows/ci-docker-compose-.yml/badge.svg)](https://github.com/cfurley/second-space/actions/workflows/ci-docker-compose-.yml)
+
 CS3203 Group D
 
 # Second Space
