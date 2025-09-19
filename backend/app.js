@@ -6,6 +6,7 @@ const PORT = 8080;
 const HOST = '0.0.0.0';
 
 // Connect to the PostgreSQL Database.  
+/*
 const client = new Client({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -14,6 +15,7 @@ const client = new Client({
   database: process.env.DB_NAME,
 });
 client.connect();
+*/
 
 // Add this middleware to your Express app to parse JSON bodies
 app.use(express.json());
