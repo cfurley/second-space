@@ -66,10 +66,27 @@ This directory is the place to store resources for the website such as <b>images
 
 # Editing Code & Branching
 
-We need to make a standard for code editing, branching, mergine, pull requests, etc..
+Workflow:
+1. git pull
+2. git branch new-branch-name
+3. git checkout new-branch-name
+4. ** make all the code changes you need **
+5. git add path/to/files/changed
+6. git commit -m "Message about the commit"
+7. git push --set-upstream origin new-branch-name
+8. ** go to github **
+9. ** merge pull request with main **
+10. git checkout main
+11. git pull
+
+This allows us to utilize pull requests properlly and help to avoid making edits to the codebase which could break it.
+Dont forget to run git pull before editing code.
 
 <br>
 
 # Testing
 
-We need to make a standard for testing, likely using github actions.
+When code is pushed to main or merged via a pull request, the CI Docker Compose workflow will trigger and create a virtual machine in which itll run all our server and test if they are online. The badge at the top of the readme will indicate the most recent status of these tests.
+
+Currently, the tests only check if the servers go online and stay running, but we can write individual tests, such as a GET or POST request for each of the parts of the application like frontend, backend, datbase queries, etc. These tests, when written can be integrated into the Github Actions worlflow to run on every push or merge with main.
+
