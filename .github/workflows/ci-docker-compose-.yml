@@ -1,0 +1,32 @@
+name: Docker Compose CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Start Docker Compose services
+        run: docker compose up -d
+      
+      - name: Wait for services to be ready
+        run: sleep 10 # Adjust this delay as needed
+      
+      - name: Check running containers
+        run: docker ps
+      
+      - name: Run tests (optional)
+        run: docker compose exec your-service-name pytest
+      
+      - name: Clean up Docker containers
+        # This will run even if a previous step fails
+        if: always()
+        run: docker compose down
