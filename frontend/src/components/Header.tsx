@@ -34,6 +34,7 @@ export function Header({ activeNav, onNavChange, onLogout }: HeaderProps) {
       <div className="flex items-center gap-4">
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         <input
           type="text"
           placeholder="Search spaces..."
@@ -59,6 +60,29 @@ export function Header({ activeNav, onNavChange, onLogout }: HeaderProps) {
 =======
         <UserMenu isLoggedIn={isLoggedIn} userName="Andrew Truong" userInitials="AT" />
 >>>>>>> 6133eba (Updated UI for user login and Signup)
+=======
+        <UserMenu isLoggedIn={isLoggedIn} userName="Andrew Truong" userInitials="AT" />
+=======
+        <input
+          type="text"
+          placeholder="Search spaces..."
+          className="w-[200px] bg-white/8 border border-white/20 rounded-full px-4 py-2 text-white text-sm placeholder:text-white/50 focus:outline-none focus:border-white/40"
+        />
+        <div className="flex items-center gap-2">
+          <div className="w-9 h-9 rounded-full bg-white/8 border border-white/30 flex items-center justify-center text-white text-xs">
+            AT
+          </div>
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="text-white/60 hover:text-white text-sm transition-colors px-3 py-1 rounded-md hover:bg-white/10"
+            >
+              Logout
+            </button>
+          )}
+        </div>
+>>>>>>> 6f4648f (Use cursor to set up preliminary login flow)
+>>>>>>> e277e2c (Use cursor to set up preliminary login flow)
       </div>
     </header>
   );
