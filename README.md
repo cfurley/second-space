@@ -14,16 +14,11 @@ This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving 
 <br>
 
 # Installation
-1. Install Docker Desktop from https://www.docker.com/products/docker-desktop/
-2. Clone into this repository..
-3. Open the project in your IDE..
-4. In your IDE terminal run the command:<br>
-   "docker compose up -d"
-5. Open a browser and visit:<br>
-   "localhost:80" <- frontend<br>
-   "localhost:8080" <- backend<br>
-6. To stop the servers run:<br>
-   "docker compose down"
+1. Install and Launch Docker Desktop from https://www.docker.com/products/docker-desktop/
+2. Clone into this repository and open with your IDE..
+3. In your IDE terminal run the command: <b>"docker compose up"</b>
+4. Open a browser and visit: <b>"localhost or 127.0.0.1"</b>
+5. To stop the servers run: <b>"docker compose down"</b>
 
 Note: To to make errors go away in the frontend, run the command:<br>
 npm i --save-dev @types/react @types/react-dom  
