@@ -76,7 +76,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
         {/* Logo/Brand */}
         <div className="text-center mb-8">
           <h1 className="text-white text-2xl font-bold mb-2">Second Space</h1>
-          <p className="text-white/60 text-sm">Welcome back to your digital workspace</p>
+          <p className="text-white/60 text-sm">Welcome back!</p>
         </div>
 
         {/* Login Card */}
@@ -84,7 +84,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
           <CardHeader className="text-center">
             <CardTitle className="text-white text-xl">Sign In</CardTitle>
             <CardDescription className="text-white/60">
-              Enter your credentials to access your spaces
+              Enter your email and password to access your spaces
             </CardDescription>
           </CardHeader>
           
