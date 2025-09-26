@@ -3,7 +3,7 @@
 CS3203 Group D
 
 # Second Space
-<img src='./resources/stock_image_01.png'>
+<img src='./resources/FigmaMarkupV1.png'>
 
 <br><br>
 
