@@ -1,6 +1,7 @@
 [![Docker Compose CI](https://github.com/cfurley/second-space/actions/workflows/ci-docker-compose-.yml/badge.svg)](https://github.com/cfurley/second-space/actions/workflows/ci-docker-compose-.yml)
 
-CS3203 Group D
+<small>CS3203 Group D</small>
+
 
 # Second Space
 <img src='./resources/FigmaMarkupV1.png'>
@@ -45,46 +46,38 @@ This is the main feature of the software product. <b>Second Space AI</b> could h
 
 ### Frontend
 
-This is the part of the application which the users will interact with. The frontend will be built in ReactJS and will interact directly with the backend api.
+This is the <b>Main User Facing Application</b>, it includes the <b>home page</b>, <b>login flow</b>, <b>space creation flow</b>, etc. 
 
 ### Backend
 
-This will host our api and if necessary other server side processes. (could be broken up into microservices, our ai-server is a google example of this).
-
-The frontend will send request to the backend for data from the database, or to access ai features, and the API will route, check validaty, and handle all such requests, and respond the frontend with the necessary data, changes, or error codes.
+Using <b>NodeJS Express</b>, the backend handles <b>API Routes</b> for data transfers between <b>Frontend <--> AI</b>, and <b>Frontend <--> Datbase.</b>
 
 ### Database
 
-This is the database for the application. The database will hold user account information, and depending on how it is designed and implemented, will also host the user data such as the media for the spaces, or saves of the spaces.
+The database is <b>Postgres SQL</b> and the scheme is currently being created.
 
 ### Resources
 This directory is the place to store resources for the website such as <b>images</b> or <b>icons</b>.
 
 <br>
 
-# Editing Code & Branching
+# Contributing to Second Space
 
-Workflow:
-1. git pull
-2. git branch new-branch-name
-3. git checkout new-branch-name
-4. ** make all the code changes you need **
-5. git add path/to/files/changed
-6. git commit -m "Message about the commit"
-7. git push --set-upstream origin new-branch-name
-8. ** go to github **
-9. ** merge pull request with main **
-10. git checkout main
-11. git pull
+### Getting Started
+* Clone the repository
+* Create and Publish a new Branch.
 
-This allows us to utilize pull requests properlly and help to avoid making edits to the codebase which could break it.
-Dont forget to run git pull before editing code.
+### Submitting Changes
+* Create a pull request to main.
+* Build tests will be run.
+* Another Peer will Review the pull request.
+* If it passes peer review, it'll be merged to the Main Branch.
 
-<br>
+<br><br><br>
+<hr>
 
-# Testing
-
-When code is pushed to main or merged via a pull request, the CI Docker Compose workflow will trigger and create a virtual machine in which itll run all our server and test if they are online. The badge at the top of the readme will indicate the most recent status of these tests.
-
-Currently, the tests only check if the servers go online and stay running, but we can write individual tests, such as a GET or POST request for each of the parts of the application like frontend, backend, datbase queries, etc. These tests, when written can be integrated into the Github Actions worlflow to run on every push or merge with main.
-
+<small>
+    Group D<br>
+    CS3203<br>
+    © 2025, Second Space<br>
+</small>
