@@ -25,6 +25,9 @@ This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving 
 6. To stop the servers run:<br>
    "docker compose down"
 
+Note: To to make errors go away in the frontend, run the command:<br>
+npm i --save-dev @types/react @types/react-dom  
+
 <br>
 
 # Feature Ideas
