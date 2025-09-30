@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS public.profile_picture CASCADE;
 DROP TABLE IF EXISTS public."user" CASCADE;
 
 -- Holds information about themes such as the font, background color, text color, etc.
+-- TODO: Add attribute columns!
 CREATE TABLE IF NOT EXISTS public.themes
 (
     id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
