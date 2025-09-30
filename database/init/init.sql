@@ -127,8 +127,8 @@ CREATE TABLE IF NOT EXISTS public.space_viewing_history
     user_id bigint NOT NULL,
     last_viewed_date_utc timestamp(3) without time zone NOT NULL,
     view_count integer NOT NULL DEFAULT 1,
-    create_date_utc timestamp without time zone NOT NULL,
-    delete_date_utc timestamp without time zone,
+    create_date_utc timestamp(3) without time zone NOT NULL,
+    delete_date_utc timestamp(3) without time zone,
     deleted smallint NOT NULL DEFAULT 0,
     CONSTRAINT pk_spaceid_userid PRIMARY KEY (space_id, user_id),
     CONSTRAINT fk_spaceid FOREIGN KEY (space_id)
