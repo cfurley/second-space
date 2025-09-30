@@ -17,6 +17,10 @@ CREATE TABLE IF NOT EXISTS public.themes
 (
     id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     attributes_placeholder smallint,
+    create_date_utc timestamp(3) with time zone NOT NULL,
+    update_date_utc timestamp(3) without time zone,
+    delete_date_utc timestamp(3) without time zone,
+    deleted smallint NOT NULL DEFAULT 0,
     CONSTRAINT themes_pkey PRIMARY KEY (id)
 );
 
