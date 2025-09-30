@@ -104,7 +104,10 @@ CREATE TABLE IF NOT EXISTS public.space
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
         NOT VALID
-); -- Create index on created_by_user_id and deleted
+);
+
+CREATE INDEX idx_space_user_deleted 
+    ON public.space (created_by_user_id, deleted);
 
 -- Space ordering keeps track of the ordering a user wants for their spaces. This keeps track of user id due to shared spaces.
 CREATE TABLE IF NOT EXISTS public.space_ordering
@@ -112,7 +115,7 @@ CREATE TABLE IF NOT EXISTS public.space_ordering
     space_id bigint NOT NULL,
     user_id bigint NOT NULL,
     "order" smallint NOT NULL,
-    CONSTRAINT pk_space_id_order PRIMARY KEY (space_id, "order"),
+    CONSTRAINT pk_space_id_order PRIMARY KEY (user_id, space_id, "order"),
     CONSTRAINT fk_space_id FOREIGN KEY (space_id)
         REFERENCES public.space (id) MATCH SIMPLE
         ON UPDATE NO ACTION
@@ -198,7 +201,13 @@ CREATE TABLE IF NOT EXISTS public.shared_spaces_permission_log
         ON UPDATE NO ACTION 
         ON DELETE NO ACTION
         NOT VALID
-); -- TODO: Create index on space_id and deleted. Create index on shared_with_user_id and deleted. Create index on all three. Idk
+);
+
+CREATE INDEX idx_sspl_space_deleted_user 
+    ON public.shared_spaces_permission_log (space_id, deleted, shared_with_user_id);
+CREATE INDEX idx_sspl_user_deleted 
+    ON public.shared_spaces_permission_log (shared_with_user_id, deleted);
+
 
 -- Containers hold media and are associated to spaces and container types.
 CREATE TABLE IF NOT EXISTS public.containers
@@ -230,7 +239,12 @@ CREATE TABLE IF NOT EXISTS public.containers
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
         NOT VALID
-); -- Create index on space id and deleted
+); 
+
+CREATE INDEX idx_containers_space_deleted
+    ON public.containers (space_id, deleted);
+CREATE INDEX idx_containers_user_deleted
+    ON public.containers (created_by_user_id, deleted);
 
 -- Media holds files that are connected to media containers.
 CREATE TABLE IF NOT EXISTS public.media
@@ -251,4 +265,6 @@ CREATE TABLE IF NOT EXISTS public.media
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
         NOT VALID
-); -- Create index on container_id and deleted
+);
+CREATE INDEX idx_media_container_deleted
+    ON public.media (container_id, deleted);
