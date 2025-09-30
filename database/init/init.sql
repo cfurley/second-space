@@ -252,7 +252,7 @@ CREATE TABLE IF NOT EXISTS public.media
     id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
 	container_id bigint NOT NULL,
 	filename character varying(255) COLLATE pg_catalog."default" NOT NULL,
-    filepath character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    filepath text COLLATE pg_catalog."default" NOT NULL,
     file_size smallint NOT NULL,
     video_length double precision,
     create_date_utc timestamp(3) without time zone NOT NULL,
