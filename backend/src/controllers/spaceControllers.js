@@ -35,8 +35,9 @@ const getById = async (req, res) => {
 };
 
 const createSpace = async (req, res) => {
-  // try {
-  // }
+  try {
+    
+  }
 };
 
 export default { getAllSpaces, getById };
