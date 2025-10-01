@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS public."user"
 (
     id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     username character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    password character varying(255) COLLATE pg_catalog."default" NOT NULL,
     display_name character varying(255) COLLATE pg_catalog."default",
     profile_picture_id bigint,
     theme_id integer NOT NULL DEFAULT 1,
