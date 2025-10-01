@@ -18,16 +18,21 @@ const getSpaces = async (userId, spaceId) => {
     queryId = spaceId
   }  
 
-  // returning keyword returns the rows to verify data
-  query += " RETURNING id;"
   try {
-    const result = pool.query(query, [id])
-    return { success: true, status: 200, data: result.rows[0]}
+    const result = await pool.query(query, [id])
+    if (result.rows.length === 0) { // No results
+      return { success: false, status: 404, error: "No spaces found."}
+    }
+    else {  // Has results
+      return { success: true, status: 200, data: result.rows }
+    }
   }
   catch(error) {
     console.log(error)
     return { success: false, status: 500, error: 'Database Error.'}
   }
+  
+ 
 };
 
 const insertSpaceToDatabase = async (space) => {
@@ -35,3 +40,14 @@ const insertSpaceToDatabase = async (space) => {
 };
 
 export default { getSpaces };
+
+ // // returning keyword returns the rows to verify data
+  // query += " RETURNING id;"
+  // try {
+  //   const result = pool.query(query, [id])
+  //   return { success: true, status: 200, data: result.rows[0]}
+  // }
+  // catch(error) {
+  //   console.log(error)
+  //   return { success: false, status: 500, error: 'Database Error.'}
+  // }
