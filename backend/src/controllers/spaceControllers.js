@@ -4,6 +4,7 @@
 // updateSpace
 // deleteSpace
 import spaceService from "../services/spaceServices.js";
+import spaceModel from "../models/spaceModel.js";
 
 const getAllSpaces = async (req, res) => {
   try {
@@ -36,8 +37,19 @@ const getById = async (req, res) => {
 
 const createSpace = async (req, res) => {
   try {
-    
+    const space = spaceModel.fromJson(req.body);
+  } catch (error) {
+    res.status(400).json({ message: "Invalid parameters given." });
   }
+  try {
+    spaceService.insertSpaceToDatabase(space);
+  } catch (error) {
+    return res.status(500).json({
+      error: "Database Error",
+      details: error.message,
+    });
+  }
+  return res.status(200).json({ message: "Space created succesfully" });
 };
 
-export default { getAllSpaces, getById };
+export default { getAllSpaces, getById, createSpace };
