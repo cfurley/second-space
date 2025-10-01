@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS public.profile_picture
     file_size smallint NOT NULL,
     create_date_utc timestamp(3) without time zone NOT NULL,
     delete_date_utc timestamp(3) without time zone,
-    deleted smallint,
+    deleted smallint NOT NULL DEFAULT 0,
     CONSTRAINT pk_id PRIMARY KEY (id)
 );
 
@@ -68,8 +68,8 @@ CREATE TABLE IF NOT EXISTS public."user"
     profile_picture_id bigint,
     theme_id integer NOT NULL DEFAULT 1,
     first_name character varying(255) COLLATE pg_catalog."default",
-    last_name character varying(255) COLLATE pg_catalog."default",
-    full_name character varying(255) COLLATE pg_catalog."default" GENERATED ALWAYS AS ((((first_name)::text || '  '::text) || (last_name)::text)) STORED,
+    last_name character varying(255) COLLATE pg_catalog."default", 
+    full_name character varying(255) COLLATE pg_catalog."default" GENERATED ALWAYS AS ((((first_name)::text || ' '::text) || (last_name)::text)) STORED,
     timezone character varying(255) COLLATE pg_catalog."default",
 	last_login_date_utc timestamp(3) without time zone NOT NULL,
 	create_date_utc timestamp(3) without time zone NOT NULL,
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS public."user"
     delete_date_utc timestamp(3) without time zone,
     deleted smallint NOT NULL DEFAULT 0,
     CONSTRAINT user_pkey PRIMARY KEY (id),
-    CONSTRAINT fk_profileid FOREIGN KEY (profile_picture_id)
+    CONSTRAINT fk_profileid FOREIGN KEY (profile_picture_id) 
         REFERENCES public.profile_picture (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
@@ -137,6 +137,7 @@ CREATE TABLE IF NOT EXISTS public.space_viewing_history
     last_viewed_date_utc timestamp(3) without time zone NOT NULL,
     view_count integer NOT NULL DEFAULT 1,
     create_date_utc timestamp(3) without time zone NOT NULL,
+    update_date_utc timestamp(3) without time zone,
     delete_date_utc timestamp(3) without time zone,
     deleted smallint NOT NULL DEFAULT 0,
     CONSTRAINT pk_spaceid_userid PRIMARY KEY (space_id, user_id),
