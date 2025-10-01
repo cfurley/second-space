@@ -16,7 +16,17 @@ DROP TABLE IF EXISTS public."user" CASCADE;
 CREATE TABLE IF NOT EXISTS public.themes
 (
     id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
-    attributes_placeholder smallint,
+    name character varying(255) NOT NULL,
+    description text NOT NULL,
+    background_color text NOT NULL,
+    caret_color text NOT NULL,
+    main_color text NOT NULL,
+    sub_color text NOT NULL,
+    text_color text NOT NULL,
+    error_color text NOT NULL,
+    error_extra_color text NOT NULL,
+    colorful_error_color text NOT NULL,
+    colorful_error_extra_color text NOT NULL,
     create_date_utc timestamp(3) without time zone NOT NULL,
     update_date_utc timestamp(3) without time zone,
     delete_date_utc timestamp(3) without time zone,
