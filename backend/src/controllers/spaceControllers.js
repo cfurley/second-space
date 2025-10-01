@@ -12,11 +12,17 @@ const getAllSpaces = async (req, res) => {
   } catch (error) {
     return res.status(400).json({ message: "No user id provided." });
   }
-  const spaces = await spaceService.getSpaces(userId, NULL);
-  if (spaces == NULL) {
-    return res
-      .status(404)
-      .json({ message: `No spaces found for user id ${userId}` });
+
+  const result = await spaceService.getSpaces(userId, NULL);
+
+  // result contains {
+  //  success boolean, status int, and data any || error any
+  // }
+  if (!result.success) {
+    return res.status(result.status).json({ message: result.error });
+  } else {
+    const spaces = result.data;
+    return res.status(result.status).json({ spaces });
   }
 };
 
