@@ -1,5 +1,21 @@
 class Space {
-  constructor({}) {
+  constructor({
+    id,
+    created_by_user_id,
+    title,
+    icon,
+    create_date_utc,
+    update_date_utc,
+    delete_date_utc,
+    deleted,
+    containers = null,
+    order,
+    view_count,
+    last_viewed_date_utc,
+    space_viewing_history = null,
+    shared_spaces = null,
+    shared_spaces_permission_log = null,
+  }) {
     this.id = id;
     this.created_by_user_id = created_by_user_id;
     this.title = title;
@@ -19,32 +35,32 @@ class Space {
 }
 
 /**
- * Populate containers after object creation
- * @param {List}
+ * Populate containers after object creation using JSON
+ * @param {Array}
  */
 function addContainers(containers) {
   this.containers = containers;
 }
 
 /**
- * Populate space viewing history after object creation
- * @param {List}
+ * Populate space viewing history after object creation using JSON.
+ * @param {Array}
  */
 function addViewingHistory(space_viewing_history) {
   this.space_viewing_history = space_viewing_history;
 }
 
 /**
- * Populate shared spaces information after object creation
- * @param {List}
+ * Populate shared spaces information after object creation using JSON.
+ * @param {Array}
  */
 function addSharedSpaces(shared_spaces) {
   this.shared_spaces = shared_spaces;
 }
 
 /**
- * Populate shared spaces permission logs after object creation
- * @param {List}
+ * Populate shared spaces permission logs after object creation using JSON.
+ * @param {Array}
  */
 function addSharedPermissionLog(shared_spaces_permission_log) {
   this.shared_spaces_permission_log = shared_spaces_permission_log;
