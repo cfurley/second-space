@@ -69,11 +69,12 @@ CREATE TABLE IF NOT EXISTS public."user"
     first_name character varying(255) COLLATE pg_catalog."default",
     last_name character varying(255) COLLATE pg_catalog."default",
     full_name character varying(255) COLLATE pg_catalog."default" GENERATED ALWAYS AS ((((first_name)::text || '  '::text) || (last_name)::text)) STORED,
-    create_date_utc timestamp(3) without time zone NOT NULL,
+    timezone character varying(255) COLLATE pg_catalog."default",
+	last_login_date_utc timestamp(3) without time zone NOT NULL,
+	create_date_utc timestamp(3) without time zone NOT NULL,
     update_date_utc timestamp(3) without time zone,
     delete_date_utc timestamp(3) without time zone,
     deleted smallint NOT NULL DEFAULT 0,
-    last_login_date_utc timestamp(3) without time zone NOT NULL,
     CONSTRAINT user_pkey PRIMARY KEY (id),
     CONSTRAINT fk_profileid FOREIGN KEY (profile_picture_id)
         REFERENCES public.profile_picture (id) MATCH SIMPLE
