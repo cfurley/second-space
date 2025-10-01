@@ -1,3 +1,12 @@
+/*
+In theory this will, by default, be built with the minimal info from DB.
+Containers, space_viewing_history, shared_viewing_history, etc, can be 
+added later in raw JSON. Ultimately if we need to start treating
+these as objects we can take in raw json and create objects
+using the container model's "fromJson()" function. 
+
+Okay fine we should be giving lists of container objects lol
+*/
 class Space {
   constructor({
     id,
