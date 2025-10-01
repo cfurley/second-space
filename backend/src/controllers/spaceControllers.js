@@ -28,17 +28,18 @@ const getAllSpaces = async (req, res) => {
 
 const getById = async (req, res) => {
   try {
-    const spaceId = req.params.id;
+    const userId = req.params.id;
   } catch (error) {
-    return res.status(400).json({ message: `No space id provided.` });
+    return res.status(400).json({ message: "No user id provided." });
   }
-  const results = spaceService.getSpaces(NULL, spaceId);
-  if (results == NULL) {
-    return res
-      .status(404)
-      .json({ message: `No spaces found for id ${spaceId}` });
+
+  const result = await spaceService.getSpaces(userId, NULL);
+  if (!result.success) {
+    return res.status(result.status).json({ message: result.error });
+  } else {
+    const spaces = result.data;
+    return res.status(result.status).json({ spaces });
   }
-  return res.status(200).json(); // we would return a json representation of our models here
 };
 
 const createSpace = async (req, res) => {
