@@ -16,4 +16,8 @@ const getSpaces = async (userID, spaceID) => {
   return result;
 };
 
+const insertSpaceToDatabase = async (space) => {
+  let query = "";
+};
+
 export default { getSpaces };
