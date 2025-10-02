@@ -19,7 +19,7 @@ const getSpaces = async (userId, spaceId) => {
   }
 
   try {
-    const result = await pool.query(query, [id]);
+    const result = await pool.query(query, [queryId]);
     if (result.rows.length === 0) {
       // No results
       return { success: false, status: 404, error: "No spaces found." };
@@ -28,7 +28,7 @@ const getSpaces = async (userId, spaceId) => {
       return { success: true, status: 200, data: result.rows };
     }
   } catch (error) {
-    console.log(error);
+    console.log(error.stack);
     return { success: false, status: 500, error: "Database Error." };
   }
 };
