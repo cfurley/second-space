@@ -9,7 +9,7 @@ Okay fine we should be giving lists of container objects lol
 */
 class Space {
   constructor({
-    id,
+    id = null,
     created_by_user_id,
     title,
     icon,
