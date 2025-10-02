@@ -1,8 +1,3 @@
-// getAllSpaces
-// getById
-// createSpace
-// updateSpace
-// deleteSpace
 import spaceService from "../services/spaceServices.js";
 import spaceModel from "../models/spaceModel.js";
 
