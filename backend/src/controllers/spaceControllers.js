@@ -37,8 +37,8 @@ const getById = async (req, res) => {
   if (!result.success) {
     return res.status(result.status).json({ message: result.error });
   } else {
-    const spaces = result.data;
-    return res.status(result.status).json({ spaces });
+    const space = result.data;
+    return res.status(result.status).json({ space });
   }
 };
 
@@ -49,7 +49,9 @@ const createSpace = async (req, res) => {
     res.status(400).json({ message: "Invalid parameters given." });
   }
   try {
-    spaceService.insertSpaceToDatabase(space);
+    // i cant make it acknowledge it's a space in the service
+    // this is def not good practice
+    spaceService.insertSpaceToDatabase(req.body);
   } catch (error) {
     return res.status(500).json({
       error: "Database Error",
