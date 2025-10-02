@@ -7,13 +7,14 @@ import spaceService from "../services/spaceServices.js";
 import spaceModel from "../models/spaceModel.js";
 
 const getAllSpaces = async (req, res) => {
+  let userId;
   try {
-    const userId = req.params.id;
+    userId = req.params.id;
   } catch (error) {
     return res.status(400).json({ message: "No user id provided." });
   }
 
-  const result = await spaceService.getSpaces(userId, NULL);
+  const result = await spaceService.getSpaces(userId, null);
 
   // result contains {
   //  success boolean, status int, and data any || error any
@@ -27,13 +28,14 @@ const getAllSpaces = async (req, res) => {
 };
 
 const getById = async (req, res) => {
+  let spaceId;
   try {
-    const userId = req.params.id;
+    spaceId = req.params.id;
   } catch (error) {
-    return res.status(400).json({ message: "No user id provided." });
+    return res.status(400).json({ message: "No space id provided." });
   }
 
-  const result = await spaceService.getSpaces(userId, NULL);
+  const result = await spaceService.getSpaces(null, spaceId);
   if (!result.success) {
     return res.status(result.status).json({ message: result.error });
   } else {
