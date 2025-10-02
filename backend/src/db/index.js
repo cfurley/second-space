@@ -4,8 +4,8 @@ const { Pool } = pkg;
 const pool = new Pool({
   connectionString: process.env.DATABASE_STRING,
   max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  idleTimeoutMillis: 3000000,
+  connectionTimeoutMillis: 200000,
 });
 
 export default pool;
