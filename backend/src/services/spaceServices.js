@@ -1,6 +1,4 @@
-const { pool } = require("../db/index.js");
-import spaceModel from "../models/spaceModel.js";
-const Space = require("../models/spaceModel.js");
+import pool from "../db/index.js";
 
 /**
  * Gets spaced based off userId or the spaceId
