@@ -1,4 +1,5 @@
-const { Pool } = require("pg");
+import pkg from "pg";
+const { Pool } = pkg;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_STRING,
@@ -7,4 +8,4 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
-module.exports = pool;
+export default pool;

@@ -63,4 +63,12 @@ const createSpace = async (req, res) => {
   return res.status(200).json({ message: "Space created succesfully" });
 };
 
-export default { getAllSpaces, getById, createSpace };
+const updateSpace = async (req, res) => {
+  return res.status(500).json({ message: "Route not implemented yet" });
+};
+
+const deleteSpace = async (req, res) => {
+  return res.status(500).json({ message: "Route not implemented yet" });
+};
+
+export default { getAllSpaces, getById, createSpace, updateSpace, deleteSpace };
