@@ -56,7 +56,7 @@ const createSpace = async (req, res) => {
     spaceService.insertSpaceToDatabase(req.body);
   } catch (error) {
     return res.status(500).json({
-      error: "Database Error",
+      error: "Database Error.",
       details: error.message,
     });
   }
