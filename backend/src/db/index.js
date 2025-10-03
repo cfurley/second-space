@@ -2,7 +2,7 @@ import pkg from "pg";
 const { Pool } = pkg;
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_STRING,
+  connectionString: "postgresql://myuser:mypassword@database:5432/mydatabase",
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
