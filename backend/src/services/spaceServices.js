@@ -42,20 +42,20 @@ const insertSpaceToDatabase = async (space) => {
     INSERT INTO space (created_by_user_id, title, icon,
     create_date_utc, update_date_utc, delete_date_utc, deleted)
     VALUES ($1, $2, $3, $4, $5, $6, $7)
-    RETURNING id
+    RETURNING id;
   `;
 
-  values = [
+  const values = [
     space.created_by_user_id,
     space.title,
     space.icon ?? null,
     space.create_date_utc ? new Date(space.create_date_utc) : new Date(),
     null,
     null,
-    0,
+    0
   ];
   try {
-    const result = await pool.query(query);
+    const result = await pool.query(query, values);
     if (result.rows.length === 0) {
       console.log("Space did not insert:", values);
       return { success: false, status: 500, error: "Space did not insert" };
