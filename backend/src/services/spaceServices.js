@@ -52,7 +52,7 @@ const insertSpaceToDatabase = async (space) => {
     space.create_date_utc ? new Date(space.create_date_utc) : new Date(),
     null,
     null,
-    0
+    0,
   ];
   try {
     const result = await pool.query(query, values);
