@@ -2,10 +2,14 @@
   "devDependencies": {
     "@types/react": "^19.1.13",
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 3774e1d (Add .key.pub and depencies)
     "@types/react-dom": "^19.1.9"
   },
   "dependencies": {
     "express": "^5.1.0",
+<<<<<<< HEAD
     "pg": "^8.16.3",
 =======
 >>>>>>> e277e2c (Use cursor to set up preliminary login flow)
@@ -13,5 +17,8 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "prettier": "^3.6.2"
+=======
+    "pg": "^8.16.3"
+>>>>>>> 3774e1d (Add .key.pub and depencies)
   }
 }
