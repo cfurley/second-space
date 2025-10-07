@@ -7,3 +7,5 @@
 *.env
 *.exe
 *.out
+*.key
+*.key.pub
