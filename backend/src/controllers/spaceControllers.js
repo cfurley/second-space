@@ -22,6 +22,7 @@ const getAllSpaces = async (req, res) => {
   }
 };
 
+// Hello
 const getById = async (req, res) => {
   let spaceId;
   try {
