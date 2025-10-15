@@ -28,6 +28,7 @@ export function Header({ activeNav, onNavChange, onLogout }: HeaderProps) {
       </nav>
 
       <div className="flex items-center gap-4">
+<<<<<<< HEAD
         <input
           type="text"
           placeholder="Search spaces..."
@@ -45,6 +46,10 @@ export function Header({ activeNav, onNavChange, onLogout }: HeaderProps) {
               Logout
             </button>
           )}
+=======
+        <div className="w-9 h-9 rounded-full bg-white/8 border border-white/30 flex items-center justify-center text-white text-xs">
+          AT
+>>>>>>> 4146847 (Updated Add Space button, Updated Search Space, Updated Dialog button)
         </div>
       </div>
     </header>
