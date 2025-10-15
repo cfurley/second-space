@@ -35,7 +35,7 @@ class User {
 }
 
 /**
- * Factory function to map a raw JSON object into a Media model
+ * Factory function to map a raw JSON object into a User model
  * @param {Object} json
  * @returns {User}
  */
