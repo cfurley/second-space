@@ -1,15 +1,15 @@
-import spaceService from "../services/spaceServices.js";
-import spaceModel from "../models/spaceModel.js";
+import medaiService from "../services/mediaServices.js";
+import mediaModel from "../models/mediaModel.js";
 
-const getAllSpaces = async (req, res) => {
+const getAllMedia = async (req, res) => {
   let userId;
   try {
     userId = req.params.id;
   } catch (error) {
-    return res.status(400).json({ message: "No user id provided." });
+    return res.status(400).json({ message: "No media id provided." });
   }
 
-  const result = await spaceService.getSpaces(userId, null);
+  const result = await mediaService.getMedia(userId, null);
 
   // result contains {
   //  success boolean, status int, and data any || error any
@@ -24,47 +24,47 @@ const getAllSpaces = async (req, res) => {
 
 // Hello
 const getById = async (req, res) => {
-  let spaceId;
+  let mediaId;
   try {
-    spaceId = req.params.id;
+    mediaId = req.params.id;
   } catch (error) {
-    return res.status(400).json({ message: "No space id provided." });
+    return res.status(400).json({ message: "No media id provided." });
   }
 
-  const result = await spaceService.getSpaces(null, spaceId);
+  const result = await spaceService.getMedia(null, mediaId);
   if (!result.success) {
     return res.status(result.status).json({ message: result.error });
   } else {
-    const space = result.data;
-    return res.status(result.status).json({ space });
+    const media = result.data;
+    return res.status(result.status).json({ media });
   }
 };
 
-const createSpace = async (req, res) => {
+const createMedia = async (req, res) => {
   try {
-    const space = spaceModel.fromJson(req.body);
+    const media = mediaModel.fromJson(req.body);
   } catch (error) {
     res.status(400).json({ error: "Invalid parameters given." });
   }
   try {
-    // i cant make it acknowledge it's a space in the service
+    // i cant make it acknowledge it's a media object in the service
     // this is def not good practice
-    spaceService.insertSpaceToDatabase(req.body);
+    mediaService.insertMediaToDatabase(req.body);
   } catch (error) {
     return res.status(500).json({
       error: "Database Error.",
       details: error.message,
     });
   }
-  return res.status(200).json({ message: "Space created succesfully" });
+  return res.status(200).json({ message: "Media created succesfully" });
 };
 
-const updateSpace = async (req, res) => {
+const updateMedia = async (req, res) => {
   return res.status(500).json({ message: "Route not implemented yet" });
 };
 
-const deleteSpace = async (req, res) => {
+const deleteMedia = async (req, res) => {
   return res.status(500).json({ message: "Route not implemented yet" });
 };
 
-export default { getAllSpaces, getById, createSpace, updateSpace, deleteSpace };
+export default { getAllMedia, getById, createMedia, updateMedia, deleteMedia };
