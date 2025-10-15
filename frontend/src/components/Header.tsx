@@ -27,11 +27,6 @@ export function Header({ activeNav, onNavChange }: HeaderProps) {
       </nav>
 
       <div className="flex items-center gap-4">
-        <input
-          type="text"
-          placeholder="Search spaces..."
-          className="w-[200px] bg-white/8 border border-white/20 rounded-full px-4 py-2 text-white text-sm placeholder:text-white/50 focus:outline-none focus:border-white/40"
-        />
         <div className="w-9 h-9 rounded-full bg-white/8 border border-white/30 flex items-center justify-center text-white text-xs">
           AT
         </div>

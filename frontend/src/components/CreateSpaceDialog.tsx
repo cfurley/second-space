@@ -10,13 +10,19 @@ interface CreateSpaceDialogProps {
     icon: string; 
     description: string;
   }) => void | Promise<void>;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function CreateSpaceDialog({ onCreateSpace }: CreateSpaceDialogProps) {
+export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDialogProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [icon, setIcon] = useState('');
   const [description, setDescription] = useState('');
+
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    onOpenChange?.(newOpen);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,47 +42,52 @@ export function CreateSpaceDialog({ onCreateSpace }: CreateSpaceDialogProps) {
     setTitle('');
     setIcon('');
     setDescription('');
-    setOpen(false);
+    handleOpenChange(false);
   };
 
   return (
-    <>
-      {/* Trigger Button */}
-      <div 
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-white/10 text-white cursor-pointer hover:bg-white/15 transition-all"
-      >
-        <span className="text-lg">+</span>
-        <span className="text-sm">New Space</span>
-      </div>
+    <div className="relative">
+      {/* Button that toggles between New Space and Close */}
+      {!open ? (
+        <div 
+          onClick={() => handleOpenChange(true)}
+          className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-white/10 text-white cursor-pointer hover:bg-white/15 transition-all"
+        >
+          <span className="text-lg">+</span>
+          <span className="text-sm">New Space</span>
+        </div>
+      ) : (
+        <button
+          onClick={() => handleOpenChange(false)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/15 transition-all"
+        >
+          <span className="text-lg">✕</span>
+          <span className="text-sm">Close</span>
+        </button>
+      )}
 
-      {/* Dialog */}
+      {/* Dialog Portal - Rendered outside the normal flow */}
       {open && (
         <>
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 animate-in fade-in duration-200"
-            onClick={() => setOpen(false)}
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[100] animate-in fade-in duration-300"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenChange(false);
+            }}
           />
           
-          {/* Dialog Content */}
+          {/* Dialog Content - Positioned in the sidebar area */}
           <div 
-            className="fixed top-[120px] left-8 z-50 w-[320px] bg-black/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl animate-in slide-in-from-left fade-in duration-200"
+            className="fixed top-[140px] left-[32px] z-[150] w-[320px] bg-[#0a0a0a] border border-white/20 rounded-2xl shadow-2xl animate-in slide-in-from-left fade-in duration-300"
             style={{
-              boxShadow: '0 0 60px rgba(255, 255, 255, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 0 60px rgba(0, 0, 0, 0.5), 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
             }}
             onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
           >
-            {/* Custom Close Button - Pill with X */}
-            <button
-              onClick={() => setOpen(false)}
-              className="absolute -top-3 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/95 backdrop-blur-xl border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all shadow-lg z-10"
-            >
-              <span className="text-sm">✕</span>
-              <span className="text-xs">Close</span>
-            </button>
-
-            <form onSubmit={handleSubmit} className="p-6 pt-8">
+            <form onSubmit={handleSubmit} className="p-6">
               <div className="mb-6">
                 <h2 className="text-lg font-semibold text-white mb-1">New Space</h2>
                 <p className="text-xs text-white/50">Create a space to organize your content</p>
@@ -145,6 +156,6 @@ export function CreateSpaceDialog({ onCreateSpace }: CreateSpaceDialogProps) {
           </div>
         </>
       )}
-    </>
+    </div>
   );
 }
