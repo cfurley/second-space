@@ -39,7 +39,7 @@ class Theme {
 }
 
 /**
- * Factory function to map a raw JSON object into a Media model
+ * Factory function to map a raw JSON object into a Theme model
  * @param {Object} json
  * @returns {Theme}
  */
