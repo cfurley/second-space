@@ -67,7 +67,7 @@ export function ContentCard({ type, content }: ContentCardProps) {
   };
 
   return (
-    <div className="bg-white/5 border border-white/10 rounded-xl p-5 text-white transition-all duration-200 cursor-pointer hover:bg-white/8 hover:border-white/20 hover:-translate-y-0.5">
+    <div className="glass rounded-xl p-5 text-foreground hover:scale-[1.01]">
       {getCardContent()}
       
       <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10 text-xs text-white/50">

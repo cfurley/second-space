@@ -43,7 +43,7 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
   const filteredAllSpaces = filterSpaces(allSpaces);
 
   return (
-    <div className="w-[280px] bg-black/98 border-r border-white/10 py-8">
+    <div className="glass w-[280px] border-r border-white/10 py-8 text-foreground">
       <div className="mb-8 px-8">
         <div className="flex items-center gap-2">
           {/* Search Bar - Hidden when dialog is open, collapses when not focused */}
@@ -94,46 +94,39 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
 
       <div className="mb-8 px-8">
         <div className="text-white/50 text-xs uppercase tracking-wider mb-4">Pinned Spaces</div>
-        {filteredPinnedSpaces.length > 0 ? (
-          filteredPinnedSpaces.map((space) => (
-            <div
-              key={space.name}
-              onClick={() => onSpaceChange(space.name)}
-              className={`flex items-center gap-3 px-4 py-2.5 mb-2 rounded-lg cursor-pointer transition-all ${
-                activeSpace === space.name
-                  ? 'bg-white/10 text-white'
-                  : 'text-white/50 hover:bg-white/5'
-              }`}
-            >
-              <span className="text-lg">{space.icon}</span>
-              <span className="text-sm">{space.name}</span>
-            </div>
-          ))
-        ) : searchValue ? (
-          <p className="text-white/40 text-xs px-4 py-2">No pinned spaces found</p>
-        ) : null}
+        {pinnedSpaces.map((space) => (
+          <div
+            key={space.name}
+            onClick={() => onSpaceChange(space.name)}
+            className={`flex items-center gap-3 px-4 py-2.5 mb-2 rounded-lg cursor-pointer transition-all duration-500 ease-out ${
+              activeSpace === space.name
+                ? 'bg-white/15 dark:bg-white/10 text-foreground shadow-[0_0_12px_rgba(255,255,255,0.15)]'
+                : 'text-foreground/60 hover:bg-white/5 dark:hover:bg-white/5 hover:text-foreground hover:shadow-[0_0_12px_rgba(255,255,255,0.15)] hover:-translate-y-[1px]'
+            }`}
+          >
+            <span className="text-lg">{space.icon}</span>
+            <span className="text-sm">{space.name}</span>
+          </div>
+        ))}
       </div>
 
       <div className="mb-8 px-8">
-        <div className="text-white/50 text-xs uppercase tracking-wider mb-4">All Spaces</div>
-        {filteredAllSpaces.length > 0 ? (
-          filteredAllSpaces.map((space) => (
-            <div
-              key={space.name}
-              onClick={() => onSpaceChange(space.name)}
-              className={`flex items-center gap-3 px-4 py-2.5 mb-2 rounded-lg cursor-pointer transition-all ${
-                activeSpace === space.name
-                  ? 'bg-white/10 text-white'
-                  : 'text-white/50 hover:bg-white/5'
-              }`}
-            >
-              <span className="text-lg">{space.icon}</span>
-              <span className="text-sm">{space.name}</span>
-            </div>
-          ))
-        ) : searchValue ? (
-          <p className="text-white/40 text-xs px-4 py-2">No spaces found</p>
-        ) : null}
+        <div className="text-foreground/60 text-xs uppercase tracking-wider mb-4">All Spaces</div>
+        {allSpaces.map((space) => (
+          <div
+            key={space.name}
+            onClick={() => onSpaceChange(space.name)}
+            className={`flex items-center gap-3 px-4 py-2.5 mb-2 rounded-lg cursor-pointer transition-all duration-500 ease-out ${
+              activeSpace === space.name
+              ? 'bg-white/15 dark:bg-white/10 text-foreground shadow-[0_0_12px_rgba(255,255,255,0.15)]'
+              : 'text-foreground/60 hover:bg-white/5 dark:hover:bg-white/5 hover:text-foreground hover:shadow-[0_0_12px_rgba(255,255,255,0.15)] hover:-translate-y-[1px]'
+          }`}
+        >
+          <span className="text-lg">{space.icon}</span>
+          <span className="text-sm">{space.name}</span>
+        </div>
+      ))}
+
       </div>
     </div>
   );
