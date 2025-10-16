@@ -31,14 +31,23 @@ const updatePassword = async (req, res) => {
     return res.status(400).json({ message: "Invalid Parameters" });
   }
 
-  const validation = validatePassword(password);
+  // Validate user's password
+  const validation = await validatePassword(password);
   if (!validation.success) {
     return res.status(400).json({ message: validation.error });
+  }
+
+  // Update the password
+  const update = await userService.updatePassword(userId, password);
+  if (!update.success) {
+    return res.status(update.status).json({ error: update.error });
+  } else {
+    return res.status(update.status).json({ message: update.message });
   }
 };
 
 const createUser = async (req, res) => {
-  return res.status(500).json({ message: "Route not implemented yet" });
+  //   return res.status(500).json({ message: "Route not implemented yet" });
 };
 
 const updateUser = async (req, res) => {
