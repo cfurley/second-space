@@ -1,4 +1,5 @@
 import React from 'react';
+import { UserMenu } from './UserMenu';
 
 interface HeaderProps {
   activeNav: string;
@@ -7,6 +8,9 @@ interface HeaderProps {
 
 export function Header({ activeNav, onNavChange }: HeaderProps) {
   const navItems = ['Spaces', 'Recent', 'Shared'];
+
+  // Mock auth state - in a real app, this would come from an auth context/provider
+  const isLoggedIn = false; // Change to true to test logged-in state
 
   return (
     <header className="bg-black/95 backdrop-blur-lg border-b border-white/10 px-10 py-5 flex items-center justify-between">
@@ -27,9 +31,7 @@ export function Header({ activeNav, onNavChange }: HeaderProps) {
       </nav>
 
       <div className="flex items-center gap-4">
-        <div className="w-9 h-9 rounded-full bg-white/8 border border-white/30 flex items-center justify-center text-white text-xs">
-          AT
-        </div>
+        <UserMenu isLoggedIn={isLoggedIn} userName="Andrew Truong" userInitials="AT" />
       </div>
     </header>
   );
