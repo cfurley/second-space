@@ -74,7 +74,7 @@ const updatePassword = async (userId, password) => {
       return {
         success: true,
         status: 200,
-        message: `Updated user id succesfully`,
+        message: `Updated password succesfully`,
       };
     }
   } catch (error) {
