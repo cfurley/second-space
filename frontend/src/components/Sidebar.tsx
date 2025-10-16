@@ -28,7 +28,7 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
   ];
 
   return (
-    <div className="w-[280px] bg-black/98 border-r border-white/10 py-8">
+    <div className="glass w-[280px] border-r border-white/10 py-8 text-foreground">
       <div className="mb-8 px-8">
         <CreateSpaceDialog
           onCreateSpace={(spaceData) => {
@@ -44,10 +44,10 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
           <div
             key={space.name}
             onClick={() => onSpaceChange(space.name)}
-            className={`flex items-center gap-3 px-4 py-2.5 mb-2 rounded-lg cursor-pointer transition-all ${
+            className={`flex items-center gap-3 px-4 py-2.5 mb-2 rounded-lg cursor-pointer transition-all duration-500 ease-out ${
               activeSpace === space.name
-                ? 'bg-white/10 text-white'
-                : 'text-white/50 hover:bg-white/5'
+                ? 'bg-white/15 dark:bg-white/10 text-foreground shadow-[0_0_12px_rgba(255,255,255,0.15)]'
+                : 'text-foreground/60 hover:bg-white/5 dark:hover:bg-white/5 hover:text-foreground hover:shadow-[0_0_12px_rgba(255,255,255,0.15)] hover:-translate-y-[1px]'
             }`}
           >
             <span className="text-lg">{space.icon}</span>
@@ -57,21 +57,22 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
       </div>
 
       <div className="mb-8 px-8">
-        <div className="text-white/50 text-xs uppercase tracking-wider mb-4">All Spaces</div>
+        <div className="text-foreground/60 text-xs uppercase tracking-wider mb-4">All Spaces</div>
         {allSpaces.map((space) => (
           <div
             key={space.name}
             onClick={() => onSpaceChange(space.name)}
-            className={`flex items-center gap-3 px-4 py-2.5 mb-2 rounded-lg cursor-pointer transition-all ${
+            className={`flex items-center gap-3 px-4 py-2.5 mb-2 rounded-lg cursor-pointer transition-all duration-500 ease-out ${
               activeSpace === space.name
-                ? 'bg-white/10 text-white'
-                : 'text-white/50 hover:bg-white/5'
-            }`}
-          >
-            <span className="text-lg">{space.icon}</span>
-            <span className="text-sm">{space.name}</span>
-          </div>
-        ))}
+              ? 'bg-white/15 dark:bg-white/10 text-foreground shadow-[0_0_12px_rgba(255,255,255,0.15)]'
+              : 'text-foreground/60 hover:bg-white/5 dark:hover:bg-white/5 hover:text-foreground hover:shadow-[0_0_12px_rgba(255,255,255,0.15)] hover:-translate-y-[1px]'
+          }`}
+        >
+          <span className="text-lg">{space.icon}</span>
+          <span className="text-sm">{space.name}</span>
+        </div>
+      ))}
+
       </div>
     </div>
   );
