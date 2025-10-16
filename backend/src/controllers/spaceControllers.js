@@ -42,7 +42,7 @@ const getById = async (req, res) => {
 
 const createSpace = async (req, res) => {
   try {
-    const space = spaceModel.fromJson(req.body);
+    const space = spaceModel.fromJson(req.body); // TODO: this is only local, fix
   } catch (error) {
     res.status(400).json({ error: "Invalid parameters given." });
   }
