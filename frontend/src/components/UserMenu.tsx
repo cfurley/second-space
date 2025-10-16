@@ -81,20 +81,7 @@ export function UserMenu({
         >
           {userInitials}
         </button>
-      ) : (
-        <button
-          onClick={() => {
-            setIsOpen(!isOpen);
-            if (!isOpen) {
-              setShowLoginForm(false);
-              setShowSignupForm(false);
-            }
-          }}
-          className="px-4 py-2 rounded-full bg-white/10 text-white text-sm hover:bg-white/15 transition-all border border-white/20"
-        >
-          Login
-        </button>
-      )}
+      ) : null}
 
       {/* Dropdown Menu */}
       {isOpen && (
