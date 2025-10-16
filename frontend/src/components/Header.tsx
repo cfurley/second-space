@@ -10,7 +10,7 @@ export function Header({ activeNav, onNavChange, onLogout }: HeaderProps) {
   const navItems = ['Spaces', 'Recent', 'Shared'];
 
   return (
-    <header className="bg-black/95 backdrop-blur-lg border-b border-white/10 px-10 py-5 flex items-center justify-between">
+    <header className="glass px-10 py-5 flex items-center justify-between">
       <div className="text-white text-xl font-bold">Second Space</div>
       
       <nav className="flex gap-8">
