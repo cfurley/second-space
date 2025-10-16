@@ -80,13 +80,19 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDi
           
           {/* Dialog Content - Positioned in the sidebar area */}
           <div 
-            className="fixed top-[140px] left-[32px] z-[150] w-[320px] bg-[#0a0a0a] border border-white/20 rounded-2xl shadow-2xl animate-in slide-in-from-left fade-in duration-300"
+            className="fixed top-[140px] left-[32px] z-[150] w-[320px] rounded-3xl shadow-2xl animate-in slide-in-from-left fade-in duration-300 overflow-hidden"
             style={{
-              boxShadow: '0 0 60px rgba(0, 0, 0, 0.5), 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 0 60px rgba(0, 0, 0, 0.5), 0 20px 50px rgba(0, 0, 0, 0.8)',
             }}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
+            <div 
+              className="bg-[#0a0a0a] border border-white/20 rounded-3xl"
+              style={{
+                boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
+              }}
+            >
             <form onSubmit={handleSubmit} className="p-6">
               <div className="mb-6">
                 <h2 className="text-lg font-semibold text-white mb-1">New Space</h2>
@@ -153,6 +159,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDi
                 </Button>
               </div>
             </form>
+            </div>
           </div>
         </>
       )}

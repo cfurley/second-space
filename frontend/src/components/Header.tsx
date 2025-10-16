@@ -1,4 +1,5 @@
 import React from 'react';
+import { UserMenu } from './UserMenu';
 
 interface HeaderProps {
   activeNav: string;
@@ -8,6 +9,9 @@ interface HeaderProps {
 
 export function Header({ activeNav, onNavChange, onLogout }: HeaderProps) {
   const navItems = ['Spaces', 'Recent', 'Shared'];
+
+  // Mock auth state - in a real app, this would come from an auth context/provider
+  const isLoggedIn = false; // Change to true to test logged-in state
 
   return (
     <header className="glass px-10 py-5 flex items-center justify-between">
@@ -28,6 +32,7 @@ export function Header({ activeNav, onNavChange, onLogout }: HeaderProps) {
       </nav>
 
       <div className="flex items-center gap-4">
+<<<<<<< HEAD
 <<<<<<< HEAD
         <input
           type="text"
@@ -51,6 +56,9 @@ export function Header({ activeNav, onNavChange, onLogout }: HeaderProps) {
           AT
 >>>>>>> 4146847 (Updated Add Space button, Updated Search Space, Updated Dialog button)
         </div>
+=======
+        <UserMenu isLoggedIn={isLoggedIn} userName="Andrew Truong" userInitials="AT" />
+>>>>>>> 6133eba (Updated UI for user login and Signup)
       </div>
     </header>
   );
