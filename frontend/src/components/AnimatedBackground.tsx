@@ -50,10 +50,10 @@ export default function AnimatedBackground() {
         Icon,
         x: Math.random() * 100,
         y: Math.random() * 100,
-        size: 20 + Math.random() * 40,
+        size: 24 + Math.random() * 32,
         duration: 20 + Math.random() * 30,
         delay: Math.random() * 10,
-        opacity: 0.15 + Math.random() * 0.25,
+        opacity: 0.6 + Math.random() * 0.3,
         rotate: Math.random() * 360,
       };
     });
@@ -77,53 +77,38 @@ export default function AnimatedBackground() {
         }}
       />
       
-      {/* Floating icons */}
-      {floatingIcons.map((item, index) => (
-        <motion.div
-          key={index}
-          className="absolute"
-          initial={{
-            x: `${item.x}vw`,
-            y: `${item.y}vh`,
-            rotate: item.rotate,
-          }}
-          animate={{
-            x: [
-              `${item.x}vw`,
-              `${(item.x + 20) % 100}vw`,
-              `${(item.x + 10) % 100}vw`,
-              `${item.x}vw`,
-            ],
-            y: [
-              `${item.y}vh`,
-              `${(item.y - 20 + 100) % 100}vh`,
-              `${(item.y + 10) % 100}vh`,
-              `${item.y}vh`,
-            ],
-            rotate: [item.rotate, item.rotate + 180, item.rotate + 360],
-          }}
-          transition={{
-            duration: item.duration,
-            delay: item.delay,
-            repeat: Infinity,
-            ease: 'linear',
-          }}
-          style={{
-            opacity: item.opacity,
-          }}
-        >
-          <item.Icon
-            size={item.size}
-            style={{
-              color: 'rgba(255, 255, 255, 0.5)',
-              filter: 'blur(0.3px) drop-shadow(0 0 12px rgba(255, 255, 255, 0.3))',
-              strokeWidth: 1.5,
+      {/* Floating Icons - with higher z-index to appear above orbs */}
+      {floatingIcons.map((icon, index) => {
+        const IconComponent = icon.Icon;
+        return (
+          <motion.div
+            key={index}
+            className="absolute"
+            initial={{
+              x: icon.x,
+              y: icon.y,
             }}
-          />
-        </motion.div>
-      ))}
-
-      {/* Subtle glass orbs */}
+            animate={{
+              x: [icon.x, icon.x + (Math.random() - 0.5) * 100, icon.x],
+              y: [icon.y, icon.y + (Math.random() - 0.5) * 100, icon.y],
+              rotate: [0, icon.rotate, 0],
+            }}
+            transition={{
+              duration: icon.duration,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            style={{
+              color: 'rgba(255, 255, 255, 1)',
+              filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.8))',
+              strokeWidth: 2.5,
+              zIndex: 10,
+            }}
+          >
+            <IconComponent size={icon.size} strokeWidth={2.5} />
+          </motion.div>
+        );
+      })}      {/* Subtle glass orbs - reduced opacity so icons show through */}
       <motion.div
         className="absolute rounded-full"
         style={{
@@ -131,8 +116,9 @@ export default function AnimatedBackground() {
           height: '600px',
           left: '10%',
           top: '20%',
-          background: 'radial-gradient(circle, rgba(122, 122, 122, 0.15) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(122, 122, 122, 0.03) 0%, transparent 70%)',
           filter: 'blur(60px)',
+          zIndex: 0,
         }}
         animate={{
           x: [0, 50, -30, 0],
@@ -153,8 +139,9 @@ export default function AnimatedBackground() {
           height: '500px',
           right: '10%',
           bottom: '20%',
-          background: 'radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%)',
-          filter: 'blur(70px)',
+          background: 'radial-gradient(circle, rgba(255, 255, 255, 0.02) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+          zIndex: 0,
         }}
         animate={{
           x: [0, -60, 40, 0],
@@ -177,12 +164,13 @@ export default function AnimatedBackground() {
           left: '50%',
           top: '50%',
           transform: 'translate(-50%, -50%)',
-          background: 'radial-gradient(circle, rgba(29, 29, 29, 0.2) 0%, transparent 70%)',
-          filter: 'blur(80px)',
+          background: 'radial-gradient(circle, rgba(29, 29, 29, 0.03) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+          zIndex: 0,
         }}
         animate={{
           scale: [1, 1.2, 1],
-          opacity: [0.6, 0.8, 0.6],
+          opacity: [0.3, 0.5, 0.3],
         }}
         transition={{
           duration: 20,

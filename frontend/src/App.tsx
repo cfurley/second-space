@@ -21,10 +21,12 @@ export default function App() {
   if (!isAuthenticated) {
     return (
       <div 
-        className="relative flex size-full items-center justify-center overflow-hidden"
+        className="relative flex items-center justify-center overflow-hidden"
         style={{ 
           backgroundColor: 'var(--ss-background)',
-          minHeight: '100vh'
+          minHeight: '100vh',
+          width: '100vw',
+          height: '100vh'
         }}
       >
         <AnimatedBackground />
