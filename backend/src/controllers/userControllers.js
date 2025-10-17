@@ -48,6 +48,12 @@ const updatePassword = async (req, res) => {
 
 const createUser = async (req, res) => {
   //   return res.status(500).json({ message: "Route not implemented yet" });
+  let user;
+  try {
+    user = userModel.fromJson(req.body);
+  } catch (error) {
+    return res.status(400).json({ error: "Invalid parameters given" });
+  }
 };
 
 const updateUser = async (req, res) => {
@@ -108,6 +114,29 @@ const validatePassword = async (password) => {
 
   // If it is strong then return true
   return { success: true };
+};
+
+/**
+ * Validate username
+ * @param {string} username
+ */
+validateUsername = async (username) => {
+  // type check
+  if (typeof username !== "string") {
+    return { success: false, error: "Username is not a string" };
+  }
+
+  // Length requirement
+  if (username.length < 6 || username.length > 16) {
+    return {
+      success: false,
+      error: "Username must be between six and 16 characters",
+    };
+  }
+
+  // Maybe add a profanity-checking library
+
+  // Unique check
 };
 
 export default {
