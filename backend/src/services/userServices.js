@@ -28,7 +28,7 @@ const authenticateLogin = async (username, password) => {
     last_login_date_utc,
     create_date_utc,
     update_date_utc
-    FROM user
+    FROM "user"
     WHERE deleted = $1 
     AND username = $2
     AND password = $3;
@@ -67,7 +67,7 @@ const updatePassword = async (userId, password) => {
   }
 
   const query = `
-  UPDATE user SET password = $1, update_date_utc = NOW()
+  UPDATE "user" SET password = $1, update_date_utc = NOW()
   WHERE id = $2
   RETURNING id;
   `;
@@ -96,7 +96,7 @@ const updatePassword = async (userId, password) => {
  * @param {userModel} user
  */
 const createUser = async (user) => {
-  const query = `INSERT INTO user (username, password, display_name, first_name,
+  const query = `INSERT INTO "user" (username, password, display_name, first_name,
   last_name, full_name, create_date_utc)
   VALUES($1, $2, $3, $4, $5, $6, NOW())
   RETURNING *;`;
@@ -127,7 +127,7 @@ const createUser = async (user) => {
  * @returns {boolean}
  */
 const usernameExists = async (username) => {
-  const query = "SELECT 1 FROM user WHERE username = $1 AND deleted = $2;";
+  const query = `SELECT 1 FROM "user" WHERE username = $1 AND deleted = $2;`;
   const result = await pool.query(query, [username]);
   if (result.rows.length === 0) {
     return false;
