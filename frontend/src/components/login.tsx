@@ -1,12 +1,16 @@
+// Login modal used by AuthGate. It provides login and create-account flows.
+// Uses the AuthContext (useAuth) for actual authentication calls.
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LoginProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
-export default function Login({ isOpen, onClose }: LoginProps) {
+export default function Login({ isOpen }: LoginProps) {
+  const auth = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -18,26 +22,12 @@ export default function Login({ isOpen, onClose }: LoginProps) {
   }, [isOpen]);
 
   if (typeof document === 'undefined') return null;
-
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { username, password };
-    // Alert with raw JSON data as requested
-    alert(`Login attempted with data: ${JSON.stringify(payload)}`);
-    // --- Where to send this data for implementing the API ---
-    // Send a POST request with JSON body to your backend auth route.
-    // Example endpoint (backend): POST /api/users/authenticate  or POST /api/auth/login
-    // Payload shape: { username: string, password: string }
-    // The server should return a session token / user object on success.
-    // You can implement the route in: backend/src/routes/userRoutes.js (add a POST /authenticate)
-    // and the handler in: backend/src/controllers/userControllers.js
-    // Example fetch (uncomment and adapt):
-    // fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-    //   .then(r => r.json()).then(data => console.log('login response', data));
-    // Close modal after submit
-    onClose();
+    await auth.login(username, password);
+    // auth.login will flip isAuthenticated in the provider
   };
 
   // Local UI mode: login | signup | verify-human
@@ -45,10 +35,24 @@ export default function Login({ isOpen, onClose }: LoginProps) {
   const [confirmPassword, setConfirmPassword] = React.useState('');
   const [verified, setVerified] = React.useState(false);
   const [verifyInput, setVerifyInput] = React.useState('');
+  const [createErrors, setCreateErrors] = useState<string[] | null>(null);
+
+  const handleCreateAccount = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!verified) { setCreateErrors(['Please verify you are human']); return; }
+    if (password !== confirmPassword) { setCreateErrors(['Passwords do not match']); return; }
+    const result = await auth.createAccount(username.trim(), password);
+    if (!result.success) {
+      setCreateErrors(result.errors);
+      return;
+    }
+    setCreateErrors(null);
+    // successful; provider already sets authenticated
+  };
 
   // Render modal via portal: full-viewport flex centering
   return ReactDOM.createPortal(
-    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }} onClick={onClose}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }} onClick={() => { /* clicking backdrop should not auto-auth; keep modal open */ }}>
       <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 10000 }} />
 
       <div onClick={(e) => e.stopPropagation()} style={{ width: 'min(1200px, 96vw)', backgroundColor: '#0a0a0a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 32, padding: 56, color: 'white', boxShadow: '0 60px 150px rgba(0,0,0,0.95)', zIndex: 10001 }}>
@@ -56,7 +60,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
           <>
             <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 24, textAlign: 'center' }}>Second Space Login</h2>
 
-            <form onSubmit={handleSubmit} style={{ display: 'block', width: 'min(900px, 88vw)', margin: '0 auto' }}>
+            <form onSubmit={handleLogin} style={{ display: 'block', width: 'min(900px, 88vw)', margin: '0 auto' }}>
               <div style={{ marginBottom: 12 }}>
                 <label htmlFor="modal-username" style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>Username</label>
                 <input id="modal-username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} required style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', fontSize: 16 }} />
@@ -72,7 +76,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
               </div>
 
               <div style={{ marginTop: 14, textAlign: 'center' }}>
-                <button type="button" onClick={() => { setMode('signup'); setVerified(false); setConfirmPassword(''); }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.85)', textDecoration: 'underline', cursor: 'pointer', fontSize: 14 }}>Or Create Account</button>
+                <button type="button" onClick={() => { setMode('signup'); setVerified(false); setConfirmPassword(''); setCreateErrors(null); }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.85)', textDecoration: 'underline', cursor: 'pointer', fontSize: 14 }}>Or Create Account</button>
               </div>
             </form>
           </>
@@ -81,14 +85,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
         {mode === 'signup' && (
           <>
             <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 18, textAlign: 'center' }}>Create Account</h2>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              if (!verified) { alert('Please verify you are human before creating an account'); return; }
-              if (password !== confirmPassword) { alert('Passwords do not match'); return; }
-              const payload = { username, password, confirmPassword };
-              alert(`Create account attempted with data: ${JSON.stringify(payload)}`);
-              onClose();
-            }} style={{ display: 'block', width: 'min(900px, 88vw)', margin: '0 auto' }}>
+            <form onSubmit={handleCreateAccount} style={{ display: 'block', width: 'min(900px, 88vw)', margin: '0 auto' }}>
               <div style={{ marginBottom: 12 }}>
                 <label htmlFor="signup-username" style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>Username</label>
                 <input id="signup-username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} required style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', fontSize: 16 }} />
@@ -103,6 +100,14 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 <label htmlFor="signup-confirm" style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>Confirm Password</label>
                 <input id="signup-confirm" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', fontSize: 16 }} />
               </div>
+
+              {createErrors && createErrors.length > 0 && (
+                <div style={{ marginBottom: 12, color: '#f87171' }}>
+                  {createErrors.map((err, i) => (
+                    <div key={i}>{err}</div>
+                  ))}
+                </div>
+              )}
 
               <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
                 <button
@@ -145,14 +150,14 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                     setMode('signup');
                     setVerifyInput('');
                   } else {
-                    alert('Verification failed — please type 67');
+                    setCreateErrors(['Verification failed  please type 67']);
                   }
                 }
               }}
               style={{ width: '100%', height: 44, padding: '0 12px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', marginBottom: 12 }}
             />
             <div style={{ display: 'flex', gap: 12 }}>
-              <button type="button" onClick={() => { if (verifyInput.trim() === '67') { setVerified(true); setMode('signup'); setVerifyInput(''); } else { alert('Verification failed — please type 67'); } }} style={{ flex: 1, height: 44, borderRadius: 8, background: '#2563eb', color: 'white' }}>Submit</button>
+              <button type="button" onClick={() => { if (verifyInput.trim() === '67') { setVerified(true); setMode('signup'); setVerifyInput(''); } else { setCreateErrors(['Verification failed  please type 67']); } }} style={{ flex: 1, height: 44, borderRadius: 8, background: '#2563eb', color: 'white' }}>Submit</button>
               <button type="button" onClick={() => { setMode('signup'); setVerifyInput(''); }} style={{ flex: 1, height: 44, borderRadius: 8, background: 'rgba(255,255,255,0.03)', color: 'white', border: '1px solid rgba(255,255,255,0.08)' }}>Cancel</button>
             </div>
           </div>

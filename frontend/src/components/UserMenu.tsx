@@ -2,19 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { useAuth } from '../contexts/AuthContext';
 
 interface UserMenuProps {
-  // Mock user state - in a real app, this would come from auth context
   isLoggedIn?: boolean;
   userName?: string;
   userInitials?: string;
 }
 
-export function UserMenu({ 
-  isLoggedIn = false, 
-  userName = 'Andrew Truong',
-  userInitials = 'AT'
-}: UserMenuProps) {
+export function UserMenu({ isLoggedIn = false, userName = 'Andrew Truong', userInitials = 'AT' }: UserMenuProps) {
+  const auth = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [showSignupForm, setShowSignupForm] = useState(false);
@@ -65,9 +62,7 @@ export function UserMenu({
   };
 
   const handleLogout = () => {
-    console.log('Logout');
-    // TODO: Implement actual logout logic
-    alert('Logged out!');
+    auth.logout();
     setIsOpen(false);
   };
 

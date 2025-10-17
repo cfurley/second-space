@@ -1,5 +1,6 @@
 import React from 'react';
 import { UserMenu } from './UserMenu';
+import { useAuth } from '../contexts/AuthContext';
 
 interface HeaderProps {
   activeNav: string;
@@ -9,8 +10,7 @@ interface HeaderProps {
 export function Header({ activeNav, onNavChange }: HeaderProps) {
   const navItems = ['Spaces', 'Recent', 'Shared'];
 
-  // Mock auth state - in a real app, this would come from an auth context/provider
-  const isLoggedIn = false; // Change to true to test logged-in state
+  const { isAuthenticated } = useAuth();
 
   return (
     <header className="glass px-10 py-5 flex items-center justify-between">
@@ -31,7 +31,7 @@ export function Header({ activeNav, onNavChange }: HeaderProps) {
       </nav>
 
       <div className="flex items-center gap-4">
-        <UserMenu isLoggedIn={isLoggedIn} userName="Andrew Truong" userInitials="AT" />
+  <UserMenu isLoggedIn={isAuthenticated} userName="Andrew Truong" userInitials="AT" />
       </div>
     </header>
   );
