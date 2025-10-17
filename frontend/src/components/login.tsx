@@ -1,4 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import {
+  validateUsernameCharacters,
+  validateUsernameLength,
+  validateUsernameDoesNotContainProfanity,
+} from '../utils/usernameValidator';
+import { validatePasswordCharacters, validatePasswordLength, validatePasswordStrength } from '../utils/passwordValidator';
 import ReactDOM from 'react-dom';
 
 interface LoginProps {
@@ -9,13 +15,72 @@ interface LoginProps {
 export default function Login({ isOpen, onClose }: LoginProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  // validation state
+  const [usernameValid, setUsernameValid] = useState<boolean | null>(null); // null = untouched
+  const [passwordValid, setPasswordValid] = useState<boolean | null>(null);
+  const [firstNameValid, setFirstNameValid] = useState<boolean | null>(null);
+  const [lastNameValid, setLastNameValid] = useState<boolean | null>(null);
+  const [confirmValid, setConfirmValid] = useState<boolean | null>(null);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) {
       setUsername('');
       setPassword('');
+      setFirstName('');
+      setLastName('');
+      setUsernameValid(null);
+      setPasswordValid(null);
+      setFirstNameValid(null);
+      setLastNameValid(null);
+      setConfirmPassword('');
+      setConfirmValid(null);
     }
   }, [isOpen]);
+
+  // helper to compute username validity from the validator functions
+  const computeUsernameValidity = (u: string) => {
+    if (!u || u.trim() === '') return false;
+    if (!validateUsernameCharacters(u)) return false;
+    if (!validateUsernameLength(u)) return false;
+    if (!validateUsernameDoesNotContainProfanity(u)) return false;
+    // no whitespace allowed
+    if (/\s/.test(u)) return false;
+    return true;
+  };
+
+  // Username requirement flags for UI hints
+  const usernameReqs = (u: string) => {
+    return {
+      hasValue: u.trim().length > 0,
+      validChars: validateUsernameCharacters(u),
+      validLength: validateUsernameLength(u),
+      noProfanity: validateUsernameDoesNotContainProfanity(u),
+      noWhitespace: !/\s/.test(u),
+    };
+  };
+
+  const computePasswordValidity = (p: string) => {
+    if (!p || p.trim() === '') return false;
+    if (!validatePasswordCharacters(p)) return false;
+    if (!validatePasswordLength(p)) return false;
+    if (!validatePasswordStrength(p)) return false;
+    // no whitespace
+    if (/\s/.test(p)) return false;
+    return true;
+  };
+
+  const passwordReqs = (p: string) => {
+    return {
+      hasValue: p.trim().length > 0,
+      validChars: validatePasswordCharacters(p),
+      validLength: validatePasswordLength(p),
+      strong: validatePasswordStrength(p),
+      noWhitespace: !/\s/.test(p),
+    };
+  };
 
   if (typeof document === 'undefined') return null;
 
@@ -81,27 +146,144 @@ export default function Login({ isOpen, onClose }: LoginProps) {
         {mode === 'signup' && (
           <>
             <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 18, textAlign: 'center' }}>Create Account</h2>
-            <form onSubmit={(e) => {
+            <form
+              onFocusCapture={(e) => {
+                const t = e.target as HTMLElement;
+                if (!t || !t.id) return;
+                if (t.id.startsWith('signup-')) {
+                  setFocusedField(t.id.replace('signup-', ''));
+                }
+              }}
+              onBlurCapture={() => {
+                // clear focus when focus leaves inputs
+                setTimeout(() => {
+                  const ae = document.activeElement as HTMLElement | null;
+                  if (!ae || !ae.id || !ae.id.startsWith('signup-')) setFocusedField(null);
+                }, 0);
+              }}
+              onSubmit={(e) => {
               e.preventDefault();
               if (!verified) { alert('Please verify you are human before creating an account'); return; }
               if (password !== confirmPassword) { alert('Passwords do not match'); return; }
-              const payload = { username, password, confirmPassword };
+              const payload = { firstName, lastName, username, password, confirmPassword };
               alert(`Create account attempted with data: ${JSON.stringify(payload)}`);
               onClose();
             }} style={{ display: 'block', width: 'min(900px, 88vw)', margin: '0 auto' }}>
               <div style={{ marginBottom: 12 }}>
+                <label htmlFor="signup-first" style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>First name</label>
+                <input
+                  id="signup-first"
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setFirstName(v);
+                    setFirstNameValid(v.trim().length > 0);
+                  }}
+                  onFocus={() => setFocusedField('first')}
+                  onBlur={() => setFocusedField(null)}
+                  required
+                  style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${firstNameValid === null ? 'rgba(255,255,255,0.08)' : firstNameValid ? '#16a34a' : '#dc2626'}`, color: 'white', fontSize: 16 }}
+                />
+                {focusedField === 'first' && (
+                  <div style={{ marginTop: 8 }}>
+                    <span style={{ color: firstNameValid ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Must not be empty</span>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ marginBottom: 12 }}>
+                <label htmlFor="signup-last" style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>Last name</label>
+                <input
+                  id="signup-last"
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setLastName(v);
+                    setLastNameValid(v.trim().length > 0);
+                  }}
+                  onFocus={() => setFocusedField('last')}
+                  onBlur={() => setFocusedField(null)}
+                  required
+                  style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${lastNameValid === null ? 'rgba(255,255,255,0.08)' : lastNameValid ? '#16a34a' : '#dc2626'}`, color: 'white', fontSize: 16 }}
+                />
+                {focusedField === 'last' && (
+                  <div style={{ marginTop: 8 }}>
+                    <span style={{ color: lastNameValid ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Must not be empty</span>
+                  </div>
+                )}
+              </div>
+              <div style={{ marginBottom: 12 }}>
                 <label htmlFor="signup-username" style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>Username</label>
-                <input id="signup-username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} required style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', fontSize: 16 }} />
+                <input
+                  id="signup-username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setUsername(v);
+                    setUsernameValid(computeUsernameValidity(v));
+                  }}
+                  onFocus={() => setFocusedField('username')}
+                  onBlur={() => setFocusedField(null)}
+                  required
+                  style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${usernameValid === null ? 'rgba(255,255,255,0.08)' : usernameValid ? '#16a34a' : '#dc2626'}`, color: 'white', fontSize: 16 }}
+                />
+                {/* Username requirements */}
+                {focusedField === 'username' && (() => {
+                  const r = usernameReqs(username);
+                  return (
+                    <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <span style={{ color: r.hasValue ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Must not be empty</span>
+                      <span style={{ color: r.validChars ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Only letters, digits, underscores, hyphens</span>
+                      <span style={{ color: r.validLength ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Less than 16 characters</span>
+                      <span style={{ color: r.noProfanity ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Must not contain profanity</span>
+                      <span style={{ color: r.noWhitespace ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>No whitespace</span>
+                    </div>
+                  );
+                })()}
               </div>
 
               <div style={{ marginBottom: 12 }}>
                 <label htmlFor="signup-password" style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>Password</label>
-                <input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', fontSize: 16 }} />
+                <input
+                  id="signup-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setPassword(v);
+                    setPasswordValid(computePasswordValidity(v));
+                  }}
+                  onFocus={() => setFocusedField('password')}
+                  onBlur={() => setFocusedField(null)}
+                  required
+                  style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${passwordValid === null ? 'rgba(255,255,255,0.08)' : passwordValid ? '#16a34a' : '#dc2626'}`, color: 'white', fontSize: 16 }}
+                />
+                {/* Password requirements */}
+                {focusedField === 'password' && (() => {
+                  const r = passwordReqs(password);
+                  return (
+                    <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <span style={{ color: r.hasValue ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Must not be empty</span>
+                      <span style={{ color: r.validLength ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>8 to 64 characters</span>
+                      <span style={{ color: r.strong ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Must contain uppercase, lowercase, digit, and symbol</span>
+                      <span style={{ color: r.noWhitespace ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>No whitespace</span>
+                      <span style={{ color: r.validChars ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Allowed characters only (no control chars/newlines)</span>
+                    </div>
+                  );
+                })()}
               </div>
 
               <div style={{ marginBottom: 12 }}>
                 <label htmlFor="signup-confirm" style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>Confirm Password</label>
-                <input id="signup-confirm" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', fontSize: 16 }} />
+                <input id="signup-confirm" type="password" value={confirmPassword} onChange={(e) => { const v = e.target.value; setConfirmPassword(v); setConfirmValid(v === password); }} onFocus={() => setFocusedField('confirm')} onBlur={() => setFocusedField(null)} required style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${confirmValid === null ? 'rgba(255,255,255,0.08)' : confirmValid ? '#16a34a' : '#dc2626'}`, color: 'white', fontSize: 16 }} />
+                {focusedField === 'confirm' && (
+                  <div style={{ marginTop: 8 }}>
+                    <span style={{ color: confirmValid ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{confirmValid ? 'Matches password' : 'Must match password'}</span>
+                  </div>
+                )}
               </div>
 
               <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
@@ -119,7 +301,13 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 >
                   {verified ? 'Verified' : 'Verify human'}
                 </button>
-                <button type="submit" style={{ flex: 1, height: 48, borderRadius: 10, background: '#2563eb', border: 'none', color: 'white' }}>Create Account</button>
+                <button
+                  type="submit"
+                  disabled={!(usernameValid && passwordValid && firstNameValid && lastNameValid && confirmValid && verified)}
+                  style={{ flex: 1, height: 48, borderRadius: 10, background: '#2563eb', border: 'none', color: 'white', opacity: !(usernameValid && passwordValid && firstNameValid && lastNameValid && confirmValid && verified) ? 0.6 : 1 }}
+                >
+                  Create Account
+                </button>
               </div>
 
               <div style={{ marginTop: 12, textAlign: 'center' }}>
