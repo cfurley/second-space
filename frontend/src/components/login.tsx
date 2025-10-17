@@ -17,8 +17,13 @@ export default function Login({ isOpen, onClose }: LoginProps) {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [mode, setMode] = useState<'login' | 'signup' | 'verify'>('login');
+  const [verified, setVerified] = useState(false);
+  const [verifyInput, setVerifyInput] = useState('');
+  
   // validation state
-  const [usernameValid, setUsernameValid] = useState<boolean | null>(null); // null = untouched
+  const [usernameValid, setUsernameValid] = useState<boolean | null>(null);
   const [passwordValid, setPasswordValid] = useState<boolean | null>(null);
   const [firstNameValid, setFirstNameValid] = useState<boolean | null>(null);
   const [lastNameValid, setLastNameValid] = useState<boolean | null>(null);
@@ -31,27 +36,27 @@ export default function Login({ isOpen, onClose }: LoginProps) {
       setPassword('');
       setFirstName('');
       setLastName('');
+      setConfirmPassword('');
       setUsernameValid(null);
       setPasswordValid(null);
       setFirstNameValid(null);
       setLastNameValid(null);
-      setConfirmPassword('');
       setConfirmValid(null);
+      setVerified(false);
+      setVerifyInput('');
+      setMode('login');
     }
   }, [isOpen]);
 
-  // helper to compute username validity from the validator functions
   const computeUsernameValidity = (u: string) => {
     if (!u || u.trim() === '') return false;
     if (!validateUsernameCharacters(u)) return false;
     if (!validateUsernameLength(u)) return false;
     if (!validateUsernameDoesNotContainProfanity(u)) return false;
-    // no whitespace allowed
     if (/\s/.test(u)) return false;
     return true;
   };
 
-  // Username requirement flags for UI hints
   const usernameReqs = (u: string) => {
     return {
       hasValue: u.trim().length > 0,
@@ -67,7 +72,6 @@ export default function Login({ isOpen, onClose }: LoginProps) {
     if (!validatePasswordCharacters(p)) return false;
     if (!validatePasswordLength(p)) return false;
     if (!validatePasswordStrength(p)) return false;
-    // no whitespace
     if (/\s/.test(p)) return false;
     return true;
   };
@@ -82,95 +86,211 @@ export default function Login({ isOpen, onClose }: LoginProps) {
     };
   };
 
-  if (typeof document === 'undefined') return null;
-
-  if (!isOpen) return null;
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const payload = { username, password };
-    // Alert with raw JSON data as requested
     alert(`Login attempted with data: ${JSON.stringify(payload)}`);
-    // --- Where to send this data for implementing the API ---
-    // Send a POST request with JSON body to your backend auth route.
-    // Example endpoint (backend): POST /api/users/authenticate  or POST /api/auth/login
-    // Payload shape: { username: string, password: string }
-    // The server should return a session token / user object on success.
-    // You can implement the route in: backend/src/routes/userRoutes.js (add a POST /authenticate)
-    // and the handler in: backend/src/controllers/userControllers.js
-    // Example fetch (uncomment and adapt):
-    // fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-    //   .then(r => r.json()).then(data => console.log('login response', data));
-    // Close modal after submit
     onClose();
   };
 
-  // Local UI mode: login | signup | verify-human
-  const [mode, setMode] = React.useState<'login' | 'signup' | 'verify'>('login');
-  const [confirmPassword, setConfirmPassword] = React.useState('');
-  const [verified, setVerified] = React.useState(false);
-  const [verifyInput, setVerifyInput] = React.useState('');
+  const handleSignupSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!verified) {
+      alert('Please verify you are human before creating an account');
+      return;
+    }
+    if (password !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    const payload = { firstName, lastName, username, password, confirmPassword };
+    alert(`Create account attempted with data: ${JSON.stringify(payload)}`);
+    onClose();
+  };
 
-  // Render modal via portal: full-viewport flex centering
+  if (typeof document === 'undefined') return null;
+  if (!isOpen) return null;
+
   return ReactDOM.createPortal(
-    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 10000 }} />
+    <div 
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-6"
+      onClick={onClose}
+    >
+      {/* Enhanced Backdrop with glass effect - made more transparent to show icons */}
+      <div 
+        className="absolute inset-0"
+        style={{ 
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(20px) saturate(150%)',
+        }}
+        aria-hidden
+      />
 
-      <div onClick={(e) => e.stopPropagation()} style={{ width: 'min(1200px, 96vw)', backgroundColor: '#0a0a0a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 32, padding: 56, color: 'white', boxShadow: '0 60px 150px rgba(0,0,0,0.95)', zIndex: 10001 }}>
+      {/* Modal with enhanced liquid glass effect */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative z-[10001] w-full max-w-[520px] rounded-3xl border p-12"
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          borderColor: 'var(--ss-glass-border-active)',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(40px) saturate(180%)',
+          backgroundImage: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%)',
+        }}
+      >
+        {/* Login Mode */}
         {mode === 'login' && (
-          <>
-            <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 24, textAlign: 'center' }}>Second Space Login</h2>
+          <div>
+            <h2 className="mb-8 text-center" style={{ fontSize: '2.2rem' }}>
+              Second Space
+            </h2>
 
-            <form onSubmit={handleSubmit} style={{ display: 'block', width: 'min(900px, 88vw)', margin: '0 auto' }}>
-              <div style={{ marginBottom: 12 }}>
-                <label htmlFor="modal-username" style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>Username</label>
-                <input id="modal-username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} required style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', fontSize: 16 }} />
+            <form onSubmit={handleLoginSubmit} className="space-y-6">
+              <div>
+                <label htmlFor="login-username" className="mb-2 block" style={{ fontSize: '0.9rem', color: 'var(--ss-text-secondary)' }}>
+                  Username
+                </label>
+                <input
+                  id="login-username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  className="w-full rounded-xl px-4 py-3 transition-all duration-300"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid var(--ss-glass-border)',
+                    color: 'var(--ss-text-primary)',
+                    fontSize: '0.85rem',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                    e.target.style.borderColor = 'var(--ss-glass-border-active)';
+                    e.target.style.boxShadow = '0 4px 20px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+                    e.target.style.borderColor = 'var(--ss-glass-border)';
+                    e.target.style.boxShadow = 'inset 0 1px 0 rgba(255, 255, 255, 0.05)';
+                  }}
+                />
               </div>
 
-              <div style={{ marginBottom: 18 }}>
-                <label htmlFor="modal-password" style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>Password</label>
-                <input id="modal-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', fontSize: 16 }} />
+              <div>
+                <label htmlFor="login-password" className="mb-2 block" style={{ fontSize: '0.9rem', color: 'var(--ss-text-secondary)' }}>
+                  Password
+                </label>
+                <input
+                  id="login-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full rounded-xl px-4 py-3 transition-all duration-300"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid var(--ss-glass-border)',
+                    color: 'var(--ss-text-primary)',
+                    fontSize: '0.85rem',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                    e.target.style.borderColor = 'var(--ss-glass-border-active)';
+                    e.target.style.boxShadow = '0 4px 20px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+                    e.target.style.borderColor = 'var(--ss-glass-border)';
+                    e.target.style.boxShadow = 'inset 0 1px 0 rgba(255, 255, 255, 0.05)';
+                  }}
+                />
               </div>
 
-              <div style={{ marginTop: 20 }}>
-                <button type="submit" style={{ width: '100%', height: 56, borderRadius: 12, background: '#2563eb', border: 'none', color: 'white', fontSize: 16, fontWeight: 600 }}>Submit</button>
-              </div>
+              <button
+                type="submit"
+                className="w-full rounded-xl py-3 transition-all duration-300"
+                style={{
+                  backgroundColor: 'rgba(29, 29, 29, 0.8)',
+                  color: 'var(--ss-text-primary)',
+                  border: '1px solid var(--ss-glass-border-active)',
+                  backdropFilter: 'blur(20px)',
+                  boxShadow: '0 4px 20px rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 8px 30px rgba(255, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.backgroundColor = 'rgba(29, 29, 29, 0.8)';
+                  e.currentTarget.style.boxShadow = '0 4px 20px rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                }}
+              >
+                Login
+              </button>
 
-              <div style={{ marginTop: 14, textAlign: 'center' }}>
-                <button type="button" onClick={() => { setMode('signup'); setVerified(false); setConfirmPassword(''); }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.85)', textDecoration: 'underline', cursor: 'pointer', fontSize: 14 }}>Or Create Account</button>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('signup');
+                    setVerified(false);
+                    setConfirmPassword('');
+                  }}
+                  className="transition-all duration-200"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--ss-text-secondary)',
+                    fontSize: '0.85rem',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = 'var(--ss-text-primary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = 'var(--ss-text-secondary)';
+                  }}
+                >
+                  Create Account →
+                </button>
               </div>
             </form>
-          </>
+          </div>
         )}
 
+        {/* Signup Mode */}
         {mode === 'signup' && (
-          <>
-            <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 18, textAlign: 'center' }}>Create Account</h2>
+          <div>
+            <h2 className="mb-8 text-center" style={{ fontSize: '2.2rem' }}>
+              Create Account
+            </h2>
+
             <form
+              onSubmit={handleSignupSubmit}
+              className="space-y-5"
               onFocusCapture={(e) => {
                 const t = e.target as HTMLElement;
-                if (!t || !t.id) return;
-                if (t.id.startsWith('signup-')) {
+                if (t?.id?.startsWith('signup-')) {
                   setFocusedField(t.id.replace('signup-', ''));
                 }
               }}
               onBlurCapture={() => {
-                // clear focus when focus leaves inputs
                 setTimeout(() => {
                   const ae = document.activeElement as HTMLElement | null;
-                  if (!ae || !ae.id || !ae.id.startsWith('signup-')) setFocusedField(null);
+                  if (!ae?.id?.startsWith('signup-')) setFocusedField(null);
                 }, 0);
               }}
-              onSubmit={(e) => {
-              e.preventDefault();
-              if (!verified) { alert('Please verify you are human before creating an account'); return; }
-              if (password !== confirmPassword) { alert('Passwords do not match'); return; }
-              const payload = { firstName, lastName, username, password, confirmPassword };
-              alert(`Create account attempted with data: ${JSON.stringify(payload)}`);
-              onClose();
-            }} style={{ display: 'block', width: 'min(900px, 88vw)', margin: '0 auto' }}>
-              <div style={{ marginBottom: 12 }}>
-                <label htmlFor="signup-first" style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>First name</label>
+            >
+              {/* First Name */}
+              <div>
+                <label htmlFor="signup-first" className="mb-2 block" style={{ fontSize: '0.85rem', color: 'var(--ss-text-secondary)' }}>
+                  First Name
+                </label>
                 <input
                   id="signup-first"
                   type="text"
@@ -180,20 +300,49 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                     setFirstName(v);
                     setFirstNameValid(v.trim().length > 0);
                   }}
-                  onFocus={() => setFocusedField('first')}
-                  onBlur={() => setFocusedField(null)}
                   required
-                  style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${firstNameValid === null ? 'rgba(255,255,255,0.08)' : firstNameValid ? '#16a34a' : '#dc2626'}`, color: 'white', fontSize: 16 }}
+                  className="w-full rounded-lg px-4 py-2.5 transition-all duration-300"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    border: `1px solid ${
+                      firstNameValid === null
+                        ? 'var(--ss-glass-border)'
+                        : firstNameValid
+                        ? 'var(--ss-success)'
+                        : 'var(--ss-error)'
+                    }`,
+                    color: 'var(--ss-text-primary)',
+                    fontSize: '0.85rem',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                    e.target.style.boxShadow = '0 4px 20px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+                    e.target.style.boxShadow = 'inset 0 1px 0 rgba(255, 255, 255, 0.05)';
+                  }}
                 />
                 {focusedField === 'first' && (
-                  <div style={{ marginTop: 8 }}>
-                    <span style={{ color: firstNameValid ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Must not be empty</span>
-                  </div>
+                  <p
+                    className="mt-1.5"
+                    style={{
+                      fontSize: '0.75rem',
+                      color: firstNameValid ? 'var(--ss-success)' : 'var(--ss-error)',
+                    }}
+                  >
+                    Must not be empty
+                  </p>
                 )}
               </div>
 
-              <div style={{ marginBottom: 12 }}>
-                <label htmlFor="signup-last" style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>Last name</label>
+              {/* Last Name */}
+              <div>
+                <label htmlFor="signup-last" className="mb-2 block" style={{ fontSize: '0.85rem', color: 'var(--ss-text-secondary)' }}>
+                  Last Name
+                </label>
                 <input
                   id="signup-last"
                   type="text"
@@ -203,19 +352,49 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                     setLastName(v);
                     setLastNameValid(v.trim().length > 0);
                   }}
-                  onFocus={() => setFocusedField('last')}
-                  onBlur={() => setFocusedField(null)}
                   required
-                  style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${lastNameValid === null ? 'rgba(255,255,255,0.08)' : lastNameValid ? '#16a34a' : '#dc2626'}`, color: 'white', fontSize: 16 }}
+                  className="w-full rounded-lg px-4 py-2.5 transition-all duration-300"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    border: `1px solid ${
+                      lastNameValid === null
+                        ? 'var(--ss-glass-border)'
+                        : lastNameValid
+                        ? 'var(--ss-success)'
+                        : 'var(--ss-error)'
+                    }`,
+                    color: 'var(--ss-text-primary)',
+                    fontSize: '0.85rem',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                    e.target.style.boxShadow = '0 4px 20px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+                    e.target.style.boxShadow = 'inset 0 1px 0 rgba(255, 255, 255, 0.05)';
+                  }}
                 />
                 {focusedField === 'last' && (
-                  <div style={{ marginTop: 8 }}>
-                    <span style={{ color: lastNameValid ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Must not be empty</span>
-                  </div>
+                  <p
+                    className="mt-1.5"
+                    style={{
+                      fontSize: '0.75rem',
+                      color: lastNameValid ? 'var(--ss-success)' : 'var(--ss-error)',
+                    }}
+                  >
+                    Must not be empty
+                  </p>
                 )}
               </div>
-              <div style={{ marginBottom: 12 }}>
-                <label htmlFor="signup-username" style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>Username</label>
+
+              {/* Username */}
+              <div>
+                <label htmlFor="signup-username" className="mb-2 block" style={{ fontSize: '0.85rem', color: 'var(--ss-text-secondary)' }}>
+                  Username
+                </label>
                 <input
                   id="signup-username"
                   type="text"
@@ -225,28 +404,60 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                     setUsername(v);
                     setUsernameValid(computeUsernameValidity(v));
                   }}
-                  onFocus={() => setFocusedField('username')}
-                  onBlur={() => setFocusedField(null)}
                   required
-                  style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${usernameValid === null ? 'rgba(255,255,255,0.08)' : usernameValid ? '#16a34a' : '#dc2626'}`, color: 'white', fontSize: 16 }}
+                  className="w-full rounded-lg px-4 py-2.5 transition-all duration-300"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    border: `1px solid ${
+                      usernameValid === null
+                        ? 'var(--ss-glass-border)'
+                        : usernameValid
+                        ? 'var(--ss-success)'
+                        : 'var(--ss-error)'
+                    }`,
+                    color: 'var(--ss-text-primary)',
+                    fontSize: '0.85rem',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                    e.target.style.boxShadow = '0 4px 20px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+                    e.target.style.boxShadow = 'inset 0 1px 0 rgba(255, 255, 255, 0.05)';
+                  }}
                 />
-                {/* Username requirements */}
                 {focusedField === 'username' && (() => {
                   const r = usernameReqs(username);
                   return (
-                    <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      <span style={{ color: r.hasValue ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Must not be empty</span>
-                      <span style={{ color: r.validChars ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Only letters, digits, underscores, hyphens</span>
-                      <span style={{ color: r.validLength ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Less than 16 characters</span>
-                      <span style={{ color: r.noProfanity ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Must not contain profanity</span>
-                      <span style={{ color: r.noWhitespace ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>No whitespace</span>
+                    <div className="mt-1.5 space-y-0.5">
+                      <p style={{ fontSize: '0.75rem', color: r.hasValue ? 'var(--ss-success)' : 'var(--ss-error)' }}>
+                        • Must not be empty
+                      </p>
+                      <p style={{ fontSize: '0.75rem', color: r.validChars ? 'var(--ss-success)' : 'var(--ss-error)' }}>
+                        • Only letters, digits, underscores, hyphens
+                      </p>
+                      <p style={{ fontSize: '0.75rem', color: r.validLength ? 'var(--ss-success)' : 'var(--ss-error)' }}>
+                        • Less than 16 characters
+                      </p>
+                      <p style={{ fontSize: '0.75rem', color: r.noProfanity ? 'var(--ss-success)' : 'var(--ss-error)' }}>
+                        • Must not contain profanity
+                      </p>
+                      <p style={{ fontSize: '0.75rem', color: r.noWhitespace ? 'var(--ss-success)' : 'var(--ss-error)' }}>
+                        • No whitespace
+                      </p>
                     </div>
                   );
                 })()}
               </div>
 
-              <div style={{ marginBottom: 12 }}>
-                <label htmlFor="signup-password" style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>Password</label>
+              {/* Password */}
+              <div>
+                <label htmlFor="signup-password" className="mb-2 block" style={{ fontSize: '0.85rem', color: 'var(--ss-text-secondary)' }}>
+                  Password
+                </label>
                 <input
                   id="signup-password"
                   type="password"
@@ -256,78 +467,209 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                     setPassword(v);
                     setPasswordValid(computePasswordValidity(v));
                   }}
-                  onFocus={() => setFocusedField('password')}
-                  onBlur={() => setFocusedField(null)}
                   required
-                  style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${passwordValid === null ? 'rgba(255,255,255,0.08)' : passwordValid ? '#16a34a' : '#dc2626'}`, color: 'white', fontSize: 16 }}
+                  className="w-full rounded-lg px-4 py-2.5 transition-all duration-300"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    border: `1px solid ${
+                      passwordValid === null
+                        ? 'var(--ss-glass-border)'
+                        : passwordValid
+                        ? 'var(--ss-success)'
+                        : 'var(--ss-error)'
+                    }`,
+                    color: 'var(--ss-text-primary)',
+                    fontSize: '0.85rem',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                    e.target.style.boxShadow = '0 4px 20px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+                    e.target.style.boxShadow = 'inset 0 1px 0 rgba(255, 255, 255, 0.05)';
+                  }}
                 />
-                {/* Password requirements */}
                 {focusedField === 'password' && (() => {
                   const r = passwordReqs(password);
                   return (
-                    <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      <span style={{ color: r.hasValue ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Must not be empty</span>
-                      <span style={{ color: r.validLength ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>8 to 64 characters</span>
-                      <span style={{ color: r.strong ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Must contain uppercase, lowercase, digit, and symbol</span>
-                      <span style={{ color: r.noWhitespace ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>No whitespace</span>
-                      <span style={{ color: r.validChars ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Allowed characters only (no control chars/newlines)</span>
+                    <div className="mt-1.5 space-y-0.5">
+                      <p style={{ fontSize: '0.75rem', color: r.hasValue ? 'var(--ss-success)' : 'var(--ss-error)' }}>
+                        • Must not be empty
+                      </p>
+                      <p style={{ fontSize: '0.75rem', color: r.validLength ? 'var(--ss-success)' : 'var(--ss-error)' }}>
+                        • 8 to 64 characters
+                      </p>
+                      <p style={{ fontSize: '0.75rem', color: r.strong ? 'var(--ss-success)' : 'var(--ss-error)' }}>
+                        • Must contain uppercase, lowercase, digit, and symbol
+                      </p>
+                      <p style={{ fontSize: '0.75rem', color: r.noWhitespace ? 'var(--ss-success)' : 'var(--ss-error)' }}>
+                        • No whitespace
+                      </p>
+                      <p style={{ fontSize: '0.75rem', color: r.validChars ? 'var(--ss-success)' : 'var(--ss-error)' }}>
+                        • Allowed characters only (no control chars/newlines)
+                      </p>
                     </div>
                   );
                 })()}
               </div>
 
-              <div style={{ marginBottom: 12 }}>
-                <label htmlFor="signup-confirm" style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>Confirm Password</label>
-                <input id="signup-confirm" type="password" value={confirmPassword} onChange={(e) => { const v = e.target.value; setConfirmPassword(v); setConfirmValid(v === password); }} onFocus={() => setFocusedField('confirm')} onBlur={() => setFocusedField(null)} required style={{ width: '100%', height: 56, padding: '0 20px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${confirmValid === null ? 'rgba(255,255,255,0.08)' : confirmValid ? '#16a34a' : '#dc2626'}`, color: 'white', fontSize: 16 }} />
+              {/* Confirm Password */}
+              <div>
+                <label htmlFor="signup-confirm" className="mb-2 block" style={{ fontSize: '0.85rem', color: 'var(--ss-text-secondary)' }}>
+                  Confirm Password
+                </label>
+                <input
+                  id="signup-confirm"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setConfirmPassword(v);
+                    setConfirmValid(v === password);
+                  }}
+                  required
+                  className="w-full rounded-lg px-4 py-2.5 transition-all duration-300"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    border: `1px solid ${
+                      confirmValid === null
+                        ? 'var(--ss-glass-border)'
+                        : confirmValid
+                        ? 'var(--ss-success)'
+                        : 'var(--ss-error)'
+                    }`,
+                    color: 'var(--ss-text-primary)',
+                    fontSize: '0.85rem',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                    e.target.style.boxShadow = '0 4px 20px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+                    e.target.style.boxShadow = 'inset 0 1px 0 rgba(255, 255, 255, 0.05)';
+                  }}
+                />
                 {focusedField === 'confirm' && (
-                  <div style={{ marginTop: 8 }}>
-                    <span style={{ color: confirmValid ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{confirmValid ? 'Matches password' : 'Must match password'}</span>
-                  </div>
+                  <p
+                    className="mt-1.5"
+                    style={{
+                      fontSize: '0.75rem',
+                      color: confirmValid ? 'var(--ss-success)' : 'var(--ss-error)',
+                    }}
+                  >
+                    {confirmValid ? 'Matches password' : 'Must match password'}
+                  </p>
                 )}
               </div>
 
-              <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+              {/* Verification & Submit Buttons */}
+              <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setMode('verify')}
+                  className="flex-1 rounded-lg py-2.5 transition-all duration-300"
                   style={{
-                    flex: 1,
-                    height: 48,
-                    borderRadius: 10,
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    color: 'white',
-                    background: verified ? '#16a34a' : '#dc2626',
+                    backgroundColor: verified ? 'rgba(34, 197, 94, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                    border: `1px solid ${verified ? 'var(--ss-success)' : 'var(--ss-glass-border)'}`,
+                    color: verified ? 'var(--ss-success)' : 'var(--ss-text-secondary)',
+                    fontSize: '0.85rem',
+                    backdropFilter: 'blur(20px)',
+                    boxShadow: verified 
+                      ? '0 4px 20px rgba(34, 197, 94, 0.2), inset 0 1px 0 rgba(34, 197, 94, 0.2)' 
+                      : 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!verified) {
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                      e.currentTarget.style.borderColor = 'var(--ss-glass-border-active)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!verified) {
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                      e.currentTarget.style.borderColor = 'var(--ss-glass-border)';
+                    }
                   }}
                 >
-                  {verified ? 'Verified' : 'Verify human'}
+                  {verified ? '✓ Verified' : 'Verify Human'}
                 </button>
                 <button
                   type="submit"
                   disabled={!(usernameValid && passwordValid && firstNameValid && lastNameValid && confirmValid && verified)}
-                  style={{ flex: 1, height: 48, borderRadius: 10, background: '#2563eb', border: 'none', color: 'white', opacity: !(usernameValid && passwordValid && firstNameValid && lastNameValid && confirmValid && verified) ? 0.6 : 1 }}
+                  className="flex-1 rounded-lg py-2.5 transition-all duration-300"
+                  style={{
+                    backgroundColor: 'rgba(29, 29, 29, 0.8)',
+                    border: '1px solid var(--ss-glass-border-active)',
+                    color: 'var(--ss-text-primary)',
+                    opacity: !(usernameValid && passwordValid && firstNameValid && lastNameValid && confirmValid && verified) ? 0.4 : 1,
+                    cursor: !(usernameValid && passwordValid && firstNameValid && lastNameValid && confirmValid && verified) ? 'not-allowed' : 'pointer',
+                    fontSize: '0.85rem',
+                    backdropFilter: 'blur(20px)',
+                    boxShadow: '0 4px 20px rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (usernameValid && passwordValid && firstNameValid && lastNameValid && confirmValid && verified) {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+                      e.currentTarget.style.boxShadow = '0 8px 30px rgba(255, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.backgroundColor = 'rgba(29, 29, 29, 0.8)';
+                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                  }}
                 >
                   Create Account
                 </button>
               </div>
 
-              <div style={{ marginTop: 12, textAlign: 'center' }}>
-                <button type="button" onClick={() => setMode('login')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.85)', textDecoration: 'underline', cursor: 'pointer' }}>Back to Login</button>
+              <div className="text-center pt-2">
+                <button
+                  type="button"
+                  onClick={() => setMode('login')}
+                  className="transition-all duration-200"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--ss-text-secondary)',
+                    fontSize: '0.85rem',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = 'var(--ss-text-primary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = 'var(--ss-text-secondary)';
+                  }}
+                >
+                  ← Back to Login
+                </button>
               </div>
             </form>
-          </>
+          </div>
         )}
 
+        {/* Verify Mode */}
         {mode === 'verify' && (
-          <div style={{ width: '100%', maxWidth: 460, margin: '0 auto', padding: 18, background: '#0f0f0f', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16 }}>
-            <h3 style={{ fontSize: 18, fontWeight: 600, textAlign: 'center', marginBottom: 12 }}>Verify human</h3>
-            <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.72)', marginBottom: 12 }}>Type 67</p>
+          <div className="mx-auto w-full max-w-md">
+            <h3 className="mb-6 text-center" style={{ fontSize: '1.4rem' }}>
+              Verify Human
+            </h3>
+            <p className="mb-6 text-center" style={{ color: 'var(--ss-text-secondary)', fontSize: '0.9rem' }}>
+              Type <span style={{ color: 'var(--ss-text-primary)' }}>67</span> to continue
+            </p>
             <input
               value={verifyInput}
               onChange={(e) => setVerifyInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
-                  // perform same verification logic as the Submit button
                   if (verifyInput.trim() === '67') {
                     setVerified(true);
                     setMode('signup');
@@ -337,14 +679,119 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                   }
                 }
               }}
-              style={{ width: '100%', height: 44, padding: '0 12px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', marginBottom: 12 }}
+              className="mb-4 w-full rounded-lg px-4 py-3 transition-all duration-300"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid var(--ss-glass-border)',
+                color: 'var(--ss-text-primary)',
+                fontSize: '0.9rem',
+                backdropFilter: 'blur(10px)',
+                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+              }}
+              onFocus={(e) => {
+                e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                e.target.style.borderColor = 'var(--ss-glass-border-active)';
+                e.target.style.boxShadow = '0 4px 20px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                e.target.style.borderColor = 'var(--ss-glass-border)';
+                e.target.style.boxShadow = 'inset 0 1px 0 rgba(255, 255, 255, 0.05)';
+              }}
+              autoFocus
             />
-            <div style={{ display: 'flex', gap: 12 }}>
-              <button type="button" onClick={() => { if (verifyInput.trim() === '67') { setVerified(true); setMode('signup'); setVerifyInput(''); } else { alert('Verification failed — please type 67'); } }} style={{ flex: 1, height: 44, borderRadius: 8, background: '#2563eb', color: 'white' }}>Submit</button>
-              <button type="button" onClick={() => { setMode('signup'); setVerifyInput(''); }} style={{ flex: 1, height: 44, borderRadius: 8, background: 'rgba(255,255,255,0.03)', color: 'white', border: '1px solid rgba(255,255,255,0.08)' }}>Cancel</button>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  if (verifyInput.trim() === '67') {
+                    setVerified(true);
+                    setMode('signup');
+                    setVerifyInput('');
+                  } else {
+                    alert('Verification failed — please type 67');
+                  }
+                }}
+                className="flex-1 rounded-lg py-3 transition-all duration-300"
+                style={{
+                  backgroundColor: 'rgba(29, 29, 29, 0.8)',
+                  border: '1px solid var(--ss-glass-border-active)',
+                  color: 'var(--ss-text-primary)',
+                  fontSize: '0.85rem',
+                  backdropFilter: 'blur(20px)',
+                  boxShadow: '0 4px 20px rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 8px 30px rgba(255, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.backgroundColor = 'rgba(29, 29, 29, 0.8)';
+                  e.currentTarget.style.boxShadow = '0 4px 20px rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                }}
+              >
+                Submit
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('signup');
+                  setVerifyInput('');
+                }}
+                className="flex-1 rounded-lg py-3 transition-all duration-300"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid var(--ss-glass-border)',
+                  color: 'var(--ss-text-primary)',
+                  fontSize: '0.85rem',
+                  backdropFilter: 'blur(20px)',
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 4px 20px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                  e.currentTarget.style.boxShadow = 'inset 0 1px 0 rgba(255, 255, 255, 0.05)';
+                }}
+              >
+                Cancel
+              </button>
             </div>
           </div>
         )}
+
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 transition-all duration-200"
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--ss-text-secondary)',
+            fontSize: '1.5rem',
+            cursor: 'pointer',
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--ss-glass-light)';
+            e.currentTarget.style.color = 'var(--ss-text-primary)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.color = 'var(--ss-text-secondary)';
+          }}
+        >
+          ×
+        </button>
       </div>
     </div>,
     document.body
