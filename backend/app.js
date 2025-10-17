@@ -1,6 +1,6 @@
 import express from "express";
 import spaceRouter from "./src/routes/spacesRoutes.js";
-import mediaRouter from "./src/routes/mediaRoutes.js";
+// import mediaRouter from "./src/routes/mediaRoutes.js";
 import userRouter from "./src/routes/userRoutes.js";
 
 const app = express();
