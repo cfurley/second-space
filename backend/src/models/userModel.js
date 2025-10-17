@@ -2,8 +2,8 @@ class User {
   constructor({
     id = null,
     username,
-    password,
-    display_name = null,
+    password = null,
+    display_name = username,
     profile_picture_id = null,
     theme_id = 1,
     first_name,
