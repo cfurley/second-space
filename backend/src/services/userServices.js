@@ -28,7 +28,7 @@ const authenticateLogin = async (username, password) => {
     last_login_date_utc,
     create_date_utc,
     update_date_utc
-    FROM users
+    FROM user
     WHERE deleted = $1 
     AND username = $2
     AND password = $3;
