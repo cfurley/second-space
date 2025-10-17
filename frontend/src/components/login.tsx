@@ -113,7 +113,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
 
   // Render modal via portal: full-viewport flex centering
   return ReactDOM.createPortal(
-    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }} onClick={onClose}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 10000 }} />
 
       <div onClick={(e) => e.stopPropagation()} style={{ width: 'min(1200px, 96vw)', backgroundColor: '#0a0a0a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 32, padding: 56, color: 'white', boxShadow: '0 60px 150px rgba(0,0,0,0.95)', zIndex: 10001 }}>
