@@ -12,7 +12,7 @@ app.use(express.json());
 
 /****** SETUP ROUTERS HERE ******/
 app.use("/spaces", spaceRouter);
-app.use("/media", mediaRouter);
+// app.use("/media", mediaRouter);
 app.use("/user", userRouter);
 //app.use('/containers', containerRouter);
 
