@@ -1,6 +1,9 @@
 import userService from "../services/userServices.js";
 import userModel from "../models/userModel.js";
 
+/**
+ * Authenticate a user login
+ */
 const authenticate = async (req, res) => {
   let username;
   let password;
@@ -21,6 +24,9 @@ const authenticate = async (req, res) => {
   }
 };
 
+/**
+ * Update password for a user
+ */
 const updatePassword = async (req, res) => {
   let userId;
   let password;
@@ -46,8 +52,10 @@ const updatePassword = async (req, res) => {
   }
 };
 
+/**
+ * Create a user from json
+ */
 const createUser = async (req, res) => {
-  //   return res.status(500).json({ message: "Route not implemented yet" });
   let user;
   try {
     user = userModel.fromJson(req.body);
@@ -88,6 +96,7 @@ const deleteUser = async (req, res) => {
 
 /**
  * Validate the user password
+ * @param {string} password
  */
 const validatePassword = async (password) => {
   // Must be a string
