@@ -6,6 +6,7 @@ import { BottomMenuBar } from './components/BottomMenuBar';
 import Board from './components/Board';
 import Login from './components/login';
 import { FloatingMenu } from './components/FloatingMenu';
+import AnimatedBackground from './components/AnimatedBackground';
 
 export default function App() {
   const [activeNav, setActiveNav] = useState('Spaces');
@@ -18,7 +19,18 @@ export default function App() {
   // will call onClose when the user submits or cancels — for now cancel
   // also proceeds to the homepage (temporary behavior). See TODO comments.
   if (!isAuthenticated) {
-    return <Login isOpen={true} onClose={() => setIsAuthenticated(true)} />;
+    return (
+      <div 
+        className="relative flex size-full items-center justify-center overflow-hidden"
+        style={{ 
+          backgroundColor: 'var(--ss-background)',
+          minHeight: '100vh'
+        }}
+      >
+        <AnimatedBackground />
+        <Login isOpen={true} onClose={() => setIsAuthenticated(true)} />
+      </div>
+    );
   }
 
   return (

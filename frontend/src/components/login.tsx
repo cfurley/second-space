@@ -141,61 +141,40 @@ export default function Login({ isOpen, onClose }: LoginProps) {
 
   // Render modal via portal: full-viewport flex centering
   return ReactDOM.createPortal(
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 9999,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 24,
-      }}
+    <div 
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-6"
+      onClick={onClose}
     >
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundColor: "rgba(0,0,0,0.85)",
-          zIndex: 10000,
+      {/* Enhanced Backdrop with glass effect */}
+      <div 
+        className="absolute inset-0"
+        style={{ 
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(20px) saturate(150%)',
         }}
+        aria-hidden
       />
 
+      {/* Modal with enhanced liquid glass effect */}
       <div
         onClick={(e) => e.stopPropagation()}
+        className="relative z-[10001] w-full max-w-[520px] rounded-3xl border p-12"
         style={{
-          width: "min(1200px, 96vw)",
-          backgroundColor: "#1e3a5f",
-          border: "1px solid rgba(255,255,255,0.08)",
-          borderRadius: 32,
-          padding: 56,
-          color: "white",
-          boxShadow: "0 60px 150px rgba(0,0,0,0.95)",
-          zIndex: 10001,
+          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          borderColor: 'var(--ss-glass-border-active)',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(40px) saturate(180%)',
+          backgroundImage: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%)',
         }}
       >
+        {/* Login Mode */}
         {mode === "login" && (
-          <>
-            <h2
-              style={{
-                fontSize: 32,
-                fontWeight: 700,
-                marginBottom: 24,
-                textAlign: "center",
-              }}
-            >
-              Second Space Login
+          <div>
+            <h2 className="mb-8 text-center" style={{ fontSize: '2.2rem', fontWeight: 700, color: 'white' }}>
+              Second Space
             </h2>
 
-            <form
-              onSubmit={handleSubmit}
-              style={{
-                display: "block",
-                width: "min(900px, 88vw)",
-                margin: "0 auto",
-              }}
-            >
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div style={{ marginBottom: 12 }}>
                 <label
                   htmlFor="modal-username"
@@ -316,19 +295,12 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 </button>
               </div>
             </form>
-          </>
+          </div>
         )}
 
         {mode === "signup" && (
-          <>
-            <h2
-              style={{
-                fontSize: 28,
-                fontWeight: 700,
-                marginBottom: 18,
-                textAlign: "center",
-              }}
-            >
+          <div>
+            <h2 className="mb-8 text-center" style={{ fontSize: '2.2rem', fontWeight: 700, color: 'white' }}>
               Create Account
             </h2>
             <form
@@ -846,7 +818,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 </button>
               </div>
             </form>
-          </>
+          </div>
         )}
 
         {mode === "verify" && (
