@@ -152,7 +152,7 @@ const validateString = async (
   let field;
   if (username) field = "username";
   else if (name) field = "name";
-  else if (field) field = "displayName";
+  else if (displayName) field = "displayName";
   else {
     return { success: false, error: "Internal Error: No boolean specified" };
   }
@@ -179,7 +179,7 @@ const validateString = async (
 
   // Check character types
   const pattern = /^[A-Za-z0-9!@#$%^&*()_\-+=\[\]{};:'",.<>/?\\|`~]*$/;
-  hasValidCharacters = pattern.test(str);
+  const hasValidCharacters = pattern.test(str);
   if (!hasValidCharacters) {
     return { success: false, error: `${field} contains invalid characters` };
   }

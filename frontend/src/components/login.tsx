@@ -86,23 +86,33 @@ export default function Login({ isOpen, onClose }: LoginProps) {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const payload = { username, password };
-    // Alert with raw JSON data as requested
-    alert(`Login attempted with data: ${JSON.stringify(payload)}`);
-    // --- Where to send this data for implementing the API ---
-    // Send a POST request with JSON body to your backend auth route.
-    // Example endpoint (backend): POST /api/users/authenticate  or POST /api/auth/login
-    // Payload shape: { username: string, password: string }
-    // The server should return a session token / user object on success.
-    // You can implement the route in: backend/src/routes/userRoutes.js (add a POST /authenticate)
-    // and the handler in: backend/src/controllers/userControllers.js
-    // Example fetch (uncomment and adapt):
-    // fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-    //   .then(r => r.json()).then(data => console.log('login response', data));
-    // Close modal after submit
-    onClose();
+    
+    try {
+      const response = await fetch('/api/user/authentication', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        // Login successful
+        console.log('Login successful:', data.user);
+        alert(`Welcome back, ${data.user.display_name || data.user.username}!`);
+        // TODO: Store user data in state/context for app use
+        onClose();
+      } else {
+        // Login failed
+        alert(`Login failed: ${data.message || 'Invalid credentials'}`);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Network error. Please check your connection and try again.');
+    }
   };
 
   // Local UI mode: login | signup | verify-human
@@ -161,13 +171,44 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                   if (!ae || !ae.id || !ae.id.startsWith('signup-')) setFocusedField(null);
                 }, 0);
               }}
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
               e.preventDefault();
               if (!verified) { alert('Please verify you are human before creating an account'); return; }
               if (password !== confirmPassword) { alert('Passwords do not match'); return; }
-              const payload = { firstName, lastName, username, password, confirmPassword };
-              alert(`Create account attempted with data: ${JSON.stringify(payload)}`);
-              onClose();
+              
+              const payload = {
+                first_name: firstName,
+                last_name: lastName,
+                username,
+                password
+              };
+              
+              console.log('Attempting to create account with:', payload);
+              
+              try {
+                const response = await fetch('/api/user/', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                console.log('Server response:', { status: response.status, data });
+                
+                if (response.ok) {
+                  // Account created successfully
+                  console.log('Account created:', data);
+                  alert(`Account created successfully! Welcome, ${data.username}!`);
+                  onClose();
+                } else {
+                  // Account creation failed
+                  console.error('Account creation failed:', data);
+                  alert(`Failed to create account: ${data.error || data.message || 'Unknown error'}`);
+                }
+              } catch (error) {
+                console.error('Signup error:', error);
+                alert('Network error. Please check your connection and try again.');
+              }
             }} style={{ display: 'block', width: 'min(900px, 88vw)', margin: '0 auto' }}>
               <div style={{ marginBottom: 12 }}>
                 <label htmlFor="signup-first" style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>First name</label>
