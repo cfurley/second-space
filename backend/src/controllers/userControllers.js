@@ -8,8 +8,7 @@ const authenticate = async (req, res) => {
   let username;
   let password;
   try {
-    username = req.params.username;
-    password = req.params.password;
+    ({ username, password } = req.query);
   } catch (error) {
     return res.status(400).json({ message: "Missing parameters." });
   }
