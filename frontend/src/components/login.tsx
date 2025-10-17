@@ -141,7 +141,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
         {/* Login Mode */}
         {mode === 'login' && (
           <div>
-            <h2 className="mb-8 text-center" style={{ fontSize: '2.2rem' }}>
+            <h2 className="mb-8 text-center" style={{ fontSize: '2.2rem', color: 'var(--ss-text-primary)', fontWeight: 600 }}>
               Second Space
             </h2>
 
@@ -266,7 +266,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
         {/* Signup Mode */}
         {mode === 'signup' && (
           <div>
-            <h2 className="mb-8 text-center" style={{ fontSize: '2.2rem' }}>
+            <h2 className="mb-8 text-center" style={{ fontSize: '2.2rem', color: 'var(--ss-text-primary)', fontWeight: 600 }}>
               Create Account
             </h2>
 
