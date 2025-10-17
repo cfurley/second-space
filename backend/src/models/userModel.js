@@ -3,7 +3,7 @@ class User {
     id = null,
     username,
     password = null,
-    display_name = null,
+    display_name = username,
     profile_picture_id = null,
     theme_id = 1,
     first_name,

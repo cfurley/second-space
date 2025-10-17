@@ -95,7 +95,31 @@ const updatePassword = async (userId, password) => {
  * Creates a user from a given user object
  * @param {userModel} user
  */
-const createUser = async (user) => {};
+const createUser = async (user) => {
+  const query = `INSERT INTO user (username, password, display_name, first_name,
+  last_name, full_name, create_date_utc)
+  VALUES($1, $2, $3, $4, $5, $6, NOW())
+  RETURNING *;`;
+
+  const values = [
+    user.username,
+    user.password,
+    user.username,
+    user.first_name,
+    user.last_name,
+    user.full_name,
+  ];
+
+  try {
+    const result = await pool.query(query, values);
+    if (result.rows.length === 0) {
+      return { success: false, status: 400, error: "User not created" };
+    }
+    return { success: true, status: 200, data: result.rows };
+  } catch (error) {
+    return { success: false, status: 500, error: "Database error" };
+  }
+};
 
 /**
  * Checks for a username's existence
