@@ -155,13 +155,17 @@ export default function Login({ isOpen, onClose }: LoginProps) {
         aria-hidden
       />
 
-      {/* Modal with enhanced liquid glass effect */}
+      {/* Modal with more rounded corners (32px), narrower and taller */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative z-[10001] w-full max-w-[520px] rounded-3xl border p-12"
+        className="relative z-[10001] w-full"
         style={{
+          maxWidth: '420px',
+          minHeight: '500px',
+          padding: '48px 40px',
+          borderRadius: '32px',
           backgroundColor: 'rgba(0, 0, 0, 0.4)',
-          borderColor: 'var(--ss-glass-border-active)',
+          border: '1px solid var(--ss-glass-border-active)',
           boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(40px) saturate(180%)',
           backgroundImage: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%)',
