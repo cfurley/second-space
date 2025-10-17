@@ -5,10 +5,12 @@ import userModel from "../models/userModel.js";
  * Authenticate a user login
  */
 const authenticate = async (req, res) => {
-  const { username, password } = req.query;
-  // } catch (error) {
-  //   return res.status(400).json({ message: "Missing parameters." });
-  // }
+  const username = req.params.username;
+  const password = req.params.password;
+  
+  if (!username || !password) {
+    return res.status(400).json({ message: "Missing username or password." });
+  }
 
   const result = await userService.authenticateLogin(username, password);
 
