@@ -114,7 +114,7 @@ const createUser = async (user) => {
     if (result.rows.length === 0) {
       return { success: false, status: 400, error: "User not created" };
     }
-    return { success: true, status: 200, data: result.rows };
+    return { success: true, status: 200, data: result.rows[0] };
   } catch (error) {
     console.error("Database error creating user:", error);
     return { success: false, status: 500, error: "Database error" };
