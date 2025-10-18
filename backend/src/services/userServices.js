@@ -162,16 +162,13 @@ const validateString = async (
     return { success: false, error: `${field} is not a string` };
   }
 
-  // Trim for validation purposes
-  const trimmed = str.trim();
-
   // Must not be empty
-  if (trimmed.length === 0) {
+  if (str.trim().length === 0) {
     return { success: false, error: `${field} cannot be empty` };
   }
 
   // Length requirements
-  if (username) {
+  if (username || displayName) {
     // Username: must be less than 16 characters
     if (str.length >= 16) {
       return {
@@ -188,7 +185,6 @@ const validateString = async (
       };
     }
   } else {
-    // Display name: 6-16 characters
     if (str.length < 6 || str.length > 16) {
       return {
         success: false,
@@ -197,14 +193,10 @@ const validateString = async (
     }
   }
 
-  // Whitespace validation
-  if (username) {
-    // Usernames: no whitespace allowed at all
-    if (/\s/.test(str)) {
-      return { success: false, error: `${field} cannot contain spaces` };
-    }
+  // Whitespace Validation
+  if (/\s/.test(str) && (username || displayName)) {
+    return { success: false, error: `${field} cannot contain spaces` };
   }
-  // Names can contain spaces, so we don't check for them
 
   // Character validation
   if (username) {
@@ -219,7 +211,7 @@ const validateString = async (
   } else if (name) {
     // Names: only letters and spaces
     const namePattern = /^[A-Za-z\s]+$/;
-    if (!namePattern.test(trimmed)) {
+    if (!namePattern.test(str)) {
       return {
         success: false,
         error: `${field} can only contain letters and spaces`,
@@ -252,7 +244,7 @@ const validatePassword = async (password) => {
   }
 
   // Must not have spaces
-  if (password.includes(" ")) {
+  if (/\s/.test(password)) {
     return { success: false, error: "Password contains space(s)" };
   }
 
@@ -273,21 +265,19 @@ const validatePassword = async (password) => {
   }
 
   // Check strength requirements
-  if (password.length <= 65) {
-    const hasUpper = /[A-Z]/.test(password);
-    const hasLower = /[a-z]/.test(password);
-    const hasNonAlpha = /[^A-Za-z]/.test(password);
+  const hasUpper = /[A-Z]/.test(password);
+  const hasLower = /[a-z]/.test(password);
+  const hasDigit = /\d/.test(password);
+  const hasSpecial = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(password);
 
-    if (!hasUpper) {
-      return { success: false, error: "Must have an upper case letter" };
-    } else if (!hasLower) {
-      return { success: false, error: "Must have a lower case letter" };
-    } else if (!hasNonAlpha) {
-      return {
-        success: false,
-        error: "Must have a non-alphabetical character",
-      };
-    }
+  if (!hasUpper) {
+    return { success: false, error: "Must have an upper case letter" };
+  } else if (!hasLower) {
+    return { success: false, error: "Must have a lower case letter" };
+  } else if (!hasDigit) {
+    return { success: false, error: "Must have a digit (0-9)" };
+  } else if (!hasSpecial) {
+    return { success: false, error: "Must have a special character" };
   }
 
   // If it is strong then return true
