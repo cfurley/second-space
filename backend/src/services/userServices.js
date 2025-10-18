@@ -97,8 +97,8 @@ const updatePassword = async (userId, password) => {
  */
 const createUser = async (user) => {
   const query = `INSERT INTO "user" (username, password, display_name, first_name,
-  last_name, create_date_utc)
-  VALUES($1, $2, $3, $4, $5, NOW())
+  last_name, create_date_utc, last_login_date_utc)
+  VALUES($1, $2, $3, $4, $5, NOW(), NOW())
   RETURNING *;`;
 
   const values = [
@@ -116,7 +116,7 @@ const createUser = async (user) => {
     }
     return { success: true, status: 200, data: result.rows };
   } catch (error) {
-    console.error('Database error creating user:', error);
+    console.error("Database error creating user:", error);
     return { success: false, status: 500, error: "Database error" };
   }
 };
@@ -164,7 +164,7 @@ const validateString = async (
 
   // Trim for validation purposes
   const trimmed = str.trim();
-  
+
   // Must not be empty
   if (trimmed.length === 0) {
     return { success: false, error: `${field} cannot be empty` };
@@ -211,18 +211,18 @@ const validateString = async (
     // Username: only letters, digits, underscores, hyphens
     const usernamePattern = /^[A-Za-z0-9_-]+$/;
     if (!usernamePattern.test(str)) {
-      return { 
-        success: false, 
-        error: `${field} can only contain letters, numbers, underscores, and hyphens` 
+      return {
+        success: false,
+        error: `${field} can only contain letters, numbers, underscores, and hyphens`,
       };
     }
   } else if (name) {
     // Names: only letters and spaces
     const namePattern = /^[A-Za-z\s]+$/;
     if (!namePattern.test(trimmed)) {
-      return { 
-        success: false, 
-        error: `${field} can only contain letters and spaces` 
+      return {
+        success: false,
+        error: `${field} can only contain letters and spaces`,
       };
     }
   } else {
@@ -234,7 +234,7 @@ const validateString = async (
   }
 
   // Unique check for usernames
-  if (username && await usernameExists(str)) {
+  if (username && (await usernameExists(str))) {
     return { success: false, error: "Username is already taken" };
   }
 

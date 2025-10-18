@@ -6,7 +6,7 @@ import userModel from "../models/userModel.js";
  */
 const authenticate = async (req, res) => {
   const { username, password } = req.body;
-  
+
   if (!username || !password) {
     return res.status(400).json({ message: "Missing username or password." });
   }
@@ -19,10 +19,10 @@ const authenticate = async (req, res) => {
     const user = result.data;
     // Set cache headers to cache the user data in the browser
     res.set({
-      'Cache-Control': 'private, max-age=3600', // Cache for 1 hour
-      'Content-Type': 'application/json'
+      "Cache-Control": "private, max-age=3600", // Cache for 1 hour
+      "Content-Type": "application/json",
     });
-    return res.status(result.status).json({ user });
+    return res.status(result.status).json(user);
   }
 };
 
@@ -102,8 +102,8 @@ const createUser = async (req, res) => {
 
   // Set cache headers to cache the user data in the browser
   res.set({
-    'Cache-Control': 'private, max-age=3600', // Cache for 1 hour
-    'Content-Type': 'application/json'
+    "Cache-Control": "private, max-age=3600", // Cache for 1 hour
+    "Content-Type": "application/json",
   });
   return res.status(userCreated.status).json(userCreated.data);
 };
