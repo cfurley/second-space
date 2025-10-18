@@ -399,7 +399,8 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                   onChange={(e) => {
                     const v = e.target.value;
                     setFirstName(v);
-                    setFirstNameValid(v.trim().length > 0);
+                    // Check: not empty AND no whitespace at all
+                    setFirstNameValid(v.trim().length > 0 && !/\s/.test(v));
                   }}
                   onFocus={() => setFocusedField("first")}
                   onBlur={() => setFocusedField(null)}
@@ -432,7 +433,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                         textOverflow: "ellipsis",
                       }}
                     >
-                      Must not be empty
+                      Must not be empty or contain whitespace
                     </span>
                   </div>
                 )}
@@ -457,7 +458,8 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                   onChange={(e) => {
                     const v = e.target.value;
                     setLastName(v);
-                    setLastNameValid(v.trim().length > 0);
+                    // Check: not empty AND no whitespace at all
+                    setLastNameValid(v.trim().length > 0 && !/\s/.test(v));
                   }}
                   onFocus={() => setFocusedField("last")}
                   onBlur={() => setFocusedField(null)}
@@ -490,7 +492,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                         textOverflow: "ellipsis",
                       }}
                     >
-                      Must not be empty
+                      Must not be empty or contain whitespace
                     </span>
                   </div>
                 )}
