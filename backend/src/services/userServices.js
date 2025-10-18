@@ -14,7 +14,7 @@ const authenticateLogin = async (username, password) => {
     return { success: false, status: 500, error: "Password is null." };
   }
 
-  const query = `
+  const selectQuery = `
    SELECT
     id,
     username,
@@ -33,14 +33,22 @@ const authenticateLogin = async (username, password) => {
     AND username = $2
     AND password = $3;
   `;
-  const values = [0, username, password];
+  const selectValues = [0, username, password];
 
   try {
-    const result = await pool.query(query, values);
+    const result = await pool.query(selectQuery, selectValues);
     if (result.rows.length === 0) {
       console.log("Invalid Login");
       return { success: false, status: 400, error: "Invalid Login" };
     } else {
+      // Updates last_login_date_utc to NOW()
+      const updateQuery = `
+      UPDATE "user" SET last_login_date_utc = NOW()
+      WHERE id = $1;
+      `;
+      await pool.query(updateQuery, result.rows[0].id);
+
+      // Return selected user JSON
       return {
         success: true,
         status: 200,
