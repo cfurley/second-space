@@ -46,7 +46,7 @@ const authenticateLogin = async (username, password) => {
       UPDATE "user" SET last_login_date_utc = NOW()
       WHERE id = $1;
       `;
-      await pool.query(updateQuery, result.rows[0].id);
+      await pool.query(updateQuery, [result.rows[0].id]);
 
       // Return selected user JSON
       return {
