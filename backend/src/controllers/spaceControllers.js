@@ -49,7 +49,7 @@ const createSpace = async (req, res) => {
   try {
     // i cant make it acknowledge it's a space in the service
     // this is def not good practice
-    spaceService.insertSpaceToDatabase(req.body);
+    await spaceService.insertSpaceToDatabase(req.body);
   } catch (error) {
     return res.status(500).json({
       error: "Database Error.",
