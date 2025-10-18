@@ -9,10 +9,10 @@ export function validateUsernameCharacters(username: string): boolean {
 }
 
 /**
- * Return true if length < 16, else false.
+ * Return true if length is between 6 and 15 characters (inclusive), else false.
  */
 export function validateUsernameLength(username: string): boolean {
-  return username.length < 16;
+  return username.length >= 6 && username.length < 16;
 }
 
 /**
