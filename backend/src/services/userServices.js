@@ -97,8 +97,8 @@ const updatePassword = async (userId, password) => {
  */
 const createUser = async (user) => {
   const query = `INSERT INTO "user" (username, password, display_name, first_name,
-  last_name, full_name, create_date_utc)
-  VALUES($1, $2, $3, $4, $5, $6, NOW())
+  last_name, create_date_utc)
+  VALUES($1, $2, $3, $4, $5, NOW())
   RETURNING *;`;
 
   const values = [
@@ -107,7 +107,6 @@ const createUser = async (user) => {
     user.username,
     user.first_name,
     user.last_name,
-    user.full_name,
   ];
 
   try {
@@ -117,6 +116,7 @@ const createUser = async (user) => {
     }
     return { success: true, status: 200, data: result.rows };
   } catch (error) {
+    console.error('Database error creating user:', error);
     return { success: false, status: 500, error: "Database error" };
   }
 };
@@ -128,7 +128,7 @@ const createUser = async (user) => {
  */
 const usernameExists = async (username) => {
   const query = `SELECT 1 FROM "user" WHERE username = $1 AND deleted = $2;`;
-  const result = await pool.query(query, [username]);
+  const result = await pool.query(query, [username, 0]);
   if (result.rows.length === 0) {
     return false;
   } else {
@@ -162,30 +162,79 @@ const validateString = async (
     return { success: false, error: `${field} is not a string` };
   }
 
-  // Length requirement
-  if (!name && (str.length < 6 || str.length > 16)) {
-    return {
-      success: false,
-      error: `${field} must be between six and 16 characters`,
-    };
+  // Trim for validation purposes
+  const trimmed = str.trim();
+  
+  // Must not be empty
+  if (trimmed.length === 0) {
+    return { success: false, error: `${field} cannot be empty` };
   }
 
-  // Maybe add a profanity-checking library
-
-  // Must not have whitespace
-  if (/\s/.test(str)) {
-    return { success: false, error: `${field} contains spaces` };
+  // Length requirements
+  if (username) {
+    // Username: must be less than 16 characters
+    if (str.length >= 16) {
+      return {
+        success: false,
+        error: `${field} must be less than 16 characters`,
+      };
+    }
+  } else if (name) {
+    // Names: reasonable length limit (e.g., 1-50 characters)
+    if (trimmed.length > 50) {
+      return {
+        success: false,
+        error: `${field} must be less than 50 characters`,
+      };
+    }
+  } else {
+    // Display name: 6-16 characters
+    if (str.length < 6 || str.length > 16) {
+      return {
+        success: false,
+        error: `${field} must be between 6 and 16 characters`,
+      };
+    }
   }
 
-  // Check character types
-  const pattern = /^[A-Za-z0-9!@#$%^&*()_\-+=\[\]{};:'",.<>/?\\|`~]*$/;
-  const hasValidCharacters = pattern.test(str);
-  if (!hasValidCharacters) {
-    return { success: false, error: `${field} contains invalid characters` };
+  // Whitespace validation
+  if (username) {
+    // Usernames: no whitespace allowed at all
+    if (/\s/.test(str)) {
+      return { success: false, error: `${field} cannot contain spaces` };
+    }
+  }
+  // Names can contain spaces, so we don't check for them
+
+  // Character validation
+  if (username) {
+    // Username: only letters, digits, underscores, hyphens
+    const usernamePattern = /^[A-Za-z0-9_-]+$/;
+    if (!usernamePattern.test(str)) {
+      return { 
+        success: false, 
+        error: `${field} can only contain letters, numbers, underscores, and hyphens` 
+      };
+    }
+  } else if (name) {
+    // Names: only letters and spaces
+    const namePattern = /^[A-Za-z\s]+$/;
+    if (!namePattern.test(trimmed)) {
+      return { 
+        success: false, 
+        error: `${field} can only contain letters and spaces` 
+      };
+    }
+  } else {
+    // Display name: broader character set
+    const pattern = /^[A-Za-z0-9!@#$%^&*()_\-+=\[\]{};:'",.<>/?\\|`~]*$/;
+    if (!pattern.test(str)) {
+      return { success: false, error: `${field} contains invalid characters` };
+    }
   }
 
-  // Unique check
-  if (username && usernameExists(str)) {
+  // Unique check for usernames
+  if (username && await usernameExists(str)) {
     return { success: false, error: "Username is already taken" };
   }
 

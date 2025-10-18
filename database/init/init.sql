@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS public."user"
     last_name character varying(255) COLLATE pg_catalog."default", 
     full_name character varying(255) COLLATE pg_catalog."default" GENERATED ALWAYS AS ((((first_name)::text || ' '::text) || (last_name)::text)) STORED,
     timezone character varying(255) COLLATE pg_catalog."default",
-	last_login_date_utc timestamp(3) without time zone NOT NULL,
+	last_login_date_utc timestamp(3) without time zone,
 	create_date_utc timestamp(3) without time zone NOT NULL,
     update_date_utc timestamp(3) without time zone,
     delete_date_utc timestamp(3) without time zone,

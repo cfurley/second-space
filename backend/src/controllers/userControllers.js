@@ -5,8 +5,7 @@ import userModel from "../models/userModel.js";
  * Authenticate a user login
  */
 const authenticate = async (req, res) => {
-  const username = req.params.username;
-  const password = req.params.password;
+  const { username, password } = req.body;
   
   if (!username || !password) {
     return res.status(400).json({ message: "Missing username or password." });
@@ -18,6 +17,11 @@ const authenticate = async (req, res) => {
     return res.status(result.status).json({ message: result.error });
   } else {
     const user = result.data;
+    // Set cache headers to cache the user data in the browser
+    res.set({
+      'Cache-Control': 'private, max-age=3600', // Cache for 1 hour
+      'Content-Type': 'application/json'
+    });
     return res.status(result.status).json({ user });
   }
 };
@@ -61,7 +65,7 @@ const createUser = async (req, res) => {
     return res.status(400).json({ error: "Invalid parameters given" });
   }
 
-  const validFirst = userService.validateString(
+  const validFirst = await userService.validateString(
     user.first_name,
     false,
     true,
@@ -71,7 +75,7 @@ const createUser = async (req, res) => {
     return res.status(400).json({ error: validFirst.error });
   }
 
-  const validLast = userService.validateString(
+  const validLast = await userService.validateString(
     user.last_name,
     false,
     true,
@@ -81,7 +85,7 @@ const createUser = async (req, res) => {
     return res.status(400).json({ error: validLast.error });
   }
 
-  const usernameValid = userService.validateString(
+  const usernameValid = await userService.validateString(
     user.username,
     true,
     false,
@@ -96,6 +100,11 @@ const createUser = async (req, res) => {
     return res.status(userCreated.status).json(userCreated.error);
   }
 
+  // Set cache headers to cache the user data in the browser
+  res.set({
+    'Cache-Control': 'private, max-age=3600', // Cache for 1 hour
+    'Content-Type': 'application/json'
+  });
   return res.status(userCreated.status).json(userCreated.data);
 };
 
