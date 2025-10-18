@@ -178,7 +178,7 @@ const validateString = async (
     }
   } else if (name) {
     // Names: reasonable length limit (e.g., 1-50 characters)
-    if (trimmed.length > 50) {
+    if (str.length > 50) {
       return {
         success: false,
         error: `${field} must be less than 50 characters`,
