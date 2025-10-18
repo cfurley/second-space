@@ -607,6 +607,18 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                       </div>
                     );
                   })()}
+                {focusedField === 'username' && (() => {
+                  const r = usernameReqs(username);
+                  return (
+                    <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <span style={{ color: r.hasValue ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Must not be empty</span>
+                      <span style={{ color: r.validChars ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Only letters, digits, underscores, hyphens</span>
+                      <span style={{ color: r.validLength ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>6 to 15 characters</span>
+                      <span style={{ color: r.noProfanity ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Must not contain profanity</span>
+                      <span style={{ color: r.noWhitespace ? '#16a34a' : '#dc2626', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>No whitespace</span>
+                    </div>
+                  );
+                })()}
               </div>
 
               <div style={{ marginBottom: 12 }}>
