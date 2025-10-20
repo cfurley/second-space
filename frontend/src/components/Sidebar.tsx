@@ -16,6 +16,19 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isDark, setIsDark] = useState(
+    document.documentElement.classList.contains("dark")
+  );
+  React.useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      document.documentElement.classList.add("dark");
+      setIsDark(true);
+    } else {
+      document.documentElement.classList.remove("dark");
+      setIsDark(false);
+    }
+  }, []);
 
   const pinnedSpaces: SidebarItem[] = [
     { icon: '💡', name: 'My Ideas', isActive: true },
@@ -43,7 +56,7 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
   const filteredAllSpaces = filterSpaces(allSpaces);
 
   return (
-    <div className="glass w-[280px] border-r border-white/10 py-8 text-foreground">
+    <div className="glass w-[280px] border-r border-white/10 py-8 text-foreground flex flex-col h-full">
       <div className="mb-8 px-8">
         <div className="flex items-center gap-2">
           {/* Search Bar - Hidden when dialog is open, collapses when not focused */}
@@ -127,6 +140,21 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
         </div>
       ))}
 
+      </div>
+            {/* ✅ Smart Theme Toggle Button */}
+      <div className="mt-auto px-8 pt-4 border-t border-white/10">
+        <button
+          onClick={() => {
+            const html = document.documentElement;
+            const isDark = html.classList.toggle("dark");
+            localStorage.setItem("theme", isDark ? "dark" : "light");
+            setIsDark(isDark); // update local state instantly
+          }}
+          className="w-full flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-lg py-2.5 transition-all duration-300"
+        >
+          <span className="text-lg">{isDark ? "🌞" : "🌙"}</span>
+          <span className="text-sm">{isDark ? "Light Mode" : "Dark Mode"}</span>
+        </button>
       </div>
     </div>
   );
