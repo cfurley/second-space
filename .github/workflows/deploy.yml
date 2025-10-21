@@ -28,33 +28,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Build with Docker Compose
-        run: docker compose build
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
 
-      - name: Create temporary container and extract frontend build
-        run: |
-          # Build the frontend service
-          docker compose build frontend
-
-          # Create a container from the frontend image (without running it)
-          CONTAINER_ID=$(docker create second-space-frontend)
-
-          # Copy the built files from the container (checking both possible locations)
-          docker cp $CONTAINER_ID:/usr/share/nginx/html ./dist || docker cp $CONTAINER_ID:/app/dist ./dist || docker cp $CONTAINER_ID:/app/build ./dist
-
-          # Clean up
-          docker rm $CONTAINER_ID
+      - name: Build
+        working-directory: ./frontend
+        run: npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ./frontend/build
 
   # Deployment job
   deploy:
