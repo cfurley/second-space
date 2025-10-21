@@ -7,7 +7,16 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "test": "test",
+     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand",
     "start": "node app.js"
+  },
+  "devDependencies": {
+     "jest": "^29.6.1",
+     "babel-jest": "^29.6.1",
+     "@babel/core": "^7.23.0",
+     "@babel/preset-env": "^7.23.0"
+  },
+  "dependencies": {
+    "pg": "^8.16.3"
   }
 }
