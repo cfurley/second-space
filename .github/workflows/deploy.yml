@@ -35,15 +35,15 @@ jobs:
         uses: actions/configure-pages@v4
 
       - name: Build with Docker Compose
-        run: docker-compose build
+        run: docker compose build
 
       - name: Create temporary container and extract frontend build
         run: |
           # Build the frontend service
-          docker-compose build frontend
+          docker compose build frontend
 
           # Create a container from the frontend image (without running it)
-          CONTAINER_ID=$(docker create $(docker-compose config | grep -A 10 "frontend:" | grep "image:" | awk '{print $2}' || echo "second-space-frontend"))
+          CONTAINER_ID=$(docker create second-space-frontend)
 
           # Copy the built files from the container (checking both possible locations)
           docker cp $CONTAINER_ID:/usr/share/nginx/html ./dist || docker cp $CONTAINER_ID:/app/dist ./dist || docker cp $CONTAINER_ID:/app/build ./dist
