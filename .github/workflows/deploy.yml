@@ -1,0 +1,69 @@
+name: Deploy to GitHub Pages
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Build job
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Build with Docker Compose
+        run: docker-compose build
+
+      - name: Create temporary container and extract frontend build
+        run: |
+          # Build the frontend service
+          docker-compose build frontend
+
+          # Create a container from the frontend image (without running it)
+          CONTAINER_ID=$(docker create $(docker-compose config | grep -A 10 "frontend:" | grep "image:" | awk '{print $2}' || echo "second-space-frontend"))
+
+          # Copy the built files from the container (checking both possible locations)
+          docker cp $CONTAINER_ID:/usr/share/nginx/html ./dist || docker cp $CONTAINER_ID:/app/dist ./dist || docker cp $CONTAINER_ID:/app/build ./dist
+
+          # Clean up
+          docker rm $CONTAINER_ID
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
