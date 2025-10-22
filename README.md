@@ -14,15 +14,13 @@ This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving 
 
 <br>
 
-# Installation
-1. Install and Launch Docker Desktop from https://www.docker.com/products/docker-desktop/
-2. Clone into this repository and open with your IDE..
-3. In your IDE terminal run the command: <b>"docker compose up"</b>
-4. Open a browser and visit: <b>"localhost or 127.0.0.1"</b>
-5. To stop the servers run: <b>"docker compose down"</b>
-
-Note: To to make errors go away in the frontend, run the command:<br>
-npm i --save-dev @types/react @types/react-dom  
+# Installation & Code Updates
+1. <b>Clone</b> into the repository using your preffered method.
+2. <b>Make a seperate branch</b> and edit any code you wish. (use of AI Agents is recommended, specficially in the frontend).
+3. <b>Publish your branch</b> to the repository with a push.
+4. Go to Github, and <b>open a pull request</b> by clicked the yellow popup at the top of the screen.
+5. A <b>peer will review the pull request</b>, and if it is valid, with merge to main
+6. This will trigger test for <b>automated integration</b> and if the tests pass, will <b>automatically deploy</b> to https://cfurley.github.io/second-space/
 
 <br>
 
