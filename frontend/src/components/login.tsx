@@ -154,7 +154,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
         onClick={(e) => e.stopPropagation()}
         style={{
           width: "min(1200px, 96vw)",
-          backgroundColor: "#dc2626",
+          backgroundColor: "#eab308",
           border: "1px solid rgba(255,255,255,0.08)",
           borderRadius: 32,
           padding: 56,
