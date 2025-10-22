@@ -173,7 +173,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 textAlign: "center",
               }}
             >
-              Second Space Login?
+              Second Space Login
             </h2>
 
             <form
