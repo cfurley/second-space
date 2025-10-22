@@ -159,7 +159,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
           borderRadius: 32,
           padding: 56,
           color: "white",
-          boxShadow: "0 60px 150px rgba(0,0,0,0.95)",
+          boxShadow: "0 60px 150px rgba(0, 0, 0, 0.85)",
           zIndex: 10001,
         }}
       >
