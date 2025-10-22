@@ -145,7 +145,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
         style={{
           position: "absolute",
           inset: 0,
-          backgroundColor: "rgba(13,42,148,0.85)", /* Blue overlay background */
+          backgroundColor: "rgba(0,0,0,0.85)",
           zIndex: 10000,
         }}
       />
@@ -154,12 +154,12 @@ export default function Login({ isOpen, onClose }: LoginProps) {
         onClick={(e) => e.stopPropagation()}
         style={{
           width: "min(1200px, 96vw)",
-          backgroundColor: "#08205f", /* Navy blue modal background */
+          backgroundColor: "#16a34a",
           border: "1px solid rgba(255,255,255,0.08)",
           borderRadius: 32,
           padding: 56,
           color: "white",
-          boxShadow: "0 60px 150px rgba(0, 0, 0, 0.85)",
+          boxShadow: "0 60px 150px rgba(0,0,0,0.95)",
           zIndex: 10001,
         }}
       >
