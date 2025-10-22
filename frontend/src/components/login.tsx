@@ -800,8 +800,8 @@ export default function Login({ isOpen, onClose }: LoginProps) {
               maxWidth: 460,
               margin: "0 auto",
               padding: 18,
-              background: "#0f0f0f",
-              border: "1px solid rgba(255,255,255,0.06)",
+              background: "rgba(13, 71, 161, 0.9)", // Slightly lighter blue
+              border: "1px solid rgba(255,255,255,0.15)",
               borderRadius: 16,
             }}
           >
