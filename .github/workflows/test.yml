@@ -2,34 +2,34 @@ name: Run Tests
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   test-frontend:
     name: Frontend Tests
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: frontend/package-lock.json
-      
+
       - name: Install dependencies
         working-directory: ./frontend
         run: npm ci || npm install
-      
+
       - name: Run tests
         working-directory: ./frontend
         run: npm test -- --run
-      
+
       - name: Type check
         working-directory: ./frontend
         run: npx tsc --noEmit || echo "Type check completed with warnings"
@@ -37,7 +37,7 @@ jobs:
   test-backend:
     name: Backend Tests
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:16
@@ -52,22 +52,22 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: backend/package-lock.json
-      
+
       - name: Install dependencies
         working-directory: ./backend
         run: npm ci || npm install
-      
+
       - name: Run tests
         working-directory: ./backend
         env:
@@ -78,7 +78,7 @@ jobs:
           DB_NAME: testdb
           NODE_ENV: test
         run: npm test
-      
+
       - name: Check for syntax errors
         working-directory: ./backend
         run: node --check app.js
@@ -86,35 +86,35 @@ jobs:
   docker-test:
     name: Docker Compose Test
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Start Docker Compose services
         run: docker compose up -d
-      
+
       - name: Wait for services to be ready
         run: |
           echo "Waiting for services to start..."
           sleep 15
-      
+
       - name: Check running containers
         run: docker ps
-      
+
       - name: Test backend health
         run: |
           curl -f http://localhost:8080 || echo "Backend not responding yet"
           sleep 5
           curl -f http://localhost:8080
-      
+
       - name: Test frontend is serving
         run: curl -f http://localhost:80 || echo "Frontend check completed"
-      
+
       - name: Show logs on failure
         if: failure()
         run: docker compose logs
-      
+
       - name: Clean up Docker containers
         if: always()
         run: docker compose down -v

@@ -1,6 +1,7 @@
 # 🚀 Deployment Guide for Second Space
 
 ## Table of Contents
+
 1. [Local Development with Docker](#local-development)
 2. [Deploy to Render.com](#render-deployment)
 3. [Connect Frontend to Backend](#connect-frontend)
@@ -12,6 +13,7 @@
 ## 📦 Local Development with Docker
 
 ### Prerequisites
+
 - Docker Desktop installed
 - Git
 - Your repository cloned
@@ -19,21 +21,25 @@
 ### Start the Full Stack Locally
 
 1. **Navigate to project root:**
+
    ```bash
    cd /path/to/second-space
    ```
 
 2. **Start all services:**
+
    ```bash
    docker-compose up --build
    ```
 
 3. **Access your application:**
+
    - Frontend: http://localhost:80
    - Backend API: http://localhost:8080
    - Database: localhost:5432
 
 4. **Stop services:**
+
    ```bash
    docker-compose down
    ```
@@ -46,6 +52,7 @@
 ### ✅ Your Docker setup WILL work after these changes!
 
 The code updates are **backward compatible**:
+
 - Environment variables have default values
 - Falls back to original Docker service names
 - No breaking changes to docker-compose.yaml
@@ -91,23 +98,27 @@ The code updates are **backward compatible**:
 2. Click **"Connect"** → Copy connection string
 3. Use any PostgreSQL client (TablePlus, pgAdmin, or psql) to connect
 4. Run the initialization script:
+
    ```bash
    # From your local machine
    psql "postgresql://second_space_user:xxxxx@dpg-xxxx.oregon-postgres.render.com/second_space?ssl=true" -f database/init/init.sql
    ```
-   
+
    Or use Render's Shell:
+
    - Click **"Shell"** in database dashboard
    - Manually run the SQL from `database/init/init.sql`
 
 ### Step 6: Test Your Backend
 
 Visit your API URL in a browser:
+
 ```
 https://your-app-name.onrender.com
 ```
 
 You should see:
+
 ```json
 {
   "message": "Second Space API",
@@ -125,22 +136,25 @@ You should see:
 ### Update Frontend API Configuration
 
 1. **Update the API URL in your frontend code:**
-   
+
    Open `frontend/src/utils/api.ts` and update line 10:
+
    ```typescript
-   const API_BASE_URL = (import.meta as any).env.PROD 
-     ? 'https://YOUR-ACTUAL-RENDER-URL.onrender.com'  // <- CHANGE THIS
-     : 'http://localhost:8080';
+   const API_BASE_URL = (import.meta as any).env.PROD
+     ? "https://YOUR-ACTUAL-RENDER-URL.onrender.com" // <- CHANGE THIS
+     : "http://localhost:8080";
    ```
 
 2. **Create production environment file (optional):**
-   
+
    Create `frontend/.env.production`:
+
    ```env
    VITE_API_URL=https://your-app-name.onrender.com
    ```
 
 3. **Push changes:**
+
    ```bash
    git add .
    git commit -m "Update API URL for production"
@@ -163,38 +177,42 @@ You should see:
 ### Frontend Tests (Vitest)
 
 1. **Install test dependencies:**
+
    ```bash
    cd frontend
    npm install --save-dev vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom
    ```
 
 2. **Create vitest config** (`frontend/vitest.config.ts`):
+
    ```typescript
-   import { defineConfig } from 'vitest/config';
-   import react from '@vitejs/plugin-react-swc';
-   import path from 'path';
+   import { defineConfig } from "vitest/config";
+   import react from "@vitejs/plugin-react-swc";
+   import path from "path";
 
    export default defineConfig({
      plugins: [react()],
      test: {
        globals: true,
-       environment: 'jsdom',
-       setupFiles: './src/test/setup.ts',
+       environment: "jsdom",
+       setupFiles: "./src/test/setup.ts",
      },
      resolve: {
        alias: {
-         '@': path.resolve(__dirname, './src'),
+         "@": path.resolve(__dirname, "./src"),
        },
      },
    });
    ```
 
 3. **Create test setup** (`frontend/src/test/setup.ts`):
+
    ```typescript
-   import '@testing-library/jest-dom';
+   import "@testing-library/jest-dom";
    ```
 
 4. **Update package.json scripts:**
+
    ```json
    {
      "scripts": {
@@ -206,17 +224,18 @@ You should see:
    ```
 
 5. **Write a test** (`frontend/src/utils/__tests__/passwordValidator.test.ts`):
-   ```typescript
-   import { describe, it, expect } from 'vitest';
-   import { validatePasswordLength } from '../passwordValidator';
 
-   describe('Password Validator', () => {
-     it('should accept valid length password', () => {
-       expect(validatePasswordLength('SecurePass123!')).toBe(true);
+   ```typescript
+   import { describe, it, expect } from "vitest";
+   import { validatePasswordLength } from "../passwordValidator";
+
+   describe("Password Validator", () => {
+     it("should accept valid length password", () => {
+       expect(validatePasswordLength("SecurePass123!")).toBe(true);
      });
-     
-     it('should reject short password', () => {
-       expect(validatePasswordLength('short')).toBe(false);
+
+     it("should reject short password", () => {
+       expect(validatePasswordLength("short")).toBe(false);
      });
    });
    ```
@@ -229,13 +248,14 @@ You should see:
 ### Backend Tests (Node.js Test Runner)
 
 1. **Create test file** (`backend/src/controllers/__tests__/userControllers.test.js`):
-   ```javascript
-   import { describe, it } from 'node:test';
-   import assert from 'node:assert';
 
-   describe('User Controller Tests', () => {
-     it('should validate username correctly', () => {
-       const validUsername = 'testuser123';
+   ```javascript
+   import { describe, it } from "node:test";
+   import assert from "node:assert";
+
+   describe("User Controller Tests", () => {
+     it("should validate username correctly", () => {
+       const validUsername = "testuser123";
        assert.strictEqual(validUsername.length > 3, true);
      });
    });
@@ -260,25 +280,25 @@ name: Run Tests
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   test-frontend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      
+          node-version: "20"
+
       - name: Install dependencies
         working-directory: ./frontend
         run: npm install
-      
+
       - name: Run tests
         working-directory: ./frontend
         run: npm test
@@ -299,19 +319,19 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      
+          node-version: "20"
+
       - name: Install dependencies
         working-directory: ./backend
         run: npm install
-      
+
       - name: Run tests
         working-directory: ./backend
         env:
@@ -329,7 +349,7 @@ Edit `.github/workflows/deploy.yml` to require tests:
 
 ```yaml
 jobs:
-  test:  # Add this job
+  test: # Add this job
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -342,7 +362,7 @@ jobs:
           npm test
 
   build:
-    needs: test  # Add this line - won't build unless tests pass
+    needs: test # Add this line - won't build unless tests pass
     runs-on: ubuntu-latest
     # ... rest of existing build job
 ```
@@ -373,7 +393,7 @@ name: Keep Render Alive
 
 on:
   schedule:
-    - cron: '*/10 * * * *'  # Every 10 minutes
+    - cron: "*/10 * * * *" # Every 10 minutes
   workflow_dispatch:
 
 jobs:
@@ -395,6 +415,7 @@ Visit your API URL 2 minutes before demo - it stays awake for 15 minutes!
 ### Docker Issues
 
 **Problem:** `docker-compose up` fails
+
 ```bash
 # Solution: Rebuild from scratch
 docker-compose down -v
@@ -402,6 +423,7 @@ docker-compose up --build
 ```
 
 **Problem:** Port already in use
+
 ```bash
 # Solution: Stop conflicting services
 docker ps  # Find conflicting containers
@@ -409,6 +431,7 @@ docker stop <container-id>
 ```
 
 **Problem:** Database connection fails
+
 ```bash
 # Solution: Check if database is ready
 docker-compose logs database
@@ -418,21 +441,25 @@ docker-compose logs database
 ### Render.com Issues
 
 **Problem:** Deploy fails
+
 - Check build logs in Render dashboard
 - Verify `render.yaml` syntax
 - Ensure all environment variables are set
 
 **Problem:** Database connection error
+
 - Verify DATABASE_URL is set correctly
 - Check if database is initialized
 - Ensure SSL is enabled in production
 
 **Problem:** CORS errors
+
 - Update ALLOWED_ORIGINS in Render dashboard
 - Add your GitHub Pages URL
 - Redeploy backend after changes
 
 **Problem:** API returns 404
+
 - Check if routes are registered correctly
 - Verify API URL in frontend matches Render URL
 - Check Render logs for errors
@@ -440,11 +467,13 @@ docker-compose logs database
 ### Frontend Issues
 
 **Problem:** API calls fail locally
+
 - Ensure Docker is running: `docker ps`
 - Check backend logs: `docker-compose logs backend`
 - Verify API_BASE_URL is `http://localhost:8080` for dev
 
 **Problem:** API calls fail on GitHub Pages
+
 - Update API URL in `api.ts`
 - Clear browser cache
 - Check browser console for CORS errors
@@ -454,12 +483,14 @@ docker-compose logs database
 ## 📊 Cost Summary
 
 ### Free Tier (Development & Testing)
+
 - GitHub Pages: $0 ✅
 - Render.com Backend: $0 ✅
 - Render.com Database: $0 ✅
 - **Total: $0/month**
 
 ### Paid Option (Presentation Week)
+
 - Upgrade Render backend for 1 month: $7
 - **Total: $7 for guaranteed uptime**
 
