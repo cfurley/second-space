@@ -47,32 +47,39 @@
 
 ## 📋 NEXT STEPS (In Order)
 
-### Step 1: Install Dependencies (5 minutes)
+### Step 1: Test Everything Works Locally (2 minutes)
+
+**The simple way (no setup needed):**
 
 ```bash
-# Backend
-cd backend
-npm install
-
-# Frontend (with test dependencies)
-cd ../frontend
-npm install
-npm install --save-dev vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom
-```
-
-### Step 2: Test Locally (10 minutes)
-
-```bash
-# From project root
+# From project root - just start Docker!
 docker-compose up --build
 
-# Wait for services to start, then visit:
+# That's it! Visit:
 # - Frontend: http://localhost:80
-# - Backend API: http://localhost:8080
-# - Test backend: curl http://localhost:8080
+# - Backend: http://localhost:8080
+# - Test: curl http://localhost:8080
+
+# ✅ No .env files needed!
+# ✅ No npm install needed!
+# ✅ Docker does everything automatically!
 
 # When done:
 docker-compose down
+```
+
+### Step 2: Run Tests (1 minute)
+
+```bash
+# Frontend tests (already installed!)
+cd frontend
+npm test
+
+# Backend tests
+cd ../backend
+npm test
+
+# All tests should pass! ✅
 ```
 
 ### Step 3: Deploy to Render.com (15 minutes)

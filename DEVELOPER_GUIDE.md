@@ -3,54 +3,65 @@
 ## 🚀 First Time Setup (Each Developer Does This)
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/cfurley/second-space.git
 cd second-space
 ```
 
-### 2. Set Up Environment Variables
+### 2. Start Development Environment - **That's It!** 🎉
 
-#### Backend `.env` File
+**The simple way (works for 99% of developers):**
+
 ```bash
-# Copy the example file
+# Just start Docker!
+docker-compose up --build
+
+# Access your app:
+# Frontend: http://localhost:80
+# Backend: http://localhost:8080
+# Database: localhost:5432
+```
+
+**✅ No `.env` files needed!** The defaults in `docker-compose.yaml` work perfectly.
+
+**✅ No manual setup!** Docker installs everything automatically.
+
+---
+
+### 2b. Optional: Manual Setup (Advanced)
+
+**Only needed if:**
+
+- You have port conflicts (8080, 5432, 80 already in use)
+- You want to run services outside Docker
+- You're debugging something specific
+
+#### Create `.env` Files (Optional)
+
+```bash
+# Backend
 cd backend
 cp .env.example .env
+# Edit if you need custom ports/credentials
 
-# Edit .env with your preferences (or keep defaults)
-# You can use different DB credentials if you want:
-# DB_USER=your_username
-# DB_PASSWORD=your_secure_password
-# DB_NAME=your_db_name
-```
-
-**Default values work for most developers!** The defaults match `docker-compose.yaml` so everything "just works."
-
-#### Frontend `.env.local` File (Optional)
-```bash
+# Frontend
 cd ../frontend
 cp .env.example .env.local
-
-# Usually you don't need to change anything!
-# The frontend auto-detects local vs production
+# Usually don't need to change anything
 ```
 
-### 3. Install Dependencies
+#### Install Dependencies Manually (Optional)
 
-#### Backend
 ```bash
-cd backend
-npm install
+cd backend && npm install
+cd ../frontend && npm install
 ```
 
-#### Frontend
-```bash
-cd ../frontend
-npm install
-```
-
-### 4. Start Development Environment
+### 3. Daily Development
 
 #### Option A: Docker Compose (Recommended)
+
 ```bash
 # From project root
 docker-compose up --build
@@ -62,6 +73,7 @@ docker-compose up --build
 ```
 
 #### Option B: Run Services Separately
+
 ```bash
 # Terminal 1: Start database
 docker run -d \
@@ -88,17 +100,18 @@ npm run dev
 
 ### Where Do Values Come From?
 
-| File | Purpose | Committed? | Who Uses It? |
-|------|---------|------------|--------------|
-| `.env.example` | **Template** for developers | ✅ YES | Everyone (reference) |
-| `.env` | **Your local config** | ❌ NO | Only you |
-| `.env.local` | **Local overrides** | ❌ NO | Only you |
-| `docker-compose.yaml` | **Docker defaults** | ✅ YES | Docker users |
-| Render dashboard | **Production secrets** | ❌ NO | Production only |
+| File                  | Purpose                     | Committed? | Who Uses It?         |
+| --------------------- | --------------------------- | ---------- | -------------------- |
+| `.env.example`        | **Template** for developers | ✅ YES     | Everyone (reference) |
+| `.env`                | **Your local config**       | ❌ NO      | Only you             |
+| `.env.local`          | **Local overrides**         | ❌ NO      | Only you             |
+| `docker-compose.yaml` | **Docker defaults**         | ✅ YES     | Docker users         |
+| Render dashboard      | **Production secrets**      | ❌ NO      | Production only      |
 
 ### Priority Order (What Takes Precedence)
 
 **Backend:**
+
 ```
 1. Environment variables (set in terminal)
 2. .env file (your local config)
@@ -106,6 +119,7 @@ npm run dev
 ```
 
 **Frontend:**
+
 ```
 1. .env.local (your overrides)
 2. .env.production (built into production build)
@@ -119,24 +133,28 @@ npm run dev
 ### Scenario 1: "I want to use a different database name"
 
 **Edit `backend/.env`:**
+
 ```bash
 DB_NAME=my_custom_database
 ```
 
 **Also update `docker-compose.yaml` if using Docker:**
+
 ```yaml
 environment:
-  - POSTGRES_DB=my_custom_database  # Match your .env
+  - POSTGRES_DB=my_custom_database # Match your .env
 ```
 
 ### Scenario 2: "I'm running backend on port 3000 instead of 8080"
 
 **Backend - Edit `backend/.env`:**
+
 ```bash
 PORT=3000
 ```
 
 **Frontend - Edit `frontend/.env.local`:**
+
 ```bash
 VITE_API_URL=http://localhost:3000
 ```
@@ -144,6 +162,7 @@ VITE_API_URL=http://localhost:3000
 ### Scenario 3: "I want to test against production API"
 
 **Edit `frontend/.env.local`:**
+
 ```bash
 VITE_API_URL=https://your-app.onrender.com
 ```
@@ -157,19 +176,13 @@ Now your local frontend will call the production backend!
 git clone <repo-url>
 cd second-space
 
-# 2. Copy environment templates
-cd backend && cp .env.example .env
-cd ../frontend && cp .env.example .env.local
-
-# 3. Install everything
-cd ../backend && npm install
-cd ../frontend && npm install
-
-# 4. Start Docker
-cd ..
-docker-compose up
+# 2. Start Docker (that's it!)
+docker-compose up --build
 
 # Done! 🎉
+# No .env files needed!
+# No manual npm install needed!
+# Everything works out of the box!
 ```
 
 ---
@@ -177,6 +190,7 @@ docker-compose up
 ## 🔐 Security Best Practices
 
 ### ✅ DO:
+
 - Copy `.env.example` to `.env` for local work
 - Use strong passwords in your local `.env`
 - Keep `.env` files in your local machine only
@@ -184,6 +198,7 @@ docker-compose up
 - Use different credentials for each environment
 
 ### ❌ DON'T:
+
 - Commit `.env` files to git (they're in `.gitignore`)
 - Share your `.env` file in Slack/Discord
 - Use production credentials locally
@@ -195,6 +210,7 @@ docker-compose up
 ## 🌍 Different Environments
 
 ### Local Development (Your Machine)
+
 ```bash
 # Uses: backend/.env
 DB_HOST=database  # Docker service name
@@ -202,6 +218,7 @@ DB_USER=myuser    # Your local username
 ```
 
 ### Docker Compose (Team Testing)
+
 ```bash
 # Uses: docker-compose.yaml environment section
 # Everyone uses same defaults for consistency
@@ -210,6 +227,7 @@ DB_USER=myuser
 ```
 
 ### Render.com Production
+
 ```bash
 # Set in Render dashboard
 # Auto-generated by render.yaml
@@ -218,6 +236,7 @@ DATABASE_URL=postgresql://user:pass@host:5432/db
 ```
 
 ### GitHub Actions CI/CD
+
 ```bash
 # Set in .github/workflows/test.yml
 # Temporary test database
@@ -231,6 +250,7 @@ DB_PASSWORD=testpass
 ## 🐛 Troubleshooting Environment Issues
 
 ### Problem: "Can't connect to database"
+
 ```bash
 # Check your .env values match docker-compose.yaml
 cat backend/.env
@@ -241,6 +261,7 @@ docker ps | grep postgres
 ```
 
 ### Problem: "CORS errors in browser"
+
 ```bash
 # Check ALLOWED_ORIGINS in backend/.env includes your frontend URL
 cat backend/.env | grep ALLOWED_ORIGINS
@@ -249,6 +270,7 @@ cat backend/.env | grep ALLOWED_ORIGINS
 ```
 
 ### Problem: "Frontend can't reach backend"
+
 ```bash
 # Check API URL
 cat frontend/.env.local
@@ -257,6 +279,7 @@ cat frontend/.env.local
 ```
 
 ### Problem: "Changes to .env not working"
+
 ```bash
 # Restart your services after changing .env:
 
@@ -273,6 +296,7 @@ npm start
 ## 📋 Developer Checklist
 
 Before starting work:
+
 - [ ] `.env` files created from examples
 - [ ] Dependencies installed (`npm install`)
 - [ ] Docker is running (if using Docker)
@@ -281,6 +305,7 @@ Before starting work:
 - [ ] Database is initialized (tables exist)
 
 Before committing:
+
 - [ ] No `.env` files in `git status`
 - [ ] No secrets in source code
 - [ ] Tests pass locally
@@ -291,6 +316,7 @@ Before committing:
 ## 🎓 Quick Reference
 
 ### View Your Environment
+
 ```bash
 # Backend
 cd backend && cat .env
@@ -303,6 +329,7 @@ cat docker-compose.yaml
 ```
 
 ### Reset to Defaults
+
 ```bash
 # Backend
 cd backend
@@ -316,6 +343,7 @@ cp .env.example .env.local
 ```
 
 ### Check What's Committed (Safety Check)
+
 ```bash
 git status
 # Should NOT see .env or .env.local files!
@@ -343,26 +371,39 @@ git reset HEAD .env.local
 
 ## ✅ Summary
 
-**For most developers:**
-```bash
-# You only need to do this once:
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env.local
-npm install
-docker-compose up
+### **For 99% of Developers (Recommended):**
 
-# The defaults work! No changes needed! 🎉
+```bash
+# Clone and start - that's it!
+git clone <repo>
+cd second-space
+docker-compose up --build
+
+# No .env files needed! 🎉
+# No manual npm install needed! 🎉
+# Everything works immediately! 🎉
 ```
 
-**Only customize `.env` if:**
-- You have conflicts with default ports
-- You want different database names
-- You're testing special configurations
+### **Advanced Users Only:**
 
-**Never commit:**
+**Only create `.env` files if:**
+
+- ❌ You have conflicts with default ports (8080, 5432, 80)
+- ❌ You want different database names for testing
+- ❌ You're running services outside Docker
+- ❌ You're debugging specific configurations
+
+**For normal development:** Just use Docker! The defaults work perfectly.
+
+### **Security Reminder:**
+
+**If you DO create `.env` files, never commit:**
+
 - `.env`
 - `.env.local`
 - `.env.production` (if it has real secrets)
+
+**They're already in `.gitignore` so you're protected!** ✅
 
 ---
 
