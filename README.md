@@ -15,12 +15,12 @@ This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving 
 <br>
 
 # Installation & Code Updates
-1. <b>Clone</b> into the repository using your preffered method.
-2. <b>Make a seperate branch</b> and edit any code you wish. (use of AI Agents is recommended, specficially in the frontend).
+1. <b>Clone</b> into the repository.
+2. <b>Checkout a seperate branch</b> and edit any code you wish.
 3. <b>Publish your branch</b> to the repository with a push.
-4. Go to Github, and <b>open a pull request</b> by clicked the yellow popup at the top of the screen.
-5. A <b>peer will review the pull request</b>, and if it is valid, with merge to main
-6. This will trigger test for <b>automated integration</b> and if the tests pass, will <b>automatically deploy</b> to https://cfurley.github.io/second-space/
+4. Go to Github, and <b>open a pull request</b> by clicking the yellow popup at the top of your screen.
+5. Tests will trigger to run, and a <b>peer will review the pull request</b>. If it is valid, the peer will merge your branch to main.
+6. When merged, will <b>automatically integrate</b> and will <b>automatically deploy</b> to the live application at https://cfurley.github.io/second-space/ which can be accessed from any browser on any type of device, anywhere. Its a full functional website.
 
 <br>
 
