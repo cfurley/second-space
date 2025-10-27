@@ -10,6 +10,7 @@ import {
   validatePasswordStrength,
 } from "../utils/passwordValidator";
 import ReactDOM from "react-dom";
+import { api } from "../utils/api";
 
 interface LoginProps {
   isOpen: boolean;
@@ -92,30 +93,18 @@ export default function Login({ isOpen, onClose }: LoginProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { username, password };
 
     try {
-      const response = await fetch("/api/user/authentication", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Login successful
-        console.log("Login successful:", data);
-        alert(`Welcome back, ${data.display_name || data.username}!`);
-        // TODO: Store user data in state/context for app use
-        onClose();
-      } else {
-        // Login failed
-        alert(`Login failed: ${data.message || "Invalid credentials"}`);
-      }
+      const data = await api.login(username, password);
+      
+      // Login successful
+      console.log("Login successful:", data);
+      alert(`Welcome back, ${data.display_name || data.username}!`);
+      // TODO: Store user data in state/context for app use
+      onClose();
     } catch (error) {
       console.error("Login error:", error);
-      alert("Network error. Please check your connection and try again.");
+      alert("Login failed. Please check your credentials and try again.");
     }
   };
 
@@ -330,8 +319,8 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 }
 
                 const payload = {
-                  first_name: firstName,
-                  last_name: lastName,
+                  firstName: firstName,
+                  lastName: lastName,
                   username,
                   password,
                 };
@@ -339,38 +328,16 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 console.log("Attempting to create account with:", payload);
 
                 try {
-                  const response = await fetch("/api/user/", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                  });
-
-                  const data = await response.json();
-                  console.log("Server response:", {
-                    status: response.status,
-                    data,
-                  });
-
-                  if (response.ok) {
-                    // Account created successfully
-                    console.log("Account created:", data);
-                    alert(
-                      `Account created successfully! Welcome, ${data.username}!`
-                    );
-                    onClose();
-                  } else {
-                    // Account creation failed
-                    console.error("Account creation failed:", data);
-                    alert(
-                      `Failed to create account: ${
-                        data.error || data.message || "Unknown error"
-                      }`
-                    );
-                  }
+                  const data = await api.createUser(payload);
+                  console.log("Account created:", data);
+                  alert(
+                    `Account created successfully! Welcome, ${data.username}!`
+                  );
+                  onClose();
                 } catch (error) {
                   console.error("Signup error:", error);
                   alert(
-                    "Network error. Please check your connection and try again."
+                    `Failed to create account: ${error instanceof Error ? error.message : "Unknown error"}`
                   );
                 }
               }}

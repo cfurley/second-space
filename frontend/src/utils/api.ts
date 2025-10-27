@@ -76,9 +76,18 @@ export const api = {
     lastName: string;
     email?: string;
   }) {
+    // Convert camelCase to snake_case for backend
+    const payload = {
+      username: userData.username,
+      password: userData.password,
+      first_name: userData.firstName,
+      last_name: userData.lastName,
+      email: userData.email,
+    };
+    
     return apiFetch('/user', {
       method: 'POST',
-      body: JSON.stringify(userData),
+      body: JSON.stringify(payload),
     });
   },
   

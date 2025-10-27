@@ -13,7 +13,8 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
   : [
       'http://localhost:5173',      // Vite dev server
-      'http://localhost:80',         // Docker frontend
+      'http://localhost:80',         // Docker frontend with port
+      'http://localhost',            // Docker frontend without port
       'https://cfurley.github.io',   // GitHub Pages
     ];
 
