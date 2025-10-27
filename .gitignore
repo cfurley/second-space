@@ -1,11 +1,41 @@
 # Add any other files or directories you would like to omit from the repository here.
 
+# Editor
 *.vscode
+.idea/
+
+# Dependencies
 *node_modules
+node_modules/
 #*package-lock.json
 
+# Environment variables (NEVER COMMIT THESE!)
 *.env
+.env
+.env.local
+.env.production
+.env.development
+
+# Security
 *.exe
 *.out
 *.key
 *.key.pub
+
+# Build outputs
+**/build/
+**/dist/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Database
+*.sql.backup
+*.db
+*.sqlite
+
+# Test coverage
+coverage/
+.nyc_output/
