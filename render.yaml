@@ -9,8 +9,9 @@ services:
     runtime: node
     region: oregon  # Choose: oregon, ohio, frankfurt, singapore
     plan: free  # free tier - will spin down after 15 min inactivity
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && npm start
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
     healthCheckPath: /
     envVars:
       - key: NODE_ENV
