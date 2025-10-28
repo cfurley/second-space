@@ -41,7 +41,7 @@ docker-compose up --build
 
 ---
 
-## � How to Contribute
+## 🤝 How to Contribute
 
 ### 1. Create Your Feature Branch
 
@@ -104,12 +104,12 @@ git push origin feature/your-feature-name
 ### Current Features
 
 - 🔐 User authentication (signup/login)
-- 📦 Space creation and management
-- 🎨 Theme customization
-- 📱 Media organization
 
 ### Coming Soon
 
+- 📦 **Space creation and management** - Create and manage user spaces
+- 🎨 **Theme customization** - Choose from various themes
+- 📱 **Media organization** - Import and organize media such as PNG, MP4, GIFs
 - 🤖 **AI Integration** - Help scrape and organize media automatically
 - 👥 **Collaboration** - Share and work on spaces with others in real-time
 - ⏰ **Time Capsule** - See what you did a year ago
