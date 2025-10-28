@@ -2,76 +2,283 @@
 
 <small>CS3203 Group D</small>
 
-
 # Second Space
+
 <img src='./resources/FigmaMarkupV1.png'>
 
-<br><br>
+## 🎯 What is Second Space?
 
-# Summary
+**Second Space** is an AI-powered hub for creating and organizing visual mood boards and think spaces. Save and curate media from your device or social media profiles in beautiful, customizable spaces.
 
-This is the repository for <b>Second Space</b>, an AI Integrated Hub for saving and creating think/mood boards with media from the users device or social media profiles.
+**🌐 Live App:** https://cfurley.github.io/second-space/
 
-<br>
+---
 
-# Installation & Code Updates
-1. <b>Clone</b> into the repository.
-2. <b>Checkout a seperate branch</b> and edit any code you wish.
-3. <b>Publish your branch</b> to the repository with a push.
-4. Go to Github, and <b>open a pull request</b> by clicking the yellow popup at the top of your screen.
-5. Tests will trigger to run, and a <b>peer will review the pull request</b>. If it is valid, the peer will merge your branch to main.
-6. When merged, will <b>automatically integrate</b> and will <b>automatically deploy</b> to the live application at https://cfurley.github.io/second-space/ which can be accessed from any browser on any type of device, anywhere. Its a full functional website.
+## 🚀 Getting Started (5 Minutes!)
 
-<br>
+### Prerequisites
 
-# Feature Ideas
-* AI: Help scrape media for the spaces, as well as help format and create spaces.
-* Customization: Bitmoji, Profile Picture, Themes(monkey-type), Custom Themes, ..
-* Spaces: think/mood boards for users to create and add media
-* Data Sharing: Upload media such as videos, images, text, gifs, ..
-* Promo Events: Special Bit Mojos, or special themes for certain events.
-* Collaberation: Multiple users able to share and work on the same mood board at the same time.
-* Time Capsule: Create time capsule spaces which shows what you did a year ago, or five years ago.
+- **Docker Desktop** installed ([Download here](https://www.docker.com/products/docker-desktop))
+- **Git** installed
+- That's it! No other setup needed.
 
-<br>
+### Start Developing
 
-# Project Architecture
-<img src='./resources/second_space_architecture.png' width="720"> <br>
+```bash
+# 1. Clone the repository
+git clone https://github.com/cfurley/second-space.git
+cd second-space
 
-### AI
+# 2. Start the full application
+docker-compose up --build
 
-This is the main feature of the software product. <b>Second Space AI</b> could help scrape media for users as well as assist in space organization and creation.
+# 3. Open your browser
+# Frontend: http://localhost
+# Backend API: http://localhost:8080
+```
 
-### Frontend
+**Done!** The entire stack (frontend, backend, database) is running on your machine. ✅
 
-This is the <b>Main User Facing Application</b>, it includes the <b>home page</b>, <b>login flow</b>, <b>space creation flow</b>, etc. 
+---
 
-### Backend
+## 🤝 How to Contribute
 
-Using <b>NodeJS Express</b>, the backend handles <b>API Routes</b> for data transfers between <b>Frontend <--> AI</b>, and <b>Frontend <--> Datbase.</b>
+### 1. Create Your Feature Branch
 
-### Database
+```bash
+git checkout -b feature/your-feature-name
+```
 
-The database is <b>Postgres SQL</b> and the scheme is currently being created.
+### 2. Make Your Changes
 
-### Resources
-This directory is the place to store resources for the website such as <b>images</b> or <b>icons</b>.
+Edit any files you want. The app will reload automatically with your changes!
 
-<br>
+### 3. Test Locally
 
-# Contributing to Second Space
+```bash
+# Make sure everything works
+docker-compose up --build
 
-### Getting Started
-* Clone the repository
-* Create and Publish a new Branch.
+# Visit http://localhost to test
+```
 
-### Submitting Changes
-* Create a pull request to main.
-* Build tests will be run.
-* Another Peer will Review the pull request.
-* If it passes peer review, it'll be merged to the Main Branch.
+### 4. Push Your Branch
 
-<br><br><br>
+```bash
+git add .
+git commit -m "Add your feature description"
+git push origin feature/your-feature-name
+```
+
+### 5. Open a Pull Request
+
+1. Go to GitHub - you'll see a yellow banner to create a PR
+2. Click "Compare & pull request"
+3. Describe what you changed
+4. Submit for review
+
+### 6. Automated Review Process
+
+- ✅ **Automated tests** run on your PR
+- 👥 **Team member reviews** your code
+- 🎉 **Auto-deploys** to production when merged to main
+
+---
+
+## 📚 Documentation
+
+| Document                                         | Purpose                                                          |
+| ------------------------------------------------ | ---------------------------------------------------------------- |
+| **[PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md)**   | 📦 Complete project reference - structure, tech stack, workflows |
+| **[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)** | 🔧 Architecture, CORS explained, API, testing, deployment steps  |
+
+**New to the project?** Start with PROJECT_OVERVIEW.md!  
+**Need to deploy?** See INTEGRATION_GUIDE.md!
+
+---
+
+---
+
+## ✨ Feature Roadmap
+
+### Current Features
+
+- 🔐 User authentication (signup/login)
+
+### Coming Soon
+
+- 📦 **Space creation and management** - Create and manage user spaces
+- 🎨 **Theme customization** - Choose from various themes
+- 📱 **Media organization** - Import and organize media such as PNG, MP4, GIFs
+- 🤖 **AI Integration** - Help scrape and organize media automatically
+- 👥 **Collaboration** - Share and work on spaces with others in real-time
+- ⏰ **Time Capsule** - See what you did a year ago
+- 🎭 **Customization** - Profile pictures, custom themes, bitmoji integration
+- 🎉 **Special Events** - Limited edition themes and features
+
+---
+
+## 🏗️ Project Architecture
+
+<img src='./resources/second_space_architecture.png' width="720">
+
+### Current Stack
+
+```
+Production (Free Hosting):
+  GitHub Pages (Frontend) ──▶ Render.com (Backend + Database)
+
+Local Development:
+  Docker Compose (Frontend + Backend + Database)
+```
+
+### Components
+
+**🎨 Frontend** (`frontend/`)
+
+- Built with React + TypeScript + Vite
+- Styled with Tailwind CSS
+- Deployed to GitHub Pages
+- Lives at: https://cfurley.github.io/second-space/
+
+**⚙️ Backend** (`backend/`)
+
+- Node.js + Express server
+- RESTful API endpoints
+- CORS-enabled for cross-origin requests
+- Deployed to Render.com (free tier)
+
+**🗄️ Database** (`database/`)
+
+- PostgreSQL 16
+- Initialization scripts in `database/init/`
+- Hosted on Render.com (free tier)
+
+**🤖 AI** (`ai-server/`)
+
+- Future AI integration for media scraping and organization
+- _Coming soon!_
+
+**📦 Resources** (`resources/`)
+
+- Images, icons, and design assets
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer            | Technology                                    |
+| ---------------- | --------------------------------------------- |
+| Frontend         | React, TypeScript, Vite, Tailwind CSS         |
+| Backend          | Node.js, Express.js                           |
+| Database         | PostgreSQL 16                                 |
+| Deployment       | GitHub Pages (frontend), Render.com (backend) |
+| CI/CD            | GitHub Actions                                |
+| Containerization | Docker Compose                                |
+
+---
+
+## 🧪 Testing
+
+```bash
+# Frontend tests (Vitest)
+cd frontend
+npm test
+
+# Backend tests (Node.js test runner)
+cd backend
+npm test
+
+# Full integration test
+docker-compose up --build
+# Visit http://localhost to test
+```
+
+Tests run automatically on every pull request! ✅
+
+---
+
+## 📊 Project Status
+
+- ✅ Frontend deployed to GitHub Pages
+- ✅ Backend API with CORS support
+- ✅ Database schema and initialization
+- ✅ Docker Compose local development
+- ✅ CI/CD pipeline with GitHub Actions
+- 🚧 Backend deployment to Render.com (in progress)
+- 🚧 AI integration (planned)
+- 🚧 Collaboration features (planned)
+
+---
+
+## 👥 Team Guidelines
+
+### Code Style
+
+- Use TypeScript for frontend code
+- Use ESM imports (`import/export`) in backend
+- Follow existing code patterns
+- Add comments for complex logic
+
+### Git Workflow
+
+1. Never commit directly to `main`
+2. Always work in feature branches
+3. Keep commits small and focused
+4. Write descriptive commit messages
+5. Wait for PR approval before merging
+
+### Before Submitting PR
+
+- [ ] Test locally with `docker-compose up`
+- [ ] Run tests: `npm test` in frontend and backend
+- [ ] Check for console errors
+- [ ] Update documentation if needed
+
+---
+
+## 🆘 Need Help?
+
+### Common Issues
+
+**Docker won't start?**
+
+```bash
+docker-compose down -v
+docker-compose up --build
+```
+
+**Frontend not loading?**
+
+```bash
+# Check if containers are running
+docker-compose ps
+
+# View logs
+docker-compose logs -f frontend
+docker-compose logs -f backend
+```
+
+**Database connection error?**
+
+```bash
+# Wait 10 seconds after starting for DB to be ready
+docker-compose logs database | grep "ready to accept connections"
+```
+
+### Documentation
+
+- **Architecture & API:** See [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)
+- **Full Project Overview:** See [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) _(coming soon)_
+
+### Contact
+
+- Open an issue on GitHub
+- Ask in team chat
+- Review existing documentation
+
+---
+
 <hr>
 
 <small>
