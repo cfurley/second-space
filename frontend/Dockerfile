@@ -7,6 +7,9 @@ RUN npm cache clean --force
 RUN rm -rf node_modules package-lock.json
 RUN npm install
 
+# Set API URL for Docker Compose local development
+ENV VITE_API_URL=http://localhost:8080
+
 RUN npm run build
 
 FROM nginx

@@ -1,0 +1,54 @@
+# Render.com Blueprint Configuration
+# This file tells Render how to deploy your application
+# Documentation: https://render.com/docs/blueprint-spec
+
+services:
+  # Backend API Service
+  - type: web
+    name: second-space-api
+    runtime: node
+    region: oregon  # Choose: oregon, ohio, frankfurt, singapore
+    plan: free  # free tier - will spin down after 15 min inactivity
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8080
+      - key: DB_HOST
+        fromDatabase:
+          name: second-space-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: second-space-db
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: second-space-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: second-space-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: second-space-db
+          property: database
+      - key: DATABASE_URL
+        fromDatabase:
+          name: second-space-db
+          property: connectionString
+      - key: ALLOWED_ORIGINS
+        value: http://localhost:5173,http://localhost:80,https://cfurley.github.io
+
+databases:
+  # PostgreSQL Database
+  - name: second-space-db
+    databaseName: second_space
+    plan: free  # free tier - 90 days then soft reset
+    region: oregon  # Should match your web service region
+    ipAllowList: []  # Empty = allow all IPs
