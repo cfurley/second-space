@@ -150,53 +150,30 @@ cd backend
 npm install
 ```
 
-### Running All Tests
+### Running Tests
 
 ```bash
-# Frontend tests (Vitest)
+# Run all frontend tests
 cd frontend
 npm test
 
-# Backend tests (Node.js test runner)
+# Run all backend tests
 cd backend
 npm test
 
-# Full integration test
-docker-compose up --build
-# Visit http://localhost to test
-```
-
-Tests run automatically on every pull request! ✅
-
-### Running Individual Test Files
-
-Run specific test files to focus on particular features:
-
-```bash
-# Frontend - run a specific test file
-cd frontend
+# Run a specific test file
 npm test login.test.tsx
-
-# Backend - run a specific test file
-cd backend
-npm test userControllers.test.js
 ```
 
-### Test File Locations
+### Where Tests Live
 
-Tests are organized in `__tests__` folders alongside the code they test:
+Tests are in `__tests__` folders:
 
-**Frontend:**
-
-- `frontend/src/components/__tests__/` - Component tests
-- `frontend/src/utils/__tests__/` - Utility function tests
-- `frontend/src/pages/__tests__/` - Page tests
-
-**Backend:**
-
-- `backend/src/controllers/__tests__/` - Controller tests
-- `backend/src/services/__tests__/` - Service tests
-- `backend/src/models/__tests__/` - Model tests
+- `frontend/src/components/__tests__/`
+- `frontend/src/utils/__tests__/`
+- `backend/src/controllers/__tests__/`
+- `backend/src/services/__tests__/`
+- `backend/src/models/__tests__/`
 
 ---
 
@@ -204,10 +181,10 @@ Tests are organized in `__tests__` folders alongside the code they test:
 
 - ✅ Frontend deployed to GitHub Pages
 - ✅ Backend API with CORS support
+- ✅ Backend deployment to Render.com
 - ✅ Database schema and initialization
 - ✅ Docker Compose local development
 - ✅ CI/CD pipeline with GitHub Actions
-- 🚧 Backend deployment to Render.com (in progress)
 - 🚧 AI integration (planned)
 - 🚧 Collaboration features (planned)
 
@@ -224,18 +201,18 @@ Tests are organized in `__tests__` folders alongside the code they test:
 
 ### Git Workflow
 
-1. Never commit directly to `main`
-2. Always work in feature branches
-3. Keep commits small and focused
-4. Write descriptive commit messages
-5. Wait for PR approval before merging
+- Never commit directly to `main`
+- Always work in feature branches
+- Keep commits small and focused
+- Write descriptive commit messages
+- Wait for PR approval before merging
 
 ### Before Submitting PR
 
-- [ ] Test locally with `docker-compose up`
-- [ ] Run tests: `npm test` in frontend and backend
-- [ ] Check for console errors
-- [ ] Update documentation if needed
+- Test locally with `docker-compose up`
+- Run tests: `npm test` in frontend and backend
+- Check for console errors
+- Update documentation if needed
 
 ---
 
