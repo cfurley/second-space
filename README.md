@@ -43,6 +43,8 @@ docker-compose up --build
 
 **Having issues?** Check the [🆘 Need Help?](#-need-help) section below for troubleshooting.
 
+**Want to run tests?** See the [🧪 Testing](#-testing) section for instructions.
+
 ---
 
 ## 🤝 How to Contribute
@@ -270,7 +272,6 @@ docker-compose logs database | grep "ready to accept connections"
 
 - Open an issue on GitHub
 - Ask in team chat
-- Review [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md) for architecture and API details
 
 ---
 
