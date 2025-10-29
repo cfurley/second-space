@@ -41,6 +41,8 @@ docker-compose up --build
 
 **Done!** The entire stack (frontend, backend, database) is running on your machine. ✅
 
+**Having issues?** Check the [🆘 Need Help?](#-need-help) section below for troubleshooting.
+
 ---
 
 ## 🤝 How to Contribute
@@ -110,47 +112,6 @@ git push origin feature/your-feature-name
 
 <img src='./resources/second_space_architecture.png' width="720">
 
-### Current Stack
-
-```
-Production (Free Hosting):
-  GitHub Pages (Frontend) ──▶ Render.com (Backend + Database)
-
-Local Development:
-  Docker Compose (Frontend + Backend + Database)
-```
-
-### Components
-
-**🎨 Frontend** (`frontend/`)
-
-- Built with React + TypeScript + Vite
-- Styled with Tailwind CSS
-- Deployed to GitHub Pages
-- Lives at: https://cfurley.github.io/second-space/
-
-**⚙️ Backend** (`backend/`)
-
-- Node.js + Express server
-- RESTful API endpoints
-- CORS-enabled for cross-origin requests
-- Deployed to Render.com (free tier)
-
-**🗄️ Database** (`database/`)
-
-- PostgreSQL 16
-- Initialization scripts in `database/init/`
-- Hosted on Render.com (free tier)
-
-**🤖 AI** (`ai-server/`)
-
-- Future AI integration for media scraping and organization
-- _Coming soon!_
-
-**📦 Resources** (`resources/`)
-
-- Images, icons, and design assets
-
 ---
 
 ## 🛠️ Tech Stack
@@ -207,111 +168,33 @@ Tests run automatically on every pull request! ✅
 
 ### Running Individual Test Files
 
-You can run specific test files to focus on particular features or components:
-
-#### Frontend Tests
+Run specific test files to focus on particular features:
 
 ```bash
+# Frontend - run a specific test file
 cd frontend
-
-# Run a specific test file (watch mode)
 npm test login.test.tsx
 
-# Run a specific test file (run once and exit)
-npm test -- login.test.tsx --run
-
-# Run tests matching a pattern
-npm test -- --testPathPattern="login"
-
-# Run tests with coverage
-npm test -- login.test.tsx --coverage
-
-# Run all tests in a directory
-npm test -- src/components/__tests__/
-
-# Run tests in watch mode with UI
-npm test -- --ui
-```
-
-#### Available Frontend Test Files
-
-- `src/components/__tests__/login.test.tsx` - Login component tests (14 tests)
-- `src/utils/__tests__/api.test.ts` - API client tests
-- `src/utils/__tests__/usernameValidator.test.ts` - Username validation tests
-- `src/utils/__tests__/passwordValidator.test.ts` - Password validation tests
-
-#### Backend Tests
-
-```bash
+# Backend - run a specific test file
 cd backend
-
-# Run all backend tests
-npm test
-
-# Run specific test file
-npm test -- test.js
-
-# Run user controller tests
-npm test -- src/controllers/__tests__/userControllers.test.js
+npm test userControllers.test.js
 ```
 
-#### Interactive Test Commands (Watch Mode)
+### Test File Locations
 
-When running tests in watch mode, you have these options:
+Tests are organized in `__tests__` folders alongside the code they test:
 
-- **`h`** - Show help
-- **`a`** - Run all tests
-- **`f`** - Run only failed tests
-- **`t`** - Filter by test name pattern
-- **`q`** - Quit watch mode
-- **`Enter`** - Trigger test re-run
+**Frontend:**
 
-### Test Coverage
+- `frontend/src/components/__tests__/` - Component tests
+- `frontend/src/utils/__tests__/` - Utility function tests
+- `frontend/src/pages/__tests__/` - Page tests
 
-Generate detailed test coverage reports:
+**Backend:**
 
-```bash
-# Frontend coverage
-cd frontend
-npm test -- --coverage
-
-# View coverage report
-open coverage/index.html
-```
-
-### Writing New Tests
-
-When adding new features, create corresponding test files:
-
-```bash
-# Frontend test structure
-frontend/src/
-  components/
-    __tests__/
-      YourComponent.test.tsx
-  utils/
-    __tests__/
-      yourUtil.test.ts
-
-# Backend test structure
-backend/src/
-  controllers/
-    __tests__/
-      yourController.test.js
-```
-
-### Test Debugging
-
-```bash
-# Run tests with verbose output
-npm test -- --reporter=verbose
-
-# Run tests with debugging enabled
-npm test -- --inspect-brk
-
-# Run a single test within a file
-npm test -- login.test.tsx -t "should successfully login"
-```
+- `backend/src/controllers/__tests__/` - Controller tests
+- `backend/src/services/__tests__/` - Service tests
+- `backend/src/models/__tests__/` - Model tests
 
 ---
 
