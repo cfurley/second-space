@@ -21,7 +21,7 @@
 
 - **Docker Desktop** installed ([Download here](https://www.docker.com/products/docker-desktop))
 - **Node.js and npm** installed ([Download here](https://nodejs.org/)) - Required for running tests and local development
-- **Git** installed
+- **Git** installed ([Download here](https://git-scm.com/downloads))
 - That's it! No other setup needed.
 
 ### Start Developing
@@ -40,6 +40,8 @@ docker-compose up --build
 ```
 
 **Done!** The entire stack (frontend, backend, database) is running on your machine. ✅
+
+<br>
 
 **Having issues?** Check the [🆘 Need Help?](#-need-help) section below for troubleshooting.
 
@@ -177,20 +179,7 @@ Tests are in `__tests__` folders:
 
 ---
 
-## 📊 Project Status
-
-- ✅ Frontend deployed to GitHub Pages
-- ✅ Backend API with CORS support
-- ✅ Backend deployment to Render.com
-- ✅ Database schema and initialization
-- ✅ Docker Compose local development
-- ✅ CI/CD pipeline with GitHub Actions
-- 🚧 AI integration (planned)
-- 🚧 Collaboration features (planned)
-
----
-
-## 👥 Team Guidelines
+## Team Guidelines
 
 ### Code Style
 
