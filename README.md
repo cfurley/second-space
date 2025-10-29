@@ -86,20 +86,6 @@ git push origin feature/your-feature-name
 
 ---
 
-## 📚 Documentation
-
-| Document                                         | Purpose                                                          |
-| ------------------------------------------------ | ---------------------------------------------------------------- |
-| **[PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md)**   | 📦 Complete project reference - structure, tech stack, workflows |
-| **[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)** | 🔧 Architecture, CORS explained, API, testing, deployment steps  |
-
-**New to the project?** Start with PROJECT_OVERVIEW.md!  
-**Need to deploy?** See INTEGRATION_GUIDE.md!
-
----
-
----
-
 ## ✨ Feature Roadmap
 
 ### Current Features
