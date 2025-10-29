@@ -29,6 +29,12 @@ export default function Login({ isOpen, onClose }: LoginProps) {
   const [lastNameValid, setLastNameValid] = useState<boolean | null>(null);
   const [confirmValid, setConfirmValid] = useState<boolean | null>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  
+  // Local UI mode: login | signup | verify-human
+  const [mode, setMode] = useState<"login" | "signup" | "verify">("login");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [verified, setVerified] = useState(false);
+  const [verifyInput, setVerifyInput] = useState("");
 
   useEffect(() => {
     if (!isOpen) {
@@ -107,14 +113,6 @@ export default function Login({ isOpen, onClose }: LoginProps) {
       alert("Login failed. Please check your credentials and try again.");
     }
   };
-
-  // Local UI mode: login | signup | verify-human
-  const [mode, setMode] = React.useState<"login" | "signup" | "verify">(
-    "login"
-  );
-  const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [verified, setVerified] = React.useState(false);
-  const [verifyInput, setVerifyInput] = React.useState("");
 
   // Render modal via portal: full-viewport flex centering
   return ReactDOM.createPortal(
