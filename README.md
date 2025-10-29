@@ -20,6 +20,7 @@
 ### Prerequisites
 
 - **Docker Desktop** installed ([Download here](https://www.docker.com/products/docker-desktop))
+- **Node.js and npm** installed ([Download here](https://nodejs.org/)) - Required for running tests and local development
 - **Git** installed
 - That's it! No other setup needed.
 
@@ -382,16 +383,11 @@ docker-compose logs -f backend
 docker-compose logs database | grep "ready to accept connections"
 ```
 
-### Documentation
-
-- **Architecture & API:** See [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)
-- **Full Project Overview:** See [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) _(coming soon)_
-
 ### Contact
 
 - Open an issue on GitHub
 - Ask in team chat
-- Review existing documentation
+- Review [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md) for architecture and API details
 
 ---
 
