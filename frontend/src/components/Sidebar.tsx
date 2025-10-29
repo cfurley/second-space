@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CreateSpaceDialog } from './CreateSpaceDialog';
+import { ThemeSelector } from './ThemeSelector';
 
 interface SidebarItem {
   icon: string;
@@ -141,20 +142,9 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
       ))}
 
       </div>
-            {/* ✅ Smart Theme Toggle Button */}
+            {/* ✅ Smart Theme Selector Button */}
       <div className="mt-auto px-8 pt-4 border-t border-white/10">
-        <button
-          onClick={() => {
-            const html = document.documentElement;
-            const isDark = html.classList.toggle("dark");
-            localStorage.setItem("theme", isDark ? "dark" : "light");
-            setIsDark(isDark); // update local state instantly
-          }}
-          className="w-full flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-lg py-2.5 transition-all duration-300"
-        >
-          <span className="text-lg">{isDark ? "🌞" : "🌙"}</span>
-          <span className="text-sm">{isDark ? "Light Mode" : "Dark Mode"}</span>
-        </button>
+        <ThemeSelector />
       </div>
     </div>
   );
