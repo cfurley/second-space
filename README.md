@@ -167,6 +167,27 @@ Local Development:
 
 ## 🧪 Testing
 
+### Prerequisites
+
+Before running tests, ensure you have **Node.js and npm** installed:
+
+- **Node.js** (includes npm) - [Download here](https://nodejs.org/) (LTS version recommended)
+- Verify installation: `node --version` and `npm --version`
+
+Then install dependencies:
+
+```bash
+# Frontend dependencies
+cd frontend
+npm install
+
+# Backend dependencies
+cd backend
+npm install
+```
+
+### Running All Tests
+
 ```bash
 # Frontend tests (Vitest)
 cd frontend
@@ -182,6 +203,114 @@ docker-compose up --build
 ```
 
 Tests run automatically on every pull request! ✅
+
+### Running Individual Test Files
+
+You can run specific test files to focus on particular features or components:
+
+#### Frontend Tests
+
+```bash
+cd frontend
+
+# Run a specific test file (watch mode)
+npm test login.test.tsx
+
+# Run a specific test file (run once and exit)
+npm test -- login.test.tsx --run
+
+# Run tests matching a pattern
+npm test -- --testPathPattern="login"
+
+# Run tests with coverage
+npm test -- login.test.tsx --coverage
+
+# Run all tests in a directory
+npm test -- src/components/__tests__/
+
+# Run tests in watch mode with UI
+npm test -- --ui
+```
+
+#### Available Frontend Test Files
+
+- `src/components/__tests__/login.test.tsx` - Login component tests (14 tests)
+- `src/utils/__tests__/api.test.ts` - API client tests
+- `src/utils/__tests__/usernameValidator.test.ts` - Username validation tests
+- `src/utils/__tests__/passwordValidator.test.ts` - Password validation tests
+
+#### Backend Tests
+
+```bash
+cd backend
+
+# Run all backend tests
+npm test
+
+# Run specific test file
+npm test -- test.js
+
+# Run user controller tests
+npm test -- src/controllers/__tests__/userControllers.test.js
+```
+
+#### Interactive Test Commands (Watch Mode)
+
+When running tests in watch mode, you have these options:
+
+- **`h`** - Show help
+- **`a`** - Run all tests
+- **`f`** - Run only failed tests
+- **`t`** - Filter by test name pattern
+- **`q`** - Quit watch mode
+- **`Enter`** - Trigger test re-run
+
+### Test Coverage
+
+Generate detailed test coverage reports:
+
+```bash
+# Frontend coverage
+cd frontend
+npm test -- --coverage
+
+# View coverage report
+open coverage/index.html
+```
+
+### Writing New Tests
+
+When adding new features, create corresponding test files:
+
+```bash
+# Frontend test structure
+frontend/src/
+  components/
+    __tests__/
+      YourComponent.test.tsx
+  utils/
+    __tests__/
+      yourUtil.test.ts
+
+# Backend test structure
+backend/src/
+  controllers/
+    __tests__/
+      yourController.test.js
+```
+
+### Test Debugging
+
+```bash
+# Run tests with verbose output
+npm test -- --reporter=verbose
+
+# Run tests with debugging enabled
+npm test -- --inspect-brk
+
+# Run a single test within a file
+npm test -- login.test.tsx -t "should successfully login"
+```
 
 ---
 
