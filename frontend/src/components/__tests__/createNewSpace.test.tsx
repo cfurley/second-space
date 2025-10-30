@@ -67,10 +67,21 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should show "Close" button when dialog is open', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      // Find the clickable div that says "New Space"
+      const newSpaceButton = screen.getByText((content, element) => {
+        return element?.textContent === '+New Space' && 
+               element?.classList.contains('cursor-pointer');
+      });
+      
+      fireEvent.click(newSpaceButton);
       
       expect(screen.getByText('Close')).toBeInTheDocument();
-      expect(screen.queryByText('New Space')).not.toBeInTheDocument();
+      // Check that the "New Space" clickable button is gone (but title remains)
+      const clickableNewSpace = screen.queryByText((content, element) => {
+        return element?.textContent === '+New Space' && 
+               element?.classList.contains('cursor-pointer');
+      });
+      expect(clickableNewSpace).not.toBeInTheDocument();
     });
 
     /**
@@ -132,8 +143,13 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
       
       fireEvent.click(screen.getByText('New Space'));
       
-      const createButton = screen.getByText('Create');
-      fireEvent.click(createButton);
+      const nameInput = screen.getByLabelText(/Name/i);
+      const form = nameInput.closest('form')!;
+      
+      // Manually trigger form submission to bypass HTML5 validation
+      const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+      Object.defineProperty(submitEvent, 'target', { value: form, enumerable: true });
+      form.dispatchEvent(submitEvent);
       
       expect(mockAlert).toHaveBeenCalledWith('Please enter a space name');
       expect(mockOnCreateSpace).not.toHaveBeenCalled();
@@ -482,7 +498,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
      * Test Case 5.2: Form resets after successful submission
      * Expected: All form fields should be cleared after submission
      */
-    it('should reset form fields after successful submission', () => {
+    it('should reset form fields after successful submission', async () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
       fireEvent.click(screen.getByText('New Space'));
@@ -498,12 +514,24 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
       const createButton = screen.getByText('Create');
       fireEvent.click(createButton);
       
+      // Wait for the dialog to close
+      await waitFor(() => {
+        expect(screen.queryByText('Create a space to organize your content')).not.toBeInTheDocument();
+      });
+      
       // Reopen the dialog
       fireEvent.click(screen.getByText('New Space'));
       
-      expect(nameInput.value).toBe('');
-      expect(iconInput.value).toBe('');
-      expect(descriptionInput.value).toBe('');
+      // Wait for dialog to open and then check values
+      await waitFor(() => {
+        const newNameInput = screen.getByLabelText(/Name/i) as HTMLInputElement;
+        const newIconInput = screen.getByLabelText(/Icon/i) as HTMLInputElement;
+        const newDescriptionInput = screen.getByLabelText(/Description/i) as HTMLTextAreaElement;
+        
+        expect(newNameInput.value).toBe('');
+        expect(newIconInput.value).toBe('');
+        expect(newDescriptionInput.value).toBe('');
+      });
     });
 
     /**
