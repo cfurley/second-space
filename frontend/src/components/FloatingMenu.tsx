@@ -127,7 +127,7 @@ export function FloatingMenu({ onAddAdvertisement }: FloatingMenuProps) {
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3C3C3C'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
-            <span style={{ fontSize: '16px' }}>�️</span> Create Ad
+            <span style={{ fontSize: '16px' }}>🖼️</span> Create Ad
           </button>
         </div>
       )}
