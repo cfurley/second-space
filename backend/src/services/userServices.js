@@ -39,7 +39,7 @@ const authenticateLogin = async (username, password) => {
     const result = await pool.query(selectQuery, selectValues);
     if (result.rows.length === 0) {
       console.log("Invalid Login");
-      return { success: false, status: 400, error: "Invalid Login" };
+      return { success: false, status: 404, error: "Invalid Login" };
     } else {
       // Updates last_login_date_utc to NOW()
       const updateQuery = `
@@ -57,7 +57,7 @@ const authenticateLogin = async (username, password) => {
     }
   } catch (error) {
     console.log(error.stack);
-    return { success: false, status: 500, erorr: "Database Error" };
+    return { success: false, status: 500, error: "Database Error" };
   }
 };
 
