@@ -1,5 +1,5 @@
-import userControllers from "../../controllers/userControllers";
-import userServices from "../userServices";
+import userControllers from "../userControllers.js";
+import userServices from "../../services/userServices.js";
 
 // Mock the pool used by userServices (imported from ../../db/index.js)
 import { describe, test, expect, vi } from "vitest";
