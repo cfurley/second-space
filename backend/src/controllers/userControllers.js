@@ -8,13 +8,13 @@ const authenticate = async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.status(400).json({ message: "Missing username or password." });
+    return res.status(400).json({ error: "Missing username or password." });
   }
 
   const result = await userService.authenticateLogin(username, password);
 
   if (!result.success) {
-    return res.status(result.status).json({ message: result.error });
+    return res.status(result.status).json({ error: result.error });
   } else {
     const user = result.data;
     // Set cache headers to cache the user data in the browser
@@ -36,13 +36,13 @@ const updatePassword = async (req, res) => {
     userId = req.params.userId;
     password = req.params.password;
   } catch (error) {
-    return res.status(400).json({ message: "Invalid Parameters" });
+    return res.status(400).json({ error: "Invalid Parameters" });
   }
 
   // Validate user's password
   const validation = await userService.validatePassword(password);
   if (!validation.success) {
-    return res.status(400).json({ message: validation.error });
+    return res.status(400).json({ error: validation.error });
   }
 
   // Update the password

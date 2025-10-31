@@ -1,71 +1,232 @@
-import { describe, it } from 'node:test';
-import assert from 'node:assert';
+import userControllers from "../userControllers.js";
+import userServices from "../../services/userServices.js";
 
-/**
- * User Controller Unit Tests
- * 
- * These tests validate the user authentication and management logic.
- * Run with: npm test
- */
+// Mock the pool used by userServices (imported from ../../db/index.js)
+import { describe, test, expect, vi } from "vitest";
 
-describe('User Authentication', () => {
-  it('should validate username format correctly', () => {
-    const validUsername = 'testuser123';
-    const invalidUsername = 'ab'; // Too short (less than 3 characters)
-    
-    assert.strictEqual(validUsername.length >= 3, true, 'Valid username should be at least 3 characters');
-    assert.strictEqual(invalidUsername.length >= 3, false, 'Invalid username should be rejected');
-  });
+vi.mock("../../db/index.js", () => ({
+  default: {
+    query: vi.fn(),
+  },
+}));
 
-  it('should validate password requirements', () => {
-    const validPassword = 'SecurePass123!';
-    const shortPassword = 'weak';
-    
-    assert.strictEqual(validPassword.length >= 8, true, 'Valid password should be at least 8 characters');
-    assert.strictEqual(shortPassword.length >= 8, false, 'Short password should be rejected');
-  });
+import pool from "../../db/index.js";
 
-  it('should reject empty credentials', () => {
-    const emptyUsername = '';
-    const emptyPassword = '';
-    
-    assert.strictEqual(emptyUsername.length > 0, false, 'Empty username should be rejected');
-    assert.strictEqual(emptyPassword.length > 0, false, 'Empty password should be rejected');
-  });
+// Helper to create an express-like response mock
+const createResMock = () => ({
+  status: vi.fn().mockReturnThis(),
+  json: vi.fn().mockReturnThis(),
+  set: vi.fn().mockReturnThis(),
 });
 
-describe('User Data Validation', () => {
-  it('should validate user object structure', () => {
-    const validUser = {
-      username: 'testuser',
-      password: 'SecurePass123!',
-      firstName: 'Test',
-      lastName: 'User',
-    };
-    
-    assert.ok(validUser.username, 'User should have username');
-    assert.ok(validUser.password, 'User should have password');
-    assert.ok(validUser.firstName, 'User should have firstName');
-    assert.ok(validUser.lastName, 'User should have lastName');
+describe("User Controller - authenticate", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('should handle missing optional fields', () => {
-    const userWithoutOptional = {
-      username: 'testuser',
-      password: 'SecurePass123!',
+  // 200 Valid Credentials
+  test("returns 200 and user json when credentials are valid", async () => {
+    const req = {
+      body: {
+        username: "testuser",
+        password: "Password1!",
+      },
     };
-    
-    assert.ok(userWithoutOptional.username, 'Required field should exist');
-    assert.strictEqual(userWithoutOptional.email, undefined, 'Optional field can be undefined');
-  });
-});
 
-describe('Password Security', () => {
-  it('should not store plain text passwords', () => {
-    const plainPassword = 'MyPassword123!';
-    const hashedPassword = 'hashed_' + plainPassword; // Simulated hashing
-    // In production, use bcrypt or similar
-    // TODO: Implement actual password hashing with bcrypt
-    assert.notStrictEqual(hashedPassword, plainPassword, 'Password should be hashed, not plain text');
+    const res = createResMock();
+
+    // Arrange: make pool.query return a row for the select, and OK for the update
+    pool.query
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            id: 1,
+            username: "testuser",
+            display_name: "Test User",
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] }); // update query doesn't need rows
+
+    // Act
+    await userControllers.authenticate(req, res);
+
+    // Assert
+    expect(pool.query).toHaveBeenCalled();
+    expect(res.set).toHaveBeenCalledWith(
+      expect.objectContaining({
+        "Cache-Control": expect.any(String),
+        "Content-Type": "application/json",
+      })
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ username: "testuser" })
+    );
+  });
+
+  // 400 no credentials passed in
+  test("returns 400 when credentials are not passed in", async () => {
+    const req = {
+      body: {
+        username: "",
+        password: "",
+      },
+    };
+
+    const res = createResMock();
+
+    // Act
+    await userControllers.authenticate(req, res);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ error: "Missing username or password." })
+    );
+  });
+
+  // 400 no username passed in
+  test("returns 400 when username is not passed in", async () => {
+    const req = {
+      body: {
+        username: "username1",
+        password: "",
+      },
+    };
+
+    const res = createResMock();
+
+    // Act
+    await userControllers.authenticate(req, res);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ error: "Missing username or password." })
+    );
+  });
+
+  // 400 no password passed in
+  test("returns 400 when password is not passed in", async () => {
+    const req = {
+      body: {
+        username: "",
+        password: "Password1!",
+      },
+    };
+
+    const res = createResMock();
+
+    // Act
+    await userControllers.authenticate(req, res);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ error: "Missing username or password." })
+    );
+  });
+
+  // 404 Credentials Invalid
+  test("returns 404 and login invalid when credentials invalid", async () => {
+    const req = {
+      body: {
+        username: "testuser",
+        password: "Password1!",
+      },
+    };
+
+    const res = createResMock();
+
+    // Arrange: make pool.query return empty list
+    pool.query.mockResolvedValueOnce({ rows: [] });
+
+    // Act
+    await userControllers.authenticate(req, res);
+
+    // Assert
+    expect(pool.query).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ error: "Invalid Login" })
+    );
+  });
+
+  // 404 Credentials Invalid
+  test("returns 404 and login invalid when credentials invalid", async () => {
+    const req = {
+      body: {
+        username: "testuser",
+        password: "Password1!",
+      },
+    };
+
+    const res = createResMock();
+
+    // Arrange: make pool.query return empty list
+    pool.query.mockResolvedValueOnce({ rows: [] });
+
+    // Act
+    await userControllers.authenticate(req, res);
+
+    // Assert
+    expect(pool.query).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ error: "Invalid Login" })
+    );
+  });
+
+  // 500 Service Recieves NULL credentials
+  test("returns 500 when service recieves NULL credentials", async () => {
+    const username = "Username1";
+    const password = "Password1!";
+
+    // NULL password
+    const resultOne = await userServices.authenticateLogin(username, null);
+
+    expect(resultOne).toEqual(
+      expect.objectContaining({ success: false, status: 500 })
+    );
+
+    // NULL Username
+    const resultTwo = await userServices.authenticateLogin(null, password);
+
+    expect(resultOne).toEqual(
+      expect.objectContaining({ success: false, status: 500 })
+    );
+
+    // NULL credentials
+    const resultThree = await userServices.authenticateLogin(undefined, null);
+
+    expect(resultOne).toEqual(
+      expect.objectContaining({ success: false, status: 500 })
+    );
+  });
+
+  // 500 On Database Error
+  test("returns 500 on database error", async () => {
+    const req = {
+      body: {
+        username: "testuser",
+        password: "Password1!",
+      },
+    };
+
+    const res = createResMock();
+
+    // Return an error to be caught
+    pool.query.mockRejectedValue(new Error("Database connection failed"));
+
+    // Act
+    await userControllers.authenticate(req, res);
+
+    // Assert
+    expect(pool.query).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ error: "Database Error" })
+    );
   });
 });

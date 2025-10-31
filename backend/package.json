@@ -7,8 +7,11 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "test": "node --test",
+    "test": "vitest run",
     "start": "node app.js"
+  },
+  "devDependencies": {
+    "vitest": "^0.34.6"
   },
   "dependencies": {
     "express": "^4.18.2",
