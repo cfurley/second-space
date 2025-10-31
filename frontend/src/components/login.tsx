@@ -35,9 +35,12 @@ export default function Login({ isOpen, onClose }: LoginProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [verified, setVerified] = useState(false);
   const [verifyInput, setVerifyInput] = useState("");
+  // Remember-me state: persist username to localStorage when true
+  const [remember, setRemember] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
+      // Clear form when the modal closes
       setUsername("");
       setPassword("");
       setFirstName("");
@@ -48,6 +51,18 @@ export default function Login({ isOpen, onClose }: LoginProps) {
       setLastNameValid(null);
       setConfirmPassword("");
       setConfirmValid(null);
+      setRemember(false);
+    } else {
+      // When opening, populate username from localStorage if available
+      try {
+        const saved = localStorage.getItem("ss_remembered_username");
+        if (saved) {
+          setUsername(saved);
+          setRemember(true);
+        }
+      } catch (e) {
+        // localStorage may be unavailable (private mode); ignore
+      }
     }
   }, [isOpen]);
 
@@ -106,6 +121,16 @@ export default function Login({ isOpen, onClose }: LoginProps) {
       // Login successful
       console.log("Login successful:", data);
       alert(`Welcome back, ${data.display_name || data.username}!`);
+      // Persist or remove remembered username according to the checkbox
+      try {
+        if (remember && username && username.trim().length > 0) {
+          localStorage.setItem("ss_remembered_username", username.trim());
+        } else {
+          localStorage.removeItem("ss_remembered_username");
+        }
+      } catch (e) {
+        // Ignore storage errors
+      }
       // TODO: Store user data in state/context for app use
       onClose();
     } catch (error) {
@@ -202,6 +227,26 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 />
               </div>
 
+              <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <input
+                  id="modal-remember"
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  style={{ width: 16, height: 16 }}
+                />
+                <label
+                  htmlFor="modal-remember"
+                  style={{
+                    color: "rgba(255,255,255,0.9)",
+                    fontSize: 14,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Remember username
+                </label>
+              </div>
+
               <div style={{ marginBottom: 18 }}>
                 <label
                   htmlFor="modal-password"
@@ -232,7 +277,6 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                   }}
                 />
               </div>
-
               <div style={{ marginTop: 20 }}>
                 <button
                   type="submit"
@@ -306,9 +350,8 @@ export default function Login({ isOpen, onClose }: LoginProps) {
               onSubmit={async (e) => {
                 e.preventDefault();
                 if (!verified) {
-                  alert(
-                    "Please verify you are human before creating an account"
-                  );
+                  // Open the verification step so user can confirm humanness.
+                  setMode('verify');
                   return;
                 }
                 if (password !== confirmPassword) {
