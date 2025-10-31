@@ -277,9 +277,6 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                   }}
                 />
               </div>
-
-              
-
               <div style={{ marginTop: 20 }}>
                 <button
                   type="submit"
