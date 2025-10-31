@@ -65,8 +65,8 @@ describe('Login Component - Authentication Tests', () => {
       render(<Login isOpen={true} onClose={mockOnClose} />);
 
       // Find and fill username field
-      const usernameInput = screen.getByLabelText(/username/i);
-      fireEvent.change(usernameInput, { target: { value: validUsername } });
+  const usernameInput = screen.getByLabelText((content) => content.trim().toLowerCase() === 'username');
+  fireEvent.change(usernameInput, { target: { value: validUsername } });
 
       // Find and fill password field
       const passwordInput = screen.getByLabelText(/password/i);
@@ -104,7 +104,7 @@ describe('Login Component - Authentication Tests', () => {
       // Act
       render(<Login isOpen={true} onClose={mockOnClose} />);
       
-      fireEvent.change(screen.getByLabelText(/username/i), {
+      fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), {
         target: { value: 'johndoe' },
       });
       fireEvent.change(screen.getByLabelText(/password/i), {
@@ -138,7 +138,7 @@ describe('Login Component - Authentication Tests', () => {
       // Act - Render and attempt login
       render(<Login isOpen={true} onClose={mockOnClose} />);
 
-      fireEvent.change(screen.getByLabelText(/username/i), {
+      fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), {
         target: { value: invalidUsername },
       });
       fireEvent.change(screen.getByLabelText(/password/i), {
@@ -169,7 +169,7 @@ describe('Login Component - Authentication Tests', () => {
       // Act
       render(<Login isOpen={true} onClose={mockOnClose} />);
       
-      fireEvent.change(screen.getByLabelText(/username/i), {
+      fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), {
         target: { value: 'nonexistent' },
       });
       fireEvent.change(screen.getByLabelText(/password/i), {
@@ -206,7 +206,7 @@ describe('Login Component - Authentication Tests', () => {
       // Act
       render(<Login isOpen={true} onClose={mockOnClose} />);
 
-      fireEvent.change(screen.getByLabelText(/username/i), {
+      fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), {
         target: { value: correctUsername },
       });
       fireEvent.change(screen.getByLabelText(/password/i), {
@@ -238,7 +238,7 @@ describe('Login Component - Authentication Tests', () => {
       // Act
       render(<Login isOpen={true} onClose={mockOnClose} />);
       
-      fireEvent.change(screen.getByLabelText(/username/i), {
+      fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), {
         target: { value: 'existinguser' },
       });
       fireEvent.change(screen.getByLabelText(/password/i), {
@@ -274,7 +274,7 @@ describe('Login Component - Authentication Tests', () => {
       // Act
       render(<Login isOpen={true} onClose={mockOnClose} />);
 
-      fireEvent.change(screen.getByLabelText(/username/i), {
+      fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), {
         target: { value: wrongUsername },
       });
       fireEvent.change(screen.getByLabelText(/password/i), {
@@ -305,7 +305,7 @@ describe('Login Component - Authentication Tests', () => {
       // Act
       render(<Login isOpen={true} onClose={mockOnClose} />);
       
-      fireEvent.change(screen.getByLabelText(/username/i), {
+      fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), {
         target: { value: 'ghost_user' },
       });
       fireEvent.change(screen.getByLabelText(/password/i), {
@@ -339,7 +339,7 @@ describe('Login Component - Authentication Tests', () => {
       const form = screen.getByRole('button', { name: /submit/i }).closest('form');
       
       // Assert - HTML5 validation should prevent submission
-      expect(screen.getByLabelText(/username/i)).toBeRequired();
+  expect(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username')).toBeRequired();
     });
 
     it('should prevent login when password field is empty', async () => {
@@ -347,7 +347,7 @@ describe('Login Component - Authentication Tests', () => {
       render(<Login isOpen={true} onClose={mockOnClose} />);
 
       // Act
-      fireEvent.change(screen.getByLabelText(/username/i), {
+      fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), {
         target: { value: 'testuser' },
       });
 
@@ -364,7 +364,7 @@ describe('Login Component - Authentication Tests', () => {
       // Act
       render(<Login isOpen={true} onClose={mockOnClose} />);
       
-      fireEvent.change(screen.getByLabelText(/username/i), {
+      fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), {
         target: { value: 'testuser' },
       });
       fireEvent.change(screen.getByLabelText(/password/i), {
@@ -403,8 +403,8 @@ describe('Login Component - Authentication Tests', () => {
 
       // Assert
       expect(screen.getByText(/Second Space Login/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+  expect(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username')).toBeInTheDocument();
+  expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument();
     });
 
@@ -413,8 +413,8 @@ describe('Login Component - Authentication Tests', () => {
       render(<Login isOpen={true} onClose={mockOnClose} />);
 
       // Assert
-      const usernameInput = screen.getByLabelText(/username/i);
-      const passwordInput = screen.getByLabelText(/password/i);
+  const usernameInput = screen.getByLabelText((content) => content.trim().toLowerCase() === 'username');
+  const passwordInput = screen.getByLabelText(/password/i);
 
       expect(usernameInput).toHaveAttribute('type', 'text');
       expect(passwordInput).toHaveAttribute('type', 'password');
