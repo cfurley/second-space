@@ -41,15 +41,15 @@ describe('Login - Remember username feature', () => {
 
     render(<Login isOpen={true} onClose={mockOnClose} />);
 
-  expect(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username')).toHaveValue('rememberedUser');
-  expect(screen.getByLabelText(/remember username/i)).toBeChecked();
+    expect(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username')).toHaveValue('rememberedUser');
+    expect(screen.getByLabelText(/remember username/i)).toBeChecked();
   });
 
   it('saves username to localStorage on successful login when checked', async () => {
     (api.login as any).mockResolvedValueOnce({ id: '1', username: 'saved', display_name: 'Saved' });
 
     render(<Login isOpen={true} onClose={mockOnClose} />);
-  fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), { target: { value: 'saved' } });
+    fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), { target: { value: 'saved' } });
     fireEvent.click(screen.getByLabelText(/remember username/i));
     fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'Pass123!' } });
     fireEvent.click(screen.getByRole('button', { name: /submit/i }));
@@ -68,7 +68,7 @@ describe('Login - Remember username feature', () => {
     (api.login as any).mockResolvedValueOnce({ id: '1', username: 'nope' });
 
     render(<Login isOpen={true} onClose={mockOnClose} />);
-  fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), { target: { value: 'nope' } });
+    fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), { target: { value: 'nope' } });
     // verify remember is unchecked by default
     expect(screen.getByLabelText(/remember username/i)).not.toBeChecked();
     fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'Pass123!' } });
@@ -88,8 +88,8 @@ describe('Login - Remember username feature', () => {
     render(<Login isOpen={true} onClose={mockOnClose} />);
 
     // initial state prefilled
-  expect(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username')).toHaveValue('oldUser');
-  expect(screen.getByLabelText(/remember username/i)).toBeChecked();
+    expect(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username')).toHaveValue('oldUser');
+    expect(screen.getByLabelText(/remember username/i)).toBeChecked();
 
     // user unchecks remember and logs in
     fireEvent.click(screen.getByLabelText(/remember username/i));
@@ -107,7 +107,7 @@ describe('Login - Remember username feature', () => {
     (api.login as any).mockRejectedValueOnce(new Error('Invalid'));
 
     render(<Login isOpen={true} onClose={mockOnClose} />);
-  fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), { target: { value: 'willFail' } });
+    fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), { target: { value: 'willFail' } });
     fireEvent.click(screen.getByLabelText(/remember username/i));
     fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'bad' } });
     fireEvent.click(screen.getByRole('button', { name: /submit/i }));
