@@ -2,7 +2,7 @@ import userControllers from "../../controllers/userControllers";
 import userServices from "../userServices";
 
 // Mock the pool used by userServices (imported from ../../db/index.js)
-import { vi } from "vitest";
+import { describe, test, expect, vi } from "vitest";
 
 vi.mock("../../db/index.js", () => ({
   default: {
