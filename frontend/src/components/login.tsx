@@ -14,7 +14,7 @@ import { api } from "../utils/api";
 
 interface LoginProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose: (authenticated?: boolean) => void;
 }
 
 export default function Login({ isOpen, onClose }: LoginProps) {
@@ -132,7 +132,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
         // Ignore storage errors
       }
       // TODO: Store user data in state/context for app use
-      onClose();
+      onClose(true); // Pass true to indicate successful authentication
     } catch (error) {
       console.error("Login error:", error);
       alert("Login failed. Please check your credentials and try again.");
@@ -143,7 +143,6 @@ export default function Login({ isOpen, onClose }: LoginProps) {
   return ReactDOM.createPortal(
     <div 
       className="fixed inset-0 z-[9999] flex items-center justify-center p-6"
-      onClick={onClose}
     >
       {/* Enhanced Backdrop with glass effect */}
       <div 
@@ -155,12 +154,12 @@ export default function Login({ isOpen, onClose }: LoginProps) {
         aria-hidden
       />
 
-      {/* Modal with more rounded corners (32px), narrower and taller */}
+      {/* Modal with enhanced liquid glass effect */}
       <div
         onClick={(e) => e.stopPropagation()}
         className="relative z-[10001] w-full"
         style={{
-          maxWidth: '420px',
+          maxWidth: '480px',
           minHeight: '500px',
           padding: '48px 40px',
           borderRadius: '32px',
@@ -350,7 +349,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                   alert(
                     `Account created successfully! Welcome, ${data.username}!`
                   );
-                  onClose();
+                  onClose(true); // Pass true to indicate successful authentication
                 } catch (error) {
                   console.error("Signup error:", error);
                   alert(
@@ -360,7 +359,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
               }}
               style={{
                 display: "block",
-                width: "min(900px, 88vw)",
+                width: "100%",
                 margin: "0 auto",
               }}
             >
@@ -756,6 +755,13 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 )}
               </div>
 
+              {/* Debug: Show validation states */}
+              <div style={{ marginBottom: 12, fontSize: 10, color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>
+                firstName={String(firstNameValid)} | lastName={String(lastNameValid)} | 
+                username={String(usernameValid)} | password={String(passwordValid)} | 
+                confirm={String(confirmValid)} | verified={String(verified)}
+              </div>
+
               <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
                 <button
                   type="button"
@@ -790,6 +796,16 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                     background: "#2563eb",
                     border: "none",
                     color: "white",
+                    cursor: !(
+                      usernameValid &&
+                      passwordValid &&
+                      firstNameValid &&
+                      lastNameValid &&
+                      confirmValid &&
+                      verified
+                    )
+                      ? "not-allowed"
+                      : "pointer",
                     opacity: !(
                       usernameValid &&
                       passwordValid &&
@@ -800,6 +816,17 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                     )
                       ? 0.6
                       : 1,
+                    pointerEvents: "auto",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!e.currentTarget.disabled) {
+                      e.currentTarget.style.background = "#1d4ed8";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!e.currentTarget.disabled) {
+                      e.currentTarget.style.background = "#2563eb";
+                    }
                   }}
                 >
                   Create Account

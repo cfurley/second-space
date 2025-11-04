@@ -107,22 +107,22 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDi
 
   return (
     <div className="relative">
-      {/* Button that toggles between New Space and Close */}
+      {/* Button that toggles between + and Close */}
       {!open ? (
-        <div 
+        <button 
           onClick={() => handleOpenChange(true)}
-          className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-white/10 text-white cursor-pointer hover:bg-white/15 transition-all"
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-white/20 text-white/70 hover:text-white hover:bg-white/5 transition-all"
+          aria-label="Create new space"
         >
-          <span className="text-lg">+</span>
-          <span className="text-sm">New Space</span>
-        </div>
+          <span className="text-xl font-light">+</span>
+        </button>
       ) : (
         <button
           onClick={() => handleOpenChange(false)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/15 transition-all"
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-white/20 text-white/70 hover:text-white hover:bg-white/5 transition-all"
+          aria-label="Close dialog"
         >
-          <span className="text-lg">✕</span>
-          <span className="text-sm">Close</span>
+          <span className="text-xl font-light">✕</span>
         </button>
       )}
 

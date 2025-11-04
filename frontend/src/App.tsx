@@ -99,7 +99,7 @@ export default function App() {
           
           <button
             onClick={() => setShowLoginModal(true)}
-            className="rounded-2xl transition-all duration-300"
+            className="rounded-full transition-all duration-300"
             style={{
               padding: '18px 60px',
               backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -128,9 +128,11 @@ export default function App() {
         
         <Login 
           isOpen={showLoginModal} 
-          onClose={() => {
+          onClose={(authenticated = false) => {
             setShowLoginModal(false);
-            setIsAuthenticated(true);
+            if (authenticated) {
+              setIsAuthenticated(true);
+            }
           }} 
         />
       </div>
@@ -138,26 +140,20 @@ export default function App() {
   }
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
       <FloatingMenu onAddAdvertisement={() => alert('test')} />
-      <div className="h-screen bg-[radial-gradient(circle_at_top,_#ffffff_0%_,_#e5e7eb_100%)
+      <div className="h-screen w-screen bg-[radial-gradient(circle_at_top,_#ffffff_0%_,_#e5e7eb_100%)
         dark:bg-[radial-gradient(circle_at_bottom,_#0a0a0a_0%,_#1a1a1a_100%)]
         transition-colors duration-500">
-        <div className="max-w-[1600px] mx-auto bg-white rounded-xl shadow-2xl overflow-hidden h-full">
-          <div className="h-full bg-black text-foreground">
-            <Header activeNav={activeNav} onNavChange={setActiveNav} />
-            <div className="flex h-[calc(100vh-76px)]">
-              <Sidebar activeSpace={activeSpace} onSpaceChange={setActiveSpace} />
-              <ContentArea
-                activeSpace={activeSpace}
-                activeFilter={activeFilter}
-                onFilterChange={setActiveFilter}
-              />
-            </div>
-            <div className="bg-background text-foreground">
-              <Board />
-            </div>
-            <BottomMenuBar />
+        <div className="w-full h-full bg-black text-foreground">
+          <Header activeNav={activeNav} onNavChange={setActiveNav} />
+          <div className="flex h-[calc(100vh-140px)]">
+            <Sidebar activeSpace={activeSpace} onSpaceChange={setActiveSpace} />
+            <ContentArea
+              activeSpace={activeSpace}
+              activeFilter={activeFilter}
+              onFilterChange={setActiveFilter}
+            />
           </div>
         </div>
         <div className="absolute bottom-0 left-0 w-full h-[300px] bg-gradient-to-t from-pink-500/20 via-purple-500/10 to-transparent blur-3xl animate-pulse pointer-events-none" />
