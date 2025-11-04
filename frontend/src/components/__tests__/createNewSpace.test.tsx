@@ -34,24 +34,25 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
    */
   describe('UI Rendering and Initial State', () => {
     /**
-     * Test Case 1.1: Component renders with "New Space" button
-     * Expected: The "New Space" button should be visible
+     * Test Case 1.1: Component renders with "+" button
+     * Expected: The "+" button should be visible
      */
     it('should render the "New Space" button initially', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      const newSpaceButton = screen.getByText('New Space');
+      const newSpaceButton = screen.getByLabelText('Create new space');
       expect(newSpaceButton).toBeInTheDocument();
+      expect(newSpaceButton).toHaveTextContent('+');
     });
 
     /**
-     * Test Case 1.2: Dialog opens when "New Space" button is clicked
+     * Test Case 1.2: Dialog opens when "+" button is clicked
      * Expected: The form should appear with all fields
      */
     it('should open the dialog when "New Space" button is clicked', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      const newSpaceButton = screen.getByText('New Space');
+      const newSpaceButton = screen.getByLabelText('Create new space');
       fireEvent.click(newSpaceButton);
       
       expect(screen.getByText('Create a space to organize your content')).toBeInTheDocument();
@@ -61,41 +62,31 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     });
 
     /**
-     * Test Case 1.3: Dialog shows "Close" button when open
-     * Expected: The "Close" button should replace "New Space" button
+     * Test Case 1.3: Dialog shows "✕" button when open
+     * Expected: The "✕" button should replace "+" button
      */
     it('should show "Close" button when dialog is open', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      // Find the clickable div that says "New Space"
-      const newSpaceButton = screen.getByText((content, element) => {
-        return element?.textContent === '+New Space' && 
-               element?.classList.contains('cursor-pointer');
-      });
-      
+      const newSpaceButton = screen.getByLabelText('Create new space');
       fireEvent.click(newSpaceButton);
       
-      expect(screen.getByText('Close')).toBeInTheDocument();
-      // Check that the "New Space" clickable button is gone (but title remains)
-      const clickableNewSpace = screen.queryByText((content, element) => {
-        return element?.textContent === '+New Space' && 
-               element?.classList.contains('cursor-pointer');
-      });
-      expect(clickableNewSpace).not.toBeInTheDocument();
+      expect(screen.getByLabelText('Close dialog')).toBeInTheDocument();
+      expect(screen.queryByLabelText('Create new space')).not.toBeInTheDocument();
     });
 
     /**
-     * Test Case 1.4: Dialog closes when "Close" button is clicked
-     * Expected: The dialog should close and show "New Space" button again
+     * Test Case 1.4: Dialog closes when "✕" button is clicked
+     * Expected: The dialog should close and show "+" button again
      */
     it('should close the dialog when "Close" button is clicked', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
-      fireEvent.click(screen.getByText('Close'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
+      fireEvent.click(screen.getByLabelText('Close dialog'));
       
       expect(screen.queryByText('Create a space to organize your content')).not.toBeInTheDocument();
-      expect(screen.getByText('New Space')).toBeInTheDocument();
+      expect(screen.getByLabelText('Create new space')).toBeInTheDocument();
     });
 
     /**
@@ -105,7 +96,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should close the dialog when backdrop is clicked', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const backdrop = document.querySelector('.fixed.inset-0.bg-black\\/30');
       expect(backdrop).toBeInTheDocument();
@@ -122,7 +113,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should close the dialog when Cancel button is clicked', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       fireEvent.click(screen.getByText('Cancel'));
       
       expect(screen.queryByText('Create a space to organize your content')).not.toBeInTheDocument();
@@ -141,7 +132,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should show alert when space name is empty', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       const form = nameInput.closest('form')!;
@@ -162,7 +153,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should show alert when space name contains only whitespace', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       fireEvent.change(nameInput, { target: { value: '   ' } });
@@ -181,7 +172,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should accept valid space name with minimum length (3 characters)', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       fireEvent.change(nameInput, { target: { value: 'ABC' } });
@@ -203,7 +194,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should accept valid space name with maximum length (50 characters)', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const longName = 'A'.repeat(50);
       const nameInput = screen.getByLabelText(/Name/i);
@@ -226,7 +217,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should trim leading and trailing whitespace from space name', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       fireEvent.change(nameInput, { target: { value: '  My Space  ' } });
@@ -248,7 +239,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should accept space name with allowed special characters', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       fireEvent.change(nameInput, { target: { value: 'My-Space_123' } });
@@ -275,7 +266,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should use default icon (📁) when icon field is empty', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       fireEvent.change(nameInput, { target: { value: 'My Space' } });
@@ -297,7 +288,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should accept custom icon when provided', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       const iconInput = screen.getByLabelText(/Icon/i);
@@ -322,7 +313,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should trim whitespace from icon', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       const iconInput = screen.getByLabelText(/Icon/i);
@@ -347,7 +338,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should have maxLength of 2 for icon field', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const iconInput = screen.getByLabelText(/Icon/i) as HTMLInputElement;
       expect(iconInput).toHaveAttribute('maxLength', '2');
@@ -365,7 +356,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should accept empty description', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       fireEvent.change(nameInput, { target: { value: 'My Space' } });
@@ -387,7 +378,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should accept custom description when provided', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       const descriptionInput = screen.getByLabelText(/Description/i);
@@ -414,7 +405,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should trim leading and trailing whitespace from description', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       const descriptionInput = screen.getByLabelText(/Description/i);
@@ -441,7 +432,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should accept description with maximum length (200 characters)', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const longDescription = 'A'.repeat(200);
       const nameInput = screen.getByLabelText(/Name/i);
@@ -472,7 +463,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should call onCreateSpace with correct data on successful submission', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       const iconInput = screen.getByLabelText(/Icon/i);
@@ -501,7 +492,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should reset form fields after successful submission', async () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i) as HTMLInputElement;
       const iconInput = screen.getByLabelText(/Icon/i) as HTMLInputElement;
@@ -520,7 +511,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
       });
       
       // Reopen the dialog
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       // Wait for dialog to open and then check values
       await waitFor(() => {
@@ -541,7 +532,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should close dialog after successful submission', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       fireEvent.change(nameInput, { target: { value: 'My Space' } });
@@ -550,7 +541,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
       fireEvent.click(createButton);
       
       expect(screen.queryByText('Create a space to organize your content')).not.toBeInTheDocument();
-      expect(screen.getByText('New Space')).toBeInTheDocument();
+      expect(screen.getByLabelText('Create new space')).toBeInTheDocument();
     });
 
     /**
@@ -566,11 +557,11 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
       );
       
       // Open dialog
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       expect(mockOnOpenChange).toHaveBeenCalledWith(true);
       
       // Close dialog
-      fireEvent.click(screen.getByText('Close'));
+      fireEvent.click(screen.getByLabelText('Close dialog'));
       expect(mockOnOpenChange).toHaveBeenCalledWith(false);
     });
   });
@@ -588,7 +579,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
       
       render(<CreateSpaceDialog onCreateSpace={asyncMock} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       fireEvent.change(nameInput, { target: { value: 'Async Space' } });
@@ -616,7 +607,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
       
       render(<CreateSpaceDialog onCreateSpace={asyncMock} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       fireEvent.change(nameInput, { target: { value: 'Async Space' } });
@@ -640,7 +631,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should handle multiple rapid submit clicks', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       fireEvent.change(nameInput, { target: { value: 'Test Space' } });
@@ -661,7 +652,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should submit form when Enter key is pressed in input field', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       fireEvent.change(nameInput, { target: { value: 'Enter Key Test' } });
@@ -682,7 +673,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should handle special characters in all fields', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i);
       const iconInput = screen.getByLabelText(/Icon/i);
@@ -711,7 +702,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should treat empty string and whitespace the same', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       // Test with empty icon
       const nameInput = screen.getByLabelText(/Name/i);
@@ -742,7 +733,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should have proper labels for all form fields', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       expect(screen.getByLabelText(/Name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/Icon/i)).toBeInTheDocument();
@@ -756,7 +747,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
     it('should mark Name field as required', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       const nameInput = screen.getByLabelText(/Name/i) as HTMLInputElement;
       expect(nameInput).toHaveAttribute('required');
@@ -764,16 +755,16 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
 
     /**
      * Test Case 8.3: Buttons have proper text
-     * Expected: All buttons should have descriptive text
+     * Expected: All buttons should have descriptive text or aria-labels
      */
     it('should have descriptive button text', () => {
       render(<CreateSpaceDialog onCreateSpace={mockOnCreateSpace} />);
       
-      fireEvent.click(screen.getByText('New Space'));
+      fireEvent.click(screen.getByLabelText('Create new space'));
       
       expect(screen.getByText('Create')).toBeInTheDocument();
       expect(screen.getByText('Cancel')).toBeInTheDocument();
-      expect(screen.getByText('Close')).toBeInTheDocument();
+      expect(screen.getByLabelText('Close dialog')).toBeInTheDocument();
     });
   });
 });

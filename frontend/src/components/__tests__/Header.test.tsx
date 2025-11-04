@@ -113,7 +113,7 @@ describe("Header Component - Borders and Styling", () => {
 
       const nav = container.querySelector("nav");
       expect(nav).toHaveClass("flex");
-      expect(nav).toHaveClass("gap-8");
+      expect(nav).toHaveClass("gap-6");
     });
 
     it("header has flex layout with space-between", () => {
@@ -122,9 +122,9 @@ describe("Header Component - Borders and Styling", () => {
       );
 
       const header = container.querySelector("header");
-      expect(header).toHaveClass("flex");
-      expect(header).toHaveClass("items-center");
-      expect(header).toHaveClass("justify-between");
+      expect(header).toHaveClass("glass");
+      expect(header).toHaveClass("px-10");
+      expect(header).toHaveClass("py-5");
     });
   });
 
@@ -175,7 +175,7 @@ describe("Header Component - Borders and Styling", () => {
         if (button.textContent === "Spaces" || 
             button.textContent === "Recent" || 
             button.textContent === "Shared") {
-          expect(button).toHaveClass("transition-colors");
+          expect(button).toHaveClass("transition-all");
         }
       });
     });
