@@ -14,10 +14,10 @@ export function FilterBar({ activeFilter, onFilterChange }: FilterBarProps) {
         <button
           key={filter}
           onClick={() => onFilterChange(filter)}
-          className={`px-4 py-2 rounded-full text-sm transition-all ${
+          className={`px-6 py-2.5 rounded-full text-sm font-normal transition-all ${
             activeFilter === filter
-              ? 'bg-gray-800 text-white border border-transparent'
-              : 'bg-white/8 text-white border border-white/30 hover:bg-white/15'
+              ? 'bg-white/90 text-black'
+              : 'bg-transparent text-white/60 border border-white/20 hover:bg-white/5 hover:text-white/80'
           }`}
         >
           {filter}

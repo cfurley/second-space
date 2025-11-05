@@ -13,26 +13,32 @@ export function Header({ activeNav, onNavChange }: HeaderProps) {
   const isLoggedIn = false; // Change to true to test logged-in state
 
   return (
-    <header className="glass px-10 py-5 flex items-center justify-between">
-      <div className="text-white text-xl font-bold">Second Space</div>
+    <header className="glass px-10 py-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="text-white text-xl font-bold tracking-tight">Second Space</div>
+        <div className="flex items-center gap-4">
+          <UserMenu isLoggedIn={isLoggedIn} userName="Andrew Truong" userInitials="AT" />
+        </div>
+      </div>
       
-      <nav className="flex gap-8">
+      <nav className="flex gap-6">
         {navItems.map((item) => (
           <button
             key={item}
             onClick={() => onNavChange(item)}
-            className={`text-sm transition-colors ${
-              activeNav === item ? 'text-white' : 'text-white/50 hover:text-white/75'
+            className={`px-0 py-1 text-sm font-normal transition-all relative ${
+              activeNav === item 
+                ? 'text-white' 
+                : 'text-white/50 hover:text-white/75'
             }`}
           >
             {item}
+            {activeNav === item && (
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white rounded-full" />
+            )}
           </button>
         ))}
       </nav>
-
-      <div className="flex items-center gap-4">
-        <UserMenu isLoggedIn={isLoggedIn} userName="Andrew Truong" userInitials="AT" />
-      </div>
     </header>
   );
 }

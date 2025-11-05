@@ -45,6 +45,12 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
     { icon: '📚', name: 'Learning' },
   ];
 
+  // Helper function to get icon component
+  const getSpaceIcon = (iconName: string) => {
+    // For now, keep emojis but you can replace with SVG icons later
+    return <span className="text-base">{iconName}</span>;
+  };
+
   // Filter spaces based on search value
   const filterSpaces = (spaces: SidebarItem[]) => {
     if (!searchValue.trim()) return spaces;
@@ -57,41 +63,44 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
   const filteredAllSpaces = filterSpaces(allSpaces);
 
   return (
-    <div className="glass w-[280px] border-r border-white/10 py-8 text-foreground flex flex-col h-full">
-      <div className="mb-8 px-8">
-        <div className="flex items-center gap-2">
-          {/* Search Bar - Hidden when dialog is open, collapses when not focused */}
-          {!dialogOpen && (
-            <div 
-              className={`transition-all duration-300 ${
-                searchExpanded ? 'flex-1' : 'w-auto'
-              }`}
+    <div className="glass w-[280px] border-r border-white/10 py-6 text-foreground flex flex-col h-full">
+      {/* Search and Add Space Controls */}
+      <div className="mb-6 px-6">
+        {/* Search Button */}
+        {searchExpanded ? (
+          <input
+            type="text"
+            autoFocus
+            placeholder="Search spaces..."
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            onBlur={() => {
+              if (!searchValue) setSearchExpanded(false);
+            }}
+            className="w-full bg-white/5 border border-white/10 rounded-full px-4 py-2 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-white/20 transition-all"
+          />
+        ) : (
+          <div className="flex items-center justify-center gap-16">
+            <button
+              onClick={() => setSearchExpanded(true)}
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-white/20 text-white/70 hover:text-white hover:bg-white/5 transition-all"
+              aria-label="Search spaces"
             >
-              {searchExpanded ? (
-                <input
-                  type="text"
-                  autoFocus
-                  placeholder="Search spaces..."
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  onBlur={() => {
-                    if (!searchValue) setSearchExpanded(false);
-                  }}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-white/20 transition-all"
-                />
-              ) : (
-                <button
-                  onClick={() => setSearchExpanded(true)}
-                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/15 transition-all"
-                >
-                  <span className="text-lg">🔍</span>
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Add Space / Close Button - Always in the same position */}
-          {!searchExpanded && (
+              <svg 
+                width="18" 
+                height="18" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+            </button>
+            
             <CreateSpaceDialog
               onCreateSpace={(spaceData) => {
                 console.log('New space data:', spaceData);
@@ -99,46 +108,48 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
               }}
               onOpenChange={(open) => {
                 setDialogOpen(open);
-                if (open) setSearchExpanded(false); // Collapse search when dialog opens
+                if (open) setSearchExpanded(false);
               }}
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      <div className="mb-8 px-8">
-        <div className="text-white/50 text-xs uppercase tracking-wider mb-4">Pinned Spaces</div>
-        {pinnedSpaces.map((space) => (
-          <div
+      {/* Pinned Spaces */}
+      <div className="mb-6 px-4">
+        <div className="text-white/40 text-[10px] uppercase tracking-widest mb-3 px-2 font-semibold">Pinned Spaces</div>
+        {filteredPinnedSpaces.map((space) => (
+          <button
             key={space.name}
             onClick={() => onSpaceChange(space.name)}
-            className={`flex items-center gap-3 px-4 py-2.5 mb-2 rounded-lg cursor-pointer transition-all duration-500 ease-out ${
+            className={`w-full flex items-center gap-3 px-3 py-2.5 mb-1 rounded-lg cursor-pointer transition-all duration-200 ${
               activeSpace === space.name
-                ? 'bg-white/15 dark:bg-white/10 text-foreground shadow-[0_0_12px_rgba(255,255,255,0.15)]'
-                : 'text-foreground/60 hover:bg-white/5 dark:hover:bg-white/5 hover:text-foreground hover:shadow-[0_0_12px_rgba(255,255,255,0.15)] hover:-translate-y-[1px]'
+                ? 'bg-white/10 text-white'
+                : 'text-white/60 hover:bg-white/5 hover:text-white/80'
             }`}
           >
-            <span className="text-lg">{space.icon}</span>
-            <span className="text-sm">{space.name}</span>
-          </div>
+            {getSpaceIcon(space.icon)}
+            <span className="text-sm font-normal">{space.name}</span>
+          </button>
         ))}
       </div>
 
-      <div className="mb-8 px-8">
-        <div className="text-foreground/60 text-xs uppercase tracking-wider mb-4">All Spaces</div>
-        {allSpaces.map((space) => (
-          <div
+      {/* All Spaces */}
+      <div className="mb-6 px-4">
+        <div className="text-white/40 text-[10px] uppercase tracking-widest mb-3 px-2 font-semibold">All Spaces</div>
+        {filteredAllSpaces.map((space) => (
+          <button
             key={space.name}
             onClick={() => onSpaceChange(space.name)}
-            className={`flex items-center gap-3 px-4 py-2.5 mb-2 rounded-lg cursor-pointer transition-all duration-500 ease-out ${
+            className={`w-full flex items-center gap-3 px-3 py-2.5 mb-1 rounded-lg cursor-pointer transition-all duration-200 ${
               activeSpace === space.name
-              ? 'bg-white/15 dark:bg-white/10 text-foreground shadow-[0_0_12px_rgba(255,255,255,0.15)]'
-              : 'text-foreground/60 hover:bg-white/5 dark:hover:bg-white/5 hover:text-foreground hover:shadow-[0_0_12px_rgba(255,255,255,0.15)] hover:-translate-y-[1px]'
+              ? 'bg-white/10 text-white'
+              : 'text-white/60 hover:bg-white/5 hover:text-white/80'
           }`}
         >
-          <span className="text-lg">{space.icon}</span>
-          <span className="text-sm">{space.name}</span>
-        </div>
+          {getSpaceIcon(space.icon)}
+          <span className="text-sm font-normal">{space.name}</span>
+        </button>
       ))}
 
       </div>

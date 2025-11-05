@@ -402,7 +402,7 @@ describe('Login Component - Authentication Tests', () => {
       render(<Login isOpen={true} onClose={mockOnClose} />);
 
       // Assert
-      expect(screen.getByText(/Second Space Login/i)).toBeInTheDocument();
+      expect(screen.getByText(/Second Space/i)).toBeInTheDocument();
   expect(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username')).toBeInTheDocument();
   expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument();

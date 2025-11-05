@@ -14,7 +14,7 @@ import { api } from "../utils/api";
 
 interface LoginProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose: (authenticated?: boolean) => void;
 }
 
 export default function Login({ isOpen, onClose }: LoginProps) {
@@ -132,7 +132,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
         // Ignore storage errors
       }
       // TODO: Store user data in state/context for app use
-      onClose();
+      onClose(true); // Pass true to indicate successful authentication
     } catch (error) {
       console.error("Login error:", error);
       alert("Login failed. Please check your credentials and try again.");
@@ -141,61 +141,43 @@ export default function Login({ isOpen, onClose }: LoginProps) {
 
   // Render modal via portal: full-viewport flex centering
   return ReactDOM.createPortal(
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 9999,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 24,
-      }}
+    <div 
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-6"
     >
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundColor: "rgba(0,0,0,0.85)",
-          zIndex: 10000,
+      {/* Enhanced Backdrop with glass effect */}
+      <div 
+        className="absolute inset-0"
+        style={{ 
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(20px) saturate(150%)',
         }}
+        aria-hidden
       />
 
+      {/* Modal with enhanced liquid glass effect */}
       <div
         onClick={(e) => e.stopPropagation()}
+        className="relative z-[10001] w-full"
         style={{
-          width: "min(1200px, 96vw)",
-          backgroundColor: "#1e3a5f",
-          border: "1px solid rgba(255,255,255,0.08)",
-          borderRadius: 32,
-          padding: 56,
-          color: "white",
-          boxShadow: "0 60px 150px rgba(0,0,0,0.95)",
-          zIndex: 10001,
+          maxWidth: '480px',
+          minHeight: '500px',
+          padding: '48px 40px',
+          borderRadius: '32px',
+          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          border: '1px solid var(--ss-glass-border-active)',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(40px) saturate(180%)',
+          backgroundImage: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%)',
         }}
       >
+        {/* Login Mode */}
         {mode === "login" && (
-          <>
-            <h2
-              style={{
-                fontSize: 32,
-                fontWeight: 700,
-                marginBottom: 24,
-                textAlign: "center",
-              }}
-            >
-              Second Space Login
+          <div>
+            <h2 className="mb-8 text-center" style={{ fontSize: '2.2rem', fontWeight: 700, color: 'white' }}>
+              Second Space
             </h2>
 
-            <form
-              onSubmit={handleSubmit}
-              style={{
-                display: "block",
-                width: "min(900px, 88vw)",
-                margin: "0 auto",
-              }}
-            >
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div style={{ marginBottom: 12 }}>
                 <label
                   htmlFor="modal-username"
@@ -316,19 +298,12 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 </button>
               </div>
             </form>
-          </>
+          </div>
         )}
 
         {mode === "signup" && (
-          <>
-            <h2
-              style={{
-                fontSize: 28,
-                fontWeight: 700,
-                marginBottom: 18,
-                textAlign: "center",
-              }}
-            >
+          <div>
+            <h2 className="mb-8 text-center" style={{ fontSize: '2.2rem', fontWeight: 700, color: 'white' }}>
               Create Account
             </h2>
             <form
@@ -374,7 +349,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                   alert(
                     `Account created successfully! Welcome, ${data.username}!`
                   );
-                  onClose();
+                  onClose(true); // Pass true to indicate successful authentication
                 } catch (error) {
                   console.error("Signup error:", error);
                   alert(
@@ -384,7 +359,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
               }}
               style={{
                 display: "block",
-                width: "min(900px, 88vw)",
+                width: "100%",
                 margin: "0 auto",
               }}
             >
@@ -780,6 +755,13 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 )}
               </div>
 
+              {/* Debug: Show validation states */}
+              <div style={{ marginBottom: 12, fontSize: 10, color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>
+                firstName={String(firstNameValid)} | lastName={String(lastNameValid)} | 
+                username={String(usernameValid)} | password={String(passwordValid)} | 
+                confirm={String(confirmValid)} | verified={String(verified)}
+              </div>
+
               <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
                 <button
                   type="button"
@@ -814,6 +796,16 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                     background: "#2563eb",
                     border: "none",
                     color: "white",
+                    cursor: !(
+                      usernameValid &&
+                      passwordValid &&
+                      firstNameValid &&
+                      lastNameValid &&
+                      confirmValid &&
+                      verified
+                    )
+                      ? "not-allowed"
+                      : "pointer",
                     opacity: !(
                       usernameValid &&
                       passwordValid &&
@@ -824,6 +816,17 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                     )
                       ? 0.6
                       : 1,
+                    pointerEvents: "auto",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!e.currentTarget.disabled) {
+                      e.currentTarget.style.background = "#1d4ed8";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!e.currentTarget.disabled) {
+                      e.currentTarget.style.background = "#2563eb";
+                    }
                   }}
                 >
                   Create Account
@@ -846,7 +849,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 </button>
               </div>
             </form>
-          </>
+          </div>
         )}
 
         {mode === "verify" && (
