@@ -114,11 +114,8 @@ git push origin feature/your-feature-name
 
 ## 🏗️ Project Architecture
 
-<img src='./resources/second_space_architecture.png' width="720">
+<img src='./resources/second_space_architecture.png' width="480">
 
----
-
-## 🛠️ Tech Stack
 
 | Layer            | Technology                                    |
 | ---------------- | --------------------------------------------- |
@@ -133,34 +130,17 @@ git push origin feature/your-feature-name
 
 ## 🧪 Testing
 
-### Prerequisites
-
-Before running tests, ensure you have **Node.js and npm** installed:
-
-- **Node.js** (includes npm) - [Download here](https://nodejs.org/) (LTS version recommended)
-- Verify installation: `node --version` and `npm --version`
-
-Then install dependencies:
-
-```bash
-# Frontend dependencies
-cd frontend
-npm install
-
-# Backend dependencies
-cd backend
-npm install
-```
-
 ### Running Tests
 
 ```bash
 # Run all frontend tests
 cd frontend
+npm install
 npm test
 
 # Run all backend tests
 cd backend
+npm install
 npm test
 
 # Run a specific test file
@@ -176,32 +156,6 @@ Tests are in `__tests__` folders:
 - `backend/src/controllers/__tests__/`
 - `backend/src/services/__tests__/`
 - `backend/src/models/__tests__/`
-
----
-
-## Team Guidelines
-
-### Code Style
-
-- Use TypeScript for frontend code
-- Use ESM imports (`import/export`) in backend
-- Follow existing code patterns
-- Add comments for complex logic
-
-### Git Workflow
-
-- Never commit directly to `main`
-- Always work in feature branches
-- Keep commits small and focused
-- Write descriptive commit messages
-- Wait for PR approval before merging
-
-### Before Submitting PR
-
-- Test locally with `docker-compose up`
-- Run tests: `npm test` in frontend and backend
-- Check for console errors
-- Update documentation if needed
 
 ---
 
