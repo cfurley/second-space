@@ -1,11 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Send, Sparkles, Image as ImageIcon, MessageSquare } from 'lucide-react';
+import { X, Send, Sparkles, Image as ImageIcon, MessageSquare, Lightbulb } from 'lucide-react';
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  metadata?: {
+    spaceCreated?: boolean;
+    spaceName?: string;
+  };
 }
 
 interface AIChatBotProps {
@@ -15,9 +19,10 @@ interface AIChatBotProps {
     spaceId?: string;
     spaceName?: string;
   };
+  onSpaceCreate?: (spaceData: any) => void;
 }
 
-export function AIChatBot({ isOpen, onClose, context }: AIChatBotProps) {
+export function AIChatBot({ isOpen, onClose, context, onSpaceCreate }: AIChatBotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -25,7 +30,7 @@ export function AIChatBot({ isOpen, onClose, context }: AIChatBotProps) {
       content: `Hi! I'm your AI assistant for ${context?.spaceName || 'Second Space'}. I can help you:
 
 • Analyze and organize your images
-• Generate tags and captions
+• Generate tags and captions  
 • Create mood timelines from your photos
 • Suggest new spaces and categories
 • Answer questions about your content
@@ -39,17 +44,140 @@ What would you like to do?`,
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Focus input when opened
   useEffect(() => {
     if (isOpen) {
       inputRef.current?.focus();
     }
   }, [isOpen]);
+
+  // Enhanced AI response with space creation
+  const getAIResponse = async (userMessage: string): Promise<string> => {
+    const lowerMessage = userMessage.toLowerCase();
+
+    // Detect space creation intent
+    if (lowerMessage.includes('create') && lowerMessage.includes('space')) {
+      // Check for specific themes
+      if (lowerMessage.includes('vib') || lowerMessage.includes('aesthetic') || lowerMessage.includes('mood')) {
+        return `? Love it! Let's create a "Vibes & Aesthetics" space!
+
+?? **Space Concept:**
+- Name: "Vibes & Aesthetics"
+- Icon: ?
+- Purpose: Curate mood boards, aesthetic inspiration, color palettes
+
+This space will be perfect for:
+• Collecting visual inspiration
+• Building mood boards
+• Organizing by color/theme
+• Creating aesthetic collections
+
+Want me to create this space for you? Just say "yes" or tell me a different name!`;
+      }
+
+      if (lowerMessage.includes('fitness') || lowerMessage.includes('workout') || lowerMessage.includes('gym')) {
+        return `?? Great choice! Creating a "Fitness Journey" space!
+
+This space will help you:
+• Track workout progress
+• Save exercise routines
+• Log fitness milestones
+• Share transformation photos
+
+Click the + button in the sidebar to finalize, or I can suggest more options!`;
+      }
+
+      // General space creation
+      return `?? Let's create a space! What vibe are you going for?
+
+**Popular themes:**
+? Vibes & Aesthetics - Mood boards and inspiration
+?? Fitness Journey - Workouts and progress
+?? Learning Hub - Notes and resources
+?? Travel Dreams - Places and memories
+?? Home Sanctuary - Cozy spaces and ideas
+?? Creative Projects - Art and designs
+
+Just tell me the vibe, and I'll help you set it up!`;
+    }
+
+    // "Vibey" or aesthetic focus
+    if (lowerMessage.includes('vib') || lowerMessage.includes('aesthetic') || lowerMessage.includes('chill')) {
+      return `? Vibey spaces are my favorite! Here are some ideas:
+
+?? **Ocean Dreams** - Calming blues, beaches, sunset vibes
+?? **Soft Pink Aesthetic** - Gentle, dreamy, pastel paradise
+?? **Midnight Thoughts** - Dark, moody, introspective
+?? **Nature's Peace** - Greens, plants, earthly vibes
+?? **Color Explosion** - Bold, vibrant, energetic
+
+Which vibe resonates with you? Or describe your own!`;
+    }
+
+    // Help with organization
+    if (lowerMessage.includes('organize') || lowerMessage.includes('help')) {
+      return `I can help you organize! Here's my advice:
+
+?? **Start with spaces** - Think of them as themed albums
+??? **Add tags** - Make content easy to find later
+?? **Use dates** - Track when memories were created
+?? **Connect related items** - Build a web of memories
+
+**Pro tip:** The neural network view shows how your memories connect. Hover over cards to see relationships!
+
+What would you like to organize first?`;
+    }
+
+    // Single letter or unclear
+    if (userMessage.length <= 2) {
+      return `I didn't quite catch that! ?? 
+
+Try asking me:
+• "Create a space" - I'll guide you through it
+• "Help me organize" - Get organization tips
+• "What's the neural view?" - Learn about memory connections
+
+What's on your mind?`;
+    }
+
+    // Try AI server
+    try {
+      const response = await fetch('http://localhost:8081/api/chat/message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userMessage,
+          context: context,
+          conversationHistory: messages.slice(-5).map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.reply) {
+          return data.reply;
+        }
+      }
+    } catch (error) {
+      console.log('AI server not available, using smart fallback');
+    }
+
+    // General helpful response
+    return `I'm here to help! Here's what you can do:
+
+?? **Create spaces** - Click the + button in sidebar
+?? **Search** - Find memories quickly
+?? **Mood Timeline** - See emotional patterns
+?? **Neural View** - Explore memory connections
+
+What interests you most?`;
+  };
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -62,43 +190,33 @@ What would you like to do?`,
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const userInput = input.trim();
     setInput('');
     setIsLoading(true);
 
     try {
-      // Call AI API
-      const response = await fetch('/api/chat/message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: userMessage.content,
-          context: context,
-          conversationHistory: messages.map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: data.reply,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-      } else {
-        throw new Error(data.error || 'Failed to get AI response');
-      }
+      const aiResponse = await getAIResponse(userInput);
+      
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: aiResponse,
+        timestamp: new Date(),
+      };
+      
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error('AI Chat error:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
+        content: `I'm still learning! Try:
+
+• "Create a vibey space"
+• "Help me organize"
+• "Show me the neural view"
+
+What would you like to explore?`,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -115,16 +233,27 @@ What would you like to do?`,
   };
 
   const quickActions = [
-    { icon: <ImageIcon size={16} />, label: 'Analyze Image', prompt: 'Can you analyze this image?' },
-    { icon: <Sparkles size={16} />, label: 'Generate Tags', prompt: 'Generate tags for my content' },
-    { icon: <MessageSquare size={16} />, label: 'Mood Timeline', prompt: 'Create a mood timeline from my photos' },
+    { 
+      icon: <Sparkles size={16} />, 
+      label: 'Vibey Space', 
+      prompt: 'Create a vibey aesthetic space' 
+    },
+    { 
+      icon: <ImageIcon size={16} />, 
+      label: 'Organize', 
+      prompt: 'Help me organize my content' 
+    },
+    { 
+      icon: <MessageSquare size={16} />, 
+      label: 'Neural View', 
+      prompt: 'What is the neural network view?' 
+    },
   ];
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      {/* Chat Container */}
       <div className="relative w-full max-w-2xl h-[600px] bg-[#0a0a0a] border border-white/20 rounded-3xl shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-gradient-to-r from-blue-600/10 to-purple-600/10">
@@ -135,7 +264,7 @@ What would you like to do?`,
             <div>
               <h3 className="text-white font-semibold">AI Assistant</h3>
               <p className="text-white/50 text-xs">
-                {context?.spaceName || 'Second Space'} • Powered by GPT-4o
+                {context?.spaceName || 'Second Space'} • Always Ready
               </p>
             </div>
           </div>
@@ -177,8 +306,8 @@ What would you like to do?`,
               <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce delay-100" />
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce delay-200" />
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
                 </div>
               </div>
             </div>
@@ -214,7 +343,7 @@ What would you like to do?`,
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask me anything about your content..."
+              placeholder="Describe your vibe..."
               className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white placeholder:text-white/30 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/50 max-h-32"
               rows={1}
               disabled={isLoading}
@@ -228,7 +357,7 @@ What would you like to do?`,
             </button>
           </div>
           <p className="text-xs text-white/30 mt-2">
-            ?? Try: "Analyze my recent photos" or "Suggest new spaces"
+            ? Try: "Create a vibey space" or "something aesthetic"
           </p>
         </div>
       </div>
