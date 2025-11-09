@@ -6,19 +6,18 @@ import spaceRouter from "./src/routes/spacesRoutes.js";
 // import mediaRouter from "./src/routes/mediaRoutes.js";
 import userRouter from "./src/routes/userRoutes.js";
 
-
-
 /**************************** Create Server **********************************/
 const app = express();
 const PORT = process.env.PORT || 8080;
 const HOST = "0.0.0.0";
 
 
-/************************ Cors Configuration ********************************/
+
+/************************* Cors Configuration ********************************/
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(',')
   : [
-      'http://localhost:5173',      // Vite dev server
+      'http://localhost:5173',       // Vite dev server
       'http://localhost:80',         // Docker frontend with port
       'http://localhost',            // Docker frontend without port
       'https://cfurley.github.io',   // GitHub Pages
@@ -44,15 +43,17 @@ app.use(cors({
 
 
 /************************** Setup Middleware *******************************/
+// Set up JSON parsing middleware
 app.use(express.json());
-
 // Request logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
 
-/****** SETUP ROUTERS HERE ******/
+
+
+/************************** Setup Routers *******************************/
 app.use("/spaces", spaceRouter);
 // app.use("/media", mediaRouter);
 app.use("/user", userRouter);
@@ -72,12 +73,13 @@ app.get("/", (req, res) => {
   });
 });
 
+
+/************************** Setup Error Handlers *******************************/
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
-
-// Error handler
+// Error handler 
 app.use((err, req, res, next) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({
@@ -86,7 +88,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start the server and listen for connections
+
+
+/************************** Start the Server *******************************/
 app.listen(PORT, HOST, () => {
   console.log(`🚀 Server is running on http://${HOST}:${PORT}`);
   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
