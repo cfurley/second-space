@@ -7,10 +7,13 @@
 
 // Determine the API base URL based on environment
 const API_BASE_URL = (import.meta as any).env.PROD 
-  ? (import.meta as any).env.VITE_API_URL || 'https://second-space-api.onrender.com'  // Production (update this URL after deploying to Render)
-  : 'http://localhost:8080';  // Local development with Docker
+  ? (import.meta as any).env.VITE_API_URL || 'https://second-space-api.onrender.com'  // Production
+  : window.location.hostname === 'localhost' && window.location.port === '80'
+    ? 'http://backend:8080'  // Docker container to container
+    : 'http://localhost:8080';  // Local development
 
 console.log('API Base URL:', API_BASE_URL);
+console.log('Window location:', window.location.href);
 
 /**
  * Generic fetch wrapper with error handling
@@ -23,6 +26,8 @@ async function apiFetch(endpoint: string, options: RequestInit = {}) {
   };
   
   try {
+    console.log(`Fetching: ${url}`);
+    
     const response = await fetch(url, {
       ...options,
       headers: {
@@ -31,16 +36,20 @@ async function apiFetch(endpoint: string, options: RequestInit = {}) {
       },
     });
     
+    console.log(`Response status: ${response.status}`);
+    
     // Handle non-JSON responses
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      console.error('Non-JSON response:', text);
       throw new Error(`Expected JSON response but got ${contentType}`);
     }
     
     const data = await response.json();
     
     if (!response.ok) {
-      throw new Error(data.message || `API Error: ${response.status}`);
+      throw new Error(data.message || data.error || `API Error: ${response.status}`);
     }
     
     return data;

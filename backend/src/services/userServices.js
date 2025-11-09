@@ -1,8 +1,31 @@
 import pool from "../db/index.js";
 import userModel from "../models/userModel.js";
+import bcrypt from "bcrypt";
+
+// Salt rounds for bcrypt (10 is a good balance of security and performance)
+const SALT_ROUNDS = 10;
 
 /**
- * Authenticates user using name and password; Not secure.
+ * Hash a password using bcrypt
+ * @param {string} password - Plain text password
+ * @returns {Promise<string>} Hashed password
+ */
+const hashPassword = async (password) => {
+  return await bcrypt.hash(password, SALT_ROUNDS);
+};
+
+/**
+ * Compare a plain text password with a hashed password
+ * @param {string} password - Plain text password
+ * @param {string} hashedPassword - Hashed password from database
+ * @returns {Promise<boolean>} True if passwords match
+ */
+const comparePassword = async (password, hashedPassword) => {
+  return await bcrypt.compare(password, hashedPassword);
+};
+
+/**
+ * Authenticates user using name and password with bcrypt
  * @param {string} username
  * @param {string} password
  */
@@ -14,10 +37,12 @@ const authenticateLogin = async (username, password) => {
     return { success: false, status: 500, error: "Password is null." };
   }
 
+  // First, get the user with their hashed password
   const selectQuery = `
    SELECT
     id,
     username,
+    password,
     display_name,
     profile_picture_id,
     theme_id,
@@ -30,31 +55,44 @@ const authenticateLogin = async (username, password) => {
     update_date_utc
     FROM "user"
     WHERE deleted = $1 
-    AND username = $2
-    AND password = $3;
+    AND username = $2;
   `;
-  const selectValues = [0, username, password];
+  const selectValues = [0, username];
 
   try {
     const result = await pool.query(selectQuery, selectValues);
+    
     if (result.rows.length === 0) {
-      console.log("Invalid Login");
+      console.log("Invalid Login - User not found");
       return { success: false, status: 404, error: "Invalid Login" };
-    } else {
-      // Updates last_login_date_utc to NOW()
-      const updateQuery = `
+    }
+
+    const user = result.rows[0];
+    
+    // Compare the provided password with the hashed password
+    const passwordMatch = await comparePassword(password, user.password);
+    
+    if (!passwordMatch) {
+      console.log("Invalid Login - Password mismatch");
+      return { success: false, status: 404, error: "Invalid Login" };
+    }
+
+    // Password is correct, update last_login_date_utc
+    const updateQuery = `
       UPDATE "user" SET last_login_date_utc = NOW()
       WHERE id = $1;
-      `;
-      await pool.query(updateQuery, [result.rows[0].id]);
+    `;
+    await pool.query(updateQuery, [user.id]);
 
-      // Return selected user JSON
-      return {
-        success: true,
-        status: 200,
-        data: result.rows[0],
-      };
-    }
+    // Remove password from response
+    delete user.password;
+
+    // Return selected user JSON (without password)
+    return {
+      success: true,
+      status: 200,
+      data: user,
+    };
   } catch (error) {
     console.log(error.stack);
     return { success: false, status: 500, error: "Database Error" };
@@ -62,7 +100,7 @@ const authenticateLogin = async (username, password) => {
 };
 
 /**
- * Updates a user's password
+ * Updates a user's password with hashing
  * @param {int} userId
  * @param {string} password
  */
@@ -74,12 +112,15 @@ const updatePassword = async (userId, password) => {
     return { success: false, status: 500, error: "No password provided" };
   }
 
+  // Hash the new password
+  const hashedPassword = await hashPassword(password);
+
   const query = `
   UPDATE "user" SET password = $1, update_date_utc = NOW()
   WHERE id = $2
   RETURNING id;
   `;
-  const values = [password, userId];
+  const values = [hashedPassword, userId];
 
   try {
     const result = await pool.query(query, values);
@@ -90,28 +131,31 @@ const updatePassword = async (userId, password) => {
       return {
         success: true,
         status: 200,
-        message: `Updated password succesfully`,
+        message: `Updated password successfully`,
       };
     }
   } catch (error) {
     console.log(error.stack);
-    return { success: false, status: 500, erorr: "Database Error" };
+    return { success: false, status: 500, error: "Database Error" };
   }
 };
 
 /**
- * Creates a user from a given user object
+ * Creates a user from a given user object with password hashing
  * @param {userModel} user
  */
 const createUser = async (user) => {
+  // Hash the password before storing
+  const hashedPassword = await hashPassword(user.password);
+
   const query = `INSERT INTO "user" (username, password, display_name, first_name,
   last_name, create_date_utc, last_login_date_utc)
   VALUES($1, $2, $3, $4, $5, NOW(), NOW())
-  RETURNING *;`;
+  RETURNING id, username, display_name, first_name, last_name, create_date_utc;`;
 
   const values = [
     user.username,
-    user.password,
+    hashedPassword,  // Store hashed password
     user.username,
     user.first_name,
     user.last_name,
@@ -122,6 +166,7 @@ const createUser = async (user) => {
     if (result.rows.length === 0) {
       return { success: false, status: 400, error: "User not created" };
     }
+    // Return user data without password
     return { success: true, status: 200, data: result.rows[0] };
   } catch (error) {
     console.error("Database error creating user:", error);
@@ -267,7 +312,7 @@ const validatePassword = async (password) => {
   const pattern = /^[A-Za-z0-9!@#$%^&*()_\-+=\[\]{};:'",.<>/?\\|`~]*$/;
 
   // Check character types
-  hasValidCharacters = pattern.test(password);
+  const hasValidCharacters = pattern.test(password);
   if (!hasValidCharacters) {
     return { success: false, error: "Password contains invalid characters" };
   }
@@ -299,4 +344,6 @@ export default {
   usernameExists,
   validateString,
   validatePassword,
+  hashPassword,      // Export for testing purposes
+  comparePassword,   // Export for testing purposes
 };

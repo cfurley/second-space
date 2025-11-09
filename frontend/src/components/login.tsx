@@ -762,20 +762,44 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 confirm={String(confirmValid)} | verified={String(verified)}
               </div>
 
+              {/* Warning message when form is filled but not verified */}
+              {usernameValid && passwordValid && firstNameValid && lastNameValid && confirmValid && !verified && (
+                <div style={{
+                  marginBottom: 12,
+                  padding: '12px',
+                  backgroundColor: 'rgba(251, 146, 60, 0.1)',
+                  border: '1px solid rgba(251, 146, 60, 0.3)',
+                  borderRadius: 8,
+                  color: '#fb923c',
+                  fontSize: 13,
+                  textAlign: 'center'
+                }}>
+                  ⚠️ Please complete human verification to create account
+                </div>
+              )}
+
               <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
                 <button
                   type="button"
-                  onClick={() => setMode("verify")}
+                  onClick={() => {
+                    if (!verified) {
+                      setMode("verify");
+                    }
+                  }}
                   style={{
                     flex: 1,
                     height: 48,
                     borderRadius: 10,
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    border: verified ? "1px solid #16a34a" : "2px solid #ef4444",
                     color: "white",
                     background: verified ? "#16a34a" : "#dc2626",
+                    cursor: "pointer",
+                    position: "relative",
+                    fontWeight: 600,
+                    animation: !verified ? 'pulse 2s infinite' : 'none'
                   }}
                 >
-                  {verified ? "Verified" : "Verify human"}
+                  {verified ? "✓ Verified" : "⚠️ Verify Human"}
                 </button>
                 <button
                   type="submit"
@@ -793,7 +817,12 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                     flex: 1,
                     height: 48,
                     borderRadius: 10,
-                    background: "#2563eb",
+                    background: (usernameValid &&
+                      passwordValid &&
+                      firstNameValid &&
+                      lastNameValid &&
+                      confirmValid &&
+                      verified) ? "#2563eb" : "#64748b",
                     border: "none",
                     color: "white",
                     cursor: !(
@@ -814,9 +843,9 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                       confirmValid &&
                       verified
                     )
-                      ? 0.6
+                      ? 0.5
                       : 1,
-                    pointerEvents: "auto",
+                    fontWeight: 600,
                   }}
                   onMouseEnter={(e) => {
                     if (!e.currentTarget.disabled) {
@@ -828,6 +857,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                       e.currentTarget.style.background = "#2563eb";
                     }
                   }}
+                  title={!verified ? "Complete human verification first" : ""}
                 >
                   Create Account
                 </button>

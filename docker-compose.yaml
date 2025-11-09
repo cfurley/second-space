@@ -8,13 +8,20 @@ services:
     depends_on:
       - database
     environment:
-      - DB_HOST=database # the service name below..
+      - DB_HOST=database
       - DB_PORT=5432
       - DB_USER=myuser
       - DB_PASSWORD=mypassword
       - DB_NAME=mydatabase
+      - PORT=8080
+      - ALLOWED_ORIGINS=http://localhost:80,http://localhost,http://localhost:5173
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   frontend:
     build:
@@ -24,6 +31,8 @@ services:
       - "80:80"
     depends_on:
       - backend
+    environment:
+      - VITE_API_URL=http://localhost:8080
     networks:
       - app-network
 
@@ -32,9 +41,9 @@ services:
       container_name: second-space-database
       restart: always
       environment:
-        - POSTGRES_USER=myuser          # Should update this to use .env
-        - POSTGRES_PASSWORD=mypassword  # Should update this to use .env
-        - POSTGRES_DB=mydatabase        # Should update this to use .env
+        - POSTGRES_USER=myuser
+        - POSTGRES_PASSWORD=mypassword
+        - POSTGRES_DB=mydatabase
       ports:
         - "5432:5432"
       volumes:
@@ -42,6 +51,11 @@ services:
         - ./database/init:/docker-entrypoint-initdb.d
       networks:
         - app-network
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U myuser -d mydatabase"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
       
 volumes:
   second_space_data:

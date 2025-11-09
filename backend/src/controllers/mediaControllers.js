@@ -1,70 +1,179 @@
-// import mediaService from "../services/mediaServices.js";
-// import mediaModel from "../models/mediaModel.js";
+import mediaService from "../services/mediaServices.js";
+import mediaModel from "../models/mediaModel.js";
 
-// const getAllMedia = async (req, res) => {
-//   let userId;
-//   try {
-//     userId = req.params.id;
-//   } catch (error) {
-//     return res.status(400).json({ message: "No media id provided." });
-//   }
+/**
+ * Get all media for a specific user
+ */
+const getMediaByUser = async (req, res) => {
+  const userId = req.params.userId;
 
-//   const result = await mediaService.getMedia(userId, null);
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required." });
+  }
 
-//   // result contains {
-//   //  success boolean, status int, and data any || error any
-//   // }
-//   if (!result.success) {
-//     return res.status(result.status).json({ message: result.error });
-//   } else {
-//     const spaces = result.data;
-//     return res.status(result.status).json({ spaces });
-//   }
-// };
+  const result = await mediaService.getMediaByUser(userId);
 
-// // Hello
-// const getById = async (req, res) => {
-//   let mediaId;
-//   try {
-//     mediaId = req.params.id;
-//   } catch (error) {
-//     return res.status(400).json({ message: "No media id provided." });
-//   }
+  if (!result.success) {
+    return res.status(result.status).json({ error: result.error });
+  }
 
-//   const result = await spaceService.getMedia(null, mediaId);
-//   if (!result.success) {
-//     return res.status(result.status).json({ message: result.error });
-//   } else {
-//     const media = result.data;
-//     return res.status(result.status).json({ media });
-//   }
-// };
+  return res.status(result.status).json({
+    media: result.data,
+    count: result.data.length,
+  });
+};
 
-// const createMedia = async (req, res) => {
-//   try {
-//     const media = mediaModel.fromJson(req.body);
-//   } catch (error) {
-//     res.status(400).json({ error: "Invalid parameters given." });
-//   }
-//   try {
-//     // i cant make it acknowledge it's a media object in the service
-//     // this is def not good practice
-//     mediaService.insertMediaToDatabase(req.body);
-//   } catch (error) {
-//     return res.status(500).json({
-//       error: "Database Error.",
-//       details: error.message,
-//     });
-//   }
-//   return res.status(200).json({ message: "Media created succesfully" });
-// };
+/**
+ * Get media by specific container ID
+ */
+const getMediaByContainer = async (req, res) => {
+  const containerId = req.params.containerId;
 
-// const updateMedia = async (req, res) => {
-//   return res.status(500).json({ message: "Route not implemented yet" });
-// };
+  if (!containerId) {
+    return res.status(400).json({ error: "Container ID is required." });
+  }
 
-// const deleteMedia = async (req, res) => {
-//   return res.status(500).json({ message: "Route not implemented yet" });
-// };
+  const result = await mediaService.getMediaByContainer(containerId);
 
-// export default { getAllMedia, getById, createMedia, updateMedia, deleteMedia };
+  if (!result.success) {
+    return res.status(result.status).json({ error: result.error });
+  }
+
+  return res.status(result.status).json({
+    media: result.data,
+    count: result.data.length,
+  });
+};
+
+/**
+ * Get media by space ID
+ */
+const getMediaBySpace = async (req, res) => {
+  const spaceId = req.params.spaceId;
+
+  if (!spaceId) {
+    return res.status(400).json({ error: "Space ID is required." });
+  }
+
+  const result = await mediaService.getMediaBySpace(spaceId);
+
+  if (!result.success) {
+    return res.status(result.status).json({ error: result.error });
+  }
+
+  return res.status(result.status).json({
+    media: result.data,
+    count: result.count,
+  });
+};
+
+/**
+ * Get specific media by ID
+ */
+const getById = async (req, res) => {
+  const mediaId = req.params.id;
+
+  if (!mediaId) {
+    return res.status(400).json({ error: "Media ID is required." });
+  }
+
+  const result = await mediaService.getMediaById(mediaId);
+
+  if (!result.success) {
+    return res.status(result.status).json({ error: result.error });
+  }
+
+  return res.status(result.status).json({ media: result.data });
+};
+
+/**
+ * Create new media
+ */
+const createMedia = async (req, res) => {
+  let media;
+
+  try {
+    media = mediaModel.fromJson(req.body);
+  } catch (error) {
+    return res.status(400).json({ error: "Invalid parameters given." });
+  }
+
+  // Validate media object
+  const validation = mediaModel.validate(media);
+  if (!validation.valid) {
+    return res.status(400).json({ error: validation.error });
+  }
+
+  // Insert into database
+  const result = await mediaService.insertMediaToDatabase(media);
+
+  if (!result.success) {
+    return res.status(result.status).json({
+      error: result.error,
+    });
+  }
+
+  return res.status(result.status).json({
+    message: result.message,
+    media: result.data,
+  });
+};
+
+/**
+ * Update existing media
+ */
+const updateMedia = async (req, res) => {
+  const mediaId = req.params.id;
+
+  if (!mediaId) {
+    return res.status(400).json({ error: "Media ID is required." });
+  }
+
+  const updates = req.body;
+
+  if (!updates || Object.keys(updates).length === 0) {
+    return res.status(400).json({ error: "No update data provided." });
+  }
+
+  const result = await mediaService.updateMedia(mediaId, updates);
+
+  if (!result.success) {
+    return res.status(result.status).json({ error: result.error });
+  }
+
+  return res.status(result.status).json({
+    message: result.message,
+    media: result.data,
+  });
+};
+
+/**
+ * Delete media (soft delete)
+ */
+const deleteMedia = async (req, res) => {
+  const mediaId = req.params.id;
+
+  if (!mediaId) {
+    return res.status(400).json({ error: "Media ID is required." });
+  }
+
+  const result = await mediaService.deleteMedia(mediaId);
+
+  if (!result.success) {
+    return res.status(result.status).json({ error: result.error });
+  }
+
+  return res.status(result.status).json({
+    message: result.message,
+  });
+};
+
+export default {
+  getMediaByUser,
+  getMediaByContainer,
+  getMediaBySpace,
+  getById,
+  createMedia,
+  updateMedia,
+  deleteMedia,
+};
