@@ -1,14 +1,20 @@
+
+/******************************* Imports **********************************/
 import express from "express";
 import cors from "cors";
 import spaceRouter from "./src/routes/spacesRoutes.js";
 // import mediaRouter from "./src/routes/mediaRoutes.js";
 import userRouter from "./src/routes/userRoutes.js";
 
+
+
+/**************************** Create Server **********************************/
 const app = express();
 const PORT = process.env.PORT || 8080;
 const HOST = "0.0.0.0";
 
-// CORS Configuration - Allow frontend to communicate with backend
+
+/************************ Cors Configuration ********************************/
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(',')
   : [
@@ -35,7 +41,9 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Middleware for JSON support
+
+
+/************************** Setup Middleware *******************************/
 app.use(express.json());
 
 // Request logging middleware
