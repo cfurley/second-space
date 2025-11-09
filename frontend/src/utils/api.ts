@@ -5,12 +5,30 @@
  * It automatically switches between local development and production URLs.
  */
 
+// Determine if we're running in Docker (port 80) or local dev (port 3000)
+const isDocker = window.location.port === '80' || window.location.port === '';
+const isLocalDev = window.location.port === '3000' || window.location.port === '5173';
+
 // Determine the API base URL based on environment
-const API_BASE_URL = (import.meta as any).env.PROD 
-  ? (import.meta as any).env.VITE_API_URL || 'https://second-space-api.onrender.com'  // Production
-  : window.location.hostname === 'localhost' && window.location.port === '80'
-    ? 'http://backend:8080'  // Docker container to container
-    : 'http://localhost:8080';  // Local development
+let API_BASE_URL: string;
+
+if (isDocker) {
+  // Running in Docker - use nginx proxy
+  API_BASE_URL = '/api';
+  console.log('?? Docker mode: Using nginx proxy at /api');
+} else if (isLocalDev) {
+  // Local development - direct to backend
+  API_BASE_URL = 'http://localhost:8080';
+  console.log('?? Dev mode: Direct to backend at http://localhost:8080');
+} else if ((import.meta as any).env.PROD) {
+  // Production - use environment variable or default
+  API_BASE_URL = (import.meta as any).env.VITE_API_URL || 'https://second-space-api.onrender.com';
+  console.log('?? Production mode:', API_BASE_URL);
+} else {
+  // Fallback
+  API_BASE_URL = 'http://localhost:8080';
+  console.log('?? Fallback mode: http://localhost:8080');
+}
 
 console.log('API Base URL:', API_BASE_URL);
 console.log('Window location:', window.location.href);
@@ -26,7 +44,7 @@ async function apiFetch(endpoint: string, options: RequestInit = {}) {
   };
   
   try {
-    console.log(`Fetching: ${url}`);
+    console.log(`?? Fetching: ${url}`);
     
     const response = await fetch(url, {
       ...options,
@@ -36,25 +54,27 @@ async function apiFetch(endpoint: string, options: RequestInit = {}) {
       },
     });
     
-    console.log(`Response status: ${response.status}`);
+    console.log(`?? Response status: ${response.status} for ${url}`);
     
     // Handle non-JSON responses
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
       const text = await response.text();
-      console.error('Non-JSON response:', text);
+      console.error('? Non-JSON response:', text.substring(0, 200));
       throw new Error(`Expected JSON response but got ${contentType}`);
     }
     
     const data = await response.json();
     
     if (!response.ok) {
+      console.error('? API Error:', data);
       throw new Error(data.message || data.error || `API Error: ${response.status}`);
     }
     
+    console.log('? Success:', url);
     return data;
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('? API Error:', error);
     throw error;
   }
 }
@@ -93,6 +113,8 @@ export const api = {
       last_name: userData.lastName,
       email: userData.email,
     };
+    
+    console.log('?? Creating user:', { username: payload.username, firstName: payload.first_name });
     
     return apiFetch('/user', {
       method: 'POST',
@@ -196,7 +218,6 @@ export const api = {
   },
   
   // ==================== MEDIA ENDPOINTS ====================
-  // (Currently commented out in backend, but ready for when you enable them)
   
   /**
    * Upload media to a space

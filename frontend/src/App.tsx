@@ -7,16 +7,18 @@ import Board from './components/Board';
 import Login from './components/login';
 import { FloatingMenu } from './components/FloatingMenu';
 import AnimatedBackground from './components/AnimatedBackground';
+import { AIChatBot } from './components/AIChatBot';
+import { Sparkles } from 'lucide-react';
 
 export default function App() {
   const [activeNav, setActiveNav] = useState('Spaces');
   const [activeSpace, setActiveSpace] = useState('My Ideas');
   const [activeFilter, setActiveFilter] = useState('Recent');
-  // Simple demo auth: app starts unauthenticated and shows login screen
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showAIChat, setShowAIChat] = useState(false);
 
-  // If not authenticated, show the landing page with "Open Login" button
+  // If not authenticated, show the landing page
   if (!isAuthenticated) {
     return (
       <div 
@@ -30,7 +32,6 @@ export default function App() {
       >
         <AnimatedBackground />
         
-        {/* Landing page content with circular gradient blur exclusion zone */}
         <div className="relative z-10 flex flex-col items-center pointer-events-auto">
           {/* Circular gradient mask - blur only in center, clear edges */}
           <div 
@@ -49,7 +50,6 @@ export default function App() {
               pointerEvents: 'none',
             }}
           >
-            {/* Inner blur layer - only affects center */}
             <div
               style={{
                 position: 'absolute',
@@ -63,7 +63,6 @@ export default function App() {
             />
           </div>
           
-          {/* Blur overlay only in center area */}
           <div
             className="absolute"
             style={{
@@ -142,6 +141,26 @@ export default function App() {
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
       <FloatingMenu onAddAdvertisement={() => alert('test')} />
+      
+      {/* AI Chat Bot Button - Fixed position */}
+      <button
+        onClick={() => setShowAIChat(true)}
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-50 group"
+        title="Open AI Assistant"
+      >
+        <Sparkles size={24} className="text-white group-hover:scale-110 transition-transform" />
+        <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-black animate-pulse" />
+      </button>
+
+      {/* AI Chat Modal */}
+      <AIChatBot
+        isOpen={showAIChat}
+        onClose={() => setShowAIChat(false)}
+        context={{
+          spaceName: activeSpace,
+        }}
+      />
+      
       <div className="h-screen w-screen bg-[radial-gradient(circle_at_top,_#ffffff_0%_,_#e5e7eb_100%)
         dark:bg-[radial-gradient(circle_at_bottom,_#0a0a0a_0%,_#1a1a1a_100%)]
         transition-colors duration-500">
