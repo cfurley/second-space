@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { ContentArea } from './components/ContentArea';
@@ -8,7 +8,7 @@ import Login from './components/login';
 import { FloatingMenu } from './components/FloatingMenu';
 import AnimatedBackground from './components/AnimatedBackground';
 import { AIChatBot } from './components/AIChatBot';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Stars, X } from 'lucide-react';
 
 export default function App() {
   const [activeNav, setActiveNav] = useState('Spaces');
@@ -17,6 +17,68 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
+  const [showNeuralView, setShowNeuralView] = useState(false);
+
+  // Login persistence - check if user was previously logged in
+  useEffect(() => {
+    const checkLoginStatus = () => {
+      try {
+        const authToken = localStorage.getItem('authToken');
+        const userData = localStorage.getItem('userData');
+        const loginTime = localStorage.getItem('loginTime');
+
+        if (authToken && userData && loginTime) {
+          // Check if login is still valid (24 hours)
+          const loginTimestamp = parseInt(loginTime);
+          const now = Date.now();
+          const hoursSinceLogin = (now - loginTimestamp) / (1000 * 60 * 60);
+
+          if (hoursSinceLogin < 24) {
+            // Still valid, restore session
+            setIsAuthenticated(true);
+            console.log('? Restored login session');
+          } else {
+            // Expired, clear data
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userData');
+            localStorage.removeItem('loginTime');
+            console.log('? Login session expired');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking login status:', error);
+        // Clear potentially corrupted data
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        localStorage.removeItem('loginTime');
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
+
+  // Save login session
+  const handleLoginSuccess = (userData: any) => {
+    try {
+      localStorage.setItem('authToken', 'mock-token-' + Date.now());
+      localStorage.setItem('userData', JSON.stringify(userData));
+      localStorage.setItem('loginTime', Date.now().toString());
+      setIsAuthenticated(true);
+      setShowLoginModal(false);
+      console.log('?? Login session saved');
+    } catch (error) {
+      console.error('Error saving login session:', error);
+    }
+  };
+
+  // Clear login session
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userData');
+    localStorage.removeItem('loginTime');
+    setIsAuthenticated(false);
+    console.log('?? Logged out and cleared session');
+  };
 
   // If not authenticated, show the landing page
   if (!isAuthenticated) {
@@ -152,6 +214,16 @@ export default function App() {
         <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-black animate-pulse" />
       </button>
 
+      {/* Neural Memory Stars Button - Fixed position */}
+      <button
+        onClick={() => setShowNeuralView(true)}
+        className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-50 group"
+        title="View Memory Constellation"
+      >
+        <Stars size={24} className="text-white group-hover:scale-110 transition-transform" />
+        <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full border-2 border-black animate-pulse" />
+      </button>
+
       {/* AI Chat Modal */}
       <AIChatBot
         isOpen={showAIChat}
@@ -160,12 +232,54 @@ export default function App() {
           spaceName: activeSpace,
         }}
       />
+
+      {/* Neural Memory Stars Modal */}
+      {showNeuralView && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="relative w-full max-w-6xl h-[80vh] bg-black border border-yellow-500/30 rounded-3xl shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-yellow-500/20 bg-gradient-to-r from-yellow-500/10 to-orange-500/10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
+                  <Stars size={20} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold">Memory Constellation</h3>
+                  <p className="text-white/50 text-xs">
+                    {activeSpace} • Neural Network View
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowNeuralView(false)}
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+              >
+                <X size={18} className="text-white/70" />
+              </button>
+            </div>
+
+            {/* Neural Grid Content */}
+            <div className="flex-1 h-full">
+              <ContentArea
+                activeSpace={activeSpace}
+                activeFilter={activeFilter}
+                onFilterChange={setActiveFilter}
+                forceNeuralView={true}
+              />
+            </div>
+          </div>
+        </div>
+      )}
       
       <div className="h-screen w-screen bg-[radial-gradient(circle_at_top,_#ffffff_0%_,_#e5e7eb_100%)
         dark:bg-[radial-gradient(circle_at_bottom,_#0a0a0a_0%,_#1a1a1a_100%)]
         transition-colors duration-500">
         <div className="w-full h-full bg-black text-foreground">
-          <Header activeNav={activeNav} onNavChange={setActiveNav} />
+          <Header
+            activeNav={activeNav}
+            onNavChange={setActiveNav}
+            onLogout={handleLogout}
+          />
           <div className="flex h-[calc(100vh-140px)]">
             <Sidebar activeSpace={activeSpace} onSpaceChange={setActiveSpace} />
             <ContentArea

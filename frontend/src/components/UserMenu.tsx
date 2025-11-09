@@ -8,12 +8,14 @@ interface UserMenuProps {
   isLoggedIn?: boolean;
   userName?: string;
   userInitials?: string;
+  onLogout?: () => void;
 }
 
-export function UserMenu({ 
-  isLoggedIn = false, 
+export function UserMenu({
+  isLoggedIn = false,
   userName = 'Andrew Truong',
-  userInitials = 'AT'
+  userInitials = 'AT',
+  onLogout
 }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showLoginForm, setShowLoginForm] = useState(false);
@@ -65,9 +67,12 @@ export function UserMenu({
   };
 
   const handleLogout = () => {
-    console.log('Logout');
-    // TODO: Implement actual logout logic
-    alert('Logged out!');
+    if (onLogout) {
+      onLogout();
+    } else {
+      console.log('Logout');
+      alert('Logged out!');
+    }
     setIsOpen(false);
   };
 
@@ -85,13 +90,13 @@ export function UserMenu({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div 
+        <div
           className="absolute right-0 top-12 w-[280px] rounded-3xl shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden"
           style={{
             boxShadow: '0 0 60px rgba(0, 0, 0, 0.5), 0 20px 50px rgba(0, 0, 0, 0.8)',
           }}
         >
-          <div 
+          <div
             className="bg-[#0a0a0a] border border-white/20 rounded-3xl"
             style={{
               boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
@@ -104,7 +109,7 @@ export function UserMenu({
                 <p className="text-white text-sm font-medium">{userName}</p>
                 <p className="text-white/50 text-xs mt-1">user@example.com</p>
               </div>
-              
+
               <button
                 onClick={() => {
                   console.log('Settings clicked');
@@ -114,7 +119,17 @@ export function UserMenu({
               >
                 ⚙️ Settings
               </button>
-              
+
+              <button
+                onClick={() => {
+                  console.log('Neural View clicked');
+                  alert('Switching to Neural Memory View!');
+                }}
+                className="w-full text-left px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all text-sm"
+              >
+                🌌 Neural View
+              </button>
+
               <button
                 onClick={handleLogout}
                 className="w-full text-left px-4 py-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all text-sm mt-1"
@@ -134,7 +149,7 @@ export function UserMenu({
                   >
                     Login
                   </button>
-                  
+
                   <button
                     onClick={() => setShowSignupForm(true)}
                     className="w-full px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all text-sm mt-2"
