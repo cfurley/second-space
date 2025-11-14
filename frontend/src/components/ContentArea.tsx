@@ -6,9 +6,10 @@ interface ContentAreaProps {
   activeSpace: string;
   activeFilter: string;
   onFilterChange: (filter: string) => void;
+  spaceContent: any[];
 }
 
-export function ContentArea({ activeSpace, activeFilter, onFilterChange }: ContentAreaProps) {
+export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceContent }: ContentAreaProps) {
   const sampleContent = [
     {
       type: 'image' as const,
@@ -75,6 +76,9 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange }: Conte
     },
   ];
 
+  // Combine user-created content with sample content
+  const allContent = [...spaceContent, ...sampleContent];
+
   return (
     <div className="flex-1 bg-black p-10 overflow-y-auto">
       <div className="flex items-center justify-between mb-8">
@@ -85,7 +89,7 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange }: Conte
       </div>
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-5 mt-8">
-        {sampleContent.map((item, index) => (
+        {allContent.map((item, index) => (
           <ContentCard
             key={index}
             type={item.type}

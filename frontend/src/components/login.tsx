@@ -115,6 +115,12 @@ export default function Login({ isOpen, onClose }: LoginProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // TEMPORARY: Bypass authentication for frontend development
+    console.log("Login bypassed - no backend needed for now");
+    alert("Login bypassed for development!");
+    onClose(true); // Pass true to indicate successful authentication
+    
+    /* ORIGINAL CODE - Uncomment when backend is ready:
     try {
       const data = await api.login(username, password);
       
@@ -137,6 +143,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
       console.error("Login error:", error);
       alert("Login failed. Please check your credentials and try again.");
     }
+    */
   };
 
   // Render modal via portal: full-viewport flex centering
