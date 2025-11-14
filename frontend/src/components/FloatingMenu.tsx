@@ -16,13 +16,16 @@ type FloatingMenuProps = {
   currentSpaceId?: string;
   currentUserId?: string;
   onContentAdded?: (content: any) => void;
+  onSearchChange?: (searchQuery: string) => void;
 };
 
-export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded }: FloatingMenuProps) {
+export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, onSearchChange }: FloatingMenuProps) {
   const [open, setOpen] = useState(false);
   const [showTextPostDialog, setShowTextPostDialog] = useState(false);
   const [showMediaDialog, setShowMediaDialog] = useState(false);
   const [showBookmarkDialog, setShowBookmarkDialog] = useState(false);
+  const [showSearchDialog, setShowSearchDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   
   // Form states for Text Post
   const [postTitle, setPostTitle] = useState("");
@@ -79,7 +82,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded }: 
         onContentAdded({
           type: 'text',
           content: {
-            text: `**${postTitle}**\n\n${postContent}`,
+            text: `${postTitle}\n\n${postContent}`,
             timestamp: 'just now'
           }
         });
@@ -137,6 +140,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded }: 
           type: 'image',
           content: {
             title: mediaTitle,
+            description: mediaDescription,
             image: mediaPreview,
             timestamp: 'just now'
           }
@@ -194,7 +198,8 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded }: 
             text: bookmarkNotes || 'No description provided',
             domain: domain,
             timestamp: 'just now',
-            url: bookmarkUrl
+            url: bookmarkUrl,
+            isBookmarked: true
           }
         });
       }
@@ -226,87 +231,115 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded }: 
       }}
     >
       {open && (
-        <div
-          style={{
-            backgroundColor: '#2C2C2C',
-            borderRadius: '8px',
-            padding: '8px',
-            marginBottom: '8px',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            width: '200px'
-          }}
-        >
+        <div style={{
+          position: 'absolute',
+          bottom: '60px',
+          right: '60px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          alignItems: 'center'
+        }}>
           <button
             onClick={() => {
               setShowTextPostDialog(true);
               setOpen(false);
             }}
             style={{
-              width: '100%',
-              padding: '8px 12px',
-              backgroundColor: 'transparent',
-              border: 'none',
+              width: '48px',
+              height: '48px',
+              backgroundColor: '#2C2C2C',
               color: 'white',
-              textAlign: 'left',
+              borderRadius: '50%',
+              border: 'none',
               cursor: 'pointer',
-              borderRadius: '4px',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              fontSize: '14px'
+              justifyContent: 'center',
+              fontSize: '20px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+              animation: 'popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) backwards',
+              transition: 'transform 0.2s, box-shadow 0.2s'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3C3C3C'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.1)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+            }}
+            title="Create Text Post"
           >
-            <span style={{ fontSize: '16px' }}>📝</span> Create Text Post
+            📝
           </button>
+
           <button
             onClick={() => {
               setShowMediaDialog(true);
               setOpen(false);
             }}
             style={{
-              width: '100%',
-              padding: '8px 12px',
-              backgroundColor: 'transparent',
-              border: 'none',
+              width: '48px',
+              height: '48px',
+              backgroundColor: '#2C2C2C',
               color: 'white',
-              textAlign: 'left',
+              borderRadius: '50%',
+              border: 'none',
               cursor: 'pointer',
-              borderRadius: '4px',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              fontSize: '14px'
+              justifyContent: 'center',
+              fontSize: '20px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+              animation: 'popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.05s backwards',
+              transition: 'transform 0.2s, box-shadow 0.2s'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3C3C3C'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.1)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+            }}
+            title="Upload Media"
           >
-            <span style={{ fontSize: '16px' }}>�</span> Upload Media
+            📷
           </button>
+
           <button
             onClick={() => {
               setShowBookmarkDialog(true);
               setOpen(false);
             }}
             style={{
-              width: '100%',
-              padding: '8px 12px',
-              backgroundColor: 'transparent',
-              border: 'none',
+              width: '48px',
+              height: '48px',
+              backgroundColor: '#2C2C2C',
               color: 'white',
-              textAlign: 'left',
+              borderRadius: '50%',
+              border: 'none',
               cursor: 'pointer',
-              borderRadius: '4px',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              fontSize: '14px'
+              justifyContent: 'center',
+              fontSize: '20px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+              animation: 'popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.1s backwards',
+              transition: 'transform 0.2s, box-shadow 0.2s'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3C3C3C'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.1)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+            }}
+            title="Save Bookmark"
           >
-            <span style={{ fontSize: '16px' }}>🔖</span> Save Bookmark
+            🔖
           </button>
         </div>
       )}
@@ -314,8 +347,8 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded }: 
         <button
         onClick={() => alert('New Note')}
         style={{
-          width: '40px',
-          height: '40px',
+          width: '48px',
+          height: '48px',
           backgroundColor: '#2C2C2C',
           color: 'white',
           borderRadius: '50%',
@@ -324,7 +357,17 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded }: 
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '20px'
+          fontSize: '20px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+          transition: 'transform 0.2s, box-shadow 0.2s'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.1)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
         }}
       >
         ✏️
@@ -333,8 +376,8 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded }: 
       <button
         onClick={() => setOpen(prev => !prev)}
         style={{
-          width: '40px',
-          height: '40px',
+          width: '48px',
+          height: '48px',
           backgroundColor: '#2C2C2C',
           color: 'white',
           borderRadius: '50%',
@@ -343,17 +386,28 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded }: 
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '20px'
+          fontSize: '24px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+          transition: 'transform 0.3s, box-shadow 0.2s',
+          transform: open ? 'rotate(45deg)' : 'rotate(0deg)'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = open ? 'rotate(45deg) scale(1.1)' : 'scale(1.1)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = open ? 'rotate(45deg)' : 'rotate(0deg)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
         }}
       >
         +
       </button>
 
       <button
-        onClick={() => alert('Search')}
+        onClick={() => setShowSearchDialog(true)}
         style={{
-          width: '40px',
-          height: '40px',
+          width: '48px',
+          height: '48px',
           backgroundColor: '#2C2C2C',
           color: 'white',
           borderRadius: '50%',
@@ -362,18 +416,42 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded }: 
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '20px'
+          fontSize: '20px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+          transition: 'transform 0.2s, box-shadow 0.2s'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.1)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
         }}
       >
         🔍
       </button>
     </div>
 
+      {/* Add CSS animation keyframes */}
+      <style>{`
+        @keyframes popIn {
+          0% {
+            transform: scale(0);
+            opacity: 0;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+      `}</style>
+
       {/* Create Text Post Dialog */}
       <Dialog open={showTextPostDialog} onOpenChange={setShowTextPostDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create Text Post</DialogTitle>
+            <DialogTitle className="text-2xl font-bold">Create Text Post</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -406,66 +484,122 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded }: 
 
       {/* Upload Media Dialog */}
       <Dialog open={showMediaDialog} onOpenChange={setShowMediaDialog}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Upload Media</DialogTitle>
+            <DialogTitle className="text-2xl font-bold">Upload Media</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="mediaTitle" className="text-right">Title</Label>
+          <div className="grid gap-6 py-4">
+            {/* Title Input */}
+            <div className="space-y-2">
+              <Label htmlFor="mediaTitle">Title</Label>
               <Input
                 id="mediaTitle"
                 value={mediaTitle}
                 onChange={(e) => setMediaTitle(e.target.value)}
-                className="col-span-3"
                 placeholder="Enter media title"
+                className="w-full"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="mediaDescription" className="text-right">Description</Label>
+
+            {/* Description Input */}
+            <div className="space-y-2">
+              <Label htmlFor="mediaDescription">Description</Label>
               <Input
                 id="mediaDescription"
                 value={mediaDescription}
                 onChange={(e) => setMediaDescription(e.target.value)}
-                className="col-span-3"
                 placeholder="Enter media description"
+                className="w-full"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="mediaFile" className="text-right">File</Label>
-              <Input
-                id="mediaFile"
-                type="file"
-                onChange={handleFileChange}
-                className="col-span-3"
-                accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
-              />
+
+            {/* Drag and Drop File Area */}
+            <div className="space-y-2">
+              <Label>File</Label>
+              <div 
+                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors cursor-pointer bg-gray-50/50"
+                onClick={() => document.getElementById('mediaFile')?.click()}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.add('border-blue-400', 'bg-blue-50/30');
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.remove('border-blue-400', 'bg-blue-50/30');
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.remove('border-blue-400', 'bg-blue-50/30');
+                  const files = e.dataTransfer.files;
+                  if (files.length > 0) {
+                    const event = { target: { files } } as any;
+                    handleFileChange(event);
+                  }
+                }}
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">
+                      {mediaFile ? mediaFile.name : 'Drag and drop your file here'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      or click to browse
+                    </p>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">
+                    Supports: Images, Videos, Audio, PDF, Documents
+                  </p>
+                </div>
+                <Input
+                  id="mediaFile"
+                  type="file"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
+                />
+              </div>
             </div>
+
+            {/* Preview Section */}
             {mediaPreview && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Preview</Label>
-                <div className="col-span-3">
+              <div className="space-y-2">
+                <Label>Preview</Label>
+                <div className="rounded-lg overflow-hidden border border-gray-200 bg-gray-50 p-4">
                   <img 
                     src={mediaPreview} 
                     alt="Preview" 
-                    style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px' }}
+                    className="max-w-full max-h-[300px] mx-auto rounded"
                   />
                 </div>
               </div>
             )}
+
+            {/* File Info for non-images */}
             {mediaFile && !mediaFile.type.startsWith('image/') && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">File Info</Label>
-                <div className="col-span-3 text-sm">
-                  <p><strong>Name:</strong> {mediaFile.name}</p>
-                  <p><strong>Type:</strong> {mediaFile.type}</p>
-                  <p><strong>Size:</strong> {(mediaFile.size / 1024).toFixed(2)} KB</p>
+              <div className="space-y-2">
+                <Label>File Information</Label>
+                <div className="bg-gray-50 rounded-lg p-4 space-y-1 text-sm border border-gray-200">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Name:</span>
+                    <span className="font-medium">{mediaFile.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Type:</span>
+                    <span className="font-medium">{mediaFile.type || 'Unknown'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Size:</span>
+                    <span className="font-medium">{(mediaFile.size / 1024).toFixed(2)} KB</span>
+                  </div>
                 </div>
               </div>
             )}
           </div>
           <DialogFooter>
-            <Button onClick={handleMediaSubmit}>Upload Media</Button>
+            <Button onClick={handleMediaSubmit} className="w-full sm:w-auto">Upload Media</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -474,7 +608,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded }: 
       <Dialog open={showBookmarkDialog} onOpenChange={setShowBookmarkDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Save Bookmark</DialogTitle>
+            <DialogTitle className="text-2xl font-bold">Save Bookmark</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -512,6 +646,49 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded }: 
           </div>
           <DialogFooter>
             <Button onClick={handleBookmarkSubmit}>Save Bookmark</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Search Dialog */}
+      <Dialog open={showSearchDialog} onOpenChange={setShowSearchDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Search Posts</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="relative">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8" strokeWidth="2"/>
+                <path d="m21 21-4.35-4.35" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <Input
+                id="searchInput"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  onSearchChange?.(e.target.value);
+                }}
+                className="pl-10 w-full"
+                placeholder="Search by title..."
+                autoFocus
+              />
+            </div>
+            <p className="text-sm text-gray-400 mt-3">
+              {searchQuery ? `Searching for: "${searchQuery}"` : 'Type to search posts by title'}
+            </p>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline"
+              onClick={() => {
+                setSearchQuery("");
+                onSearchChange?.("");
+                setShowSearchDialog(false);
+              }}
+            >
+              Clear Search
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
