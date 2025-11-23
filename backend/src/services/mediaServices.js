@@ -1,4 +1,10 @@
 import pool from "../db/index.js";
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
+
+// maximum file size allowed (bytes). 20 MB default.
+const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
 /**
  * Get media either by the owner userId (via containers.created_by_user_id)
@@ -39,28 +45,30 @@ const insertMediaToDatabase = async (media) => {
   if (!media) {
     return { success: false, status: 400, error: "Media is not given." };
   }
-
-  const query = `
-    INSERT INTO media (
-      container_id, filename, filepath, file_size, video_length,
-      create_date_utc, update_date_utc, delete_date_utc, deleted
-    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-    RETURNING id;
-  `;
-
-  const values = [
-    media.container_id,
-    media.filename,
-    media.filepath,
-    media.file_size,
-    media.video_length ?? null,
-    media.create_date_utc ? new Date(media.create_date_utc) : new Date(),
-    null,
-    null,
-    0,
-  ];
-
+  // Generate server-side filepath; do NOT use user-provided filepath
   try {
+    const filepath = await generateFilepath(media);
+
+    const query = `
+      INSERT INTO media (
+        container_id, filename, filepath, file_size, video_length,
+        create_date_utc, update_date_utc, delete_date_utc, deleted
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      RETURNING id;
+    `;
+
+    const values = [
+      media.container_id,
+      media.filename,
+      filepath,
+      media.file_size,
+      media.video_length ?? null,
+      media.create_date_utc ? new Date(media.create_date_utc) : new Date(),
+      null,
+      null,
+      0,
+    ];
+
     const result = await pool.query(query, values);
     if (!result || result.rows.length === 0) {
       console.log("Media did not insert:", values);
@@ -78,25 +86,83 @@ const insertMediaToDatabase = async (media) => {
   }
 };
 
+/**
+ * Generate a safe filepath for storage based on filename extension and a hash.
+ * - organizes by type under ./uploads/<type>/
+ * - returns path stored in DB like `/uploads/<type>/<hash><ext>`
+ * - writes file if `media.base64` is present (base64 encoded file content)
+ */
+async function generateFilepath(media) {
+  if (!media || !media.filename) throw new Error("Missing filename");
+
+  const ext = path.extname(media.filename).toLowerCase();
+
+  // map extensions to folders
+  const imageExts = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg"];
+  const textExts = [".txt"];
+  const jsonExts = [".json"];
+
+  let folder = "others";
+  if (imageExts.includes(ext)) folder = "images";
+  else if (textExts.includes(ext)) folder = "text";
+  else if (jsonExts.includes(ext)) folder = "json";
+
+  // Determine uploads root:
+  // - If process.cwd() ends with 'backend', use process.cwd()/uploads
+  // - Otherwise use <repo-root>/backend/uploads
+  const cwdBase = path.basename(process.cwd());
+  const uploadsRoot =
+    cwdBase === "backend"
+      ? path.join(process.cwd(), "uploads")
+      : path.join(process.cwd(), "backend", "uploads");
+  const destDir = path.join(uploadsRoot, folder);
+  // ensure directory exists
+  await fs.promises.mkdir(destDir, { recursive: true });
+
+  // create a hashed name
+  const hash = crypto.randomBytes(16).toString("hex");
+  const filename = `${hash}${ext}`;
+  const absolutePath = path.join(destDir, filename);
+  const dbPath = `/uploads/${folder}/${filename}`; // store unix-style
+
+  // write file only if base64 content provided
+  if (media.base64 && typeof media.base64 === "string") {
+    const buffer = Buffer.from(media.base64, "base64");
+
+    // validate size against file_size if provided and MAX_FILE_SIZE
+    if (media.file_size && typeof media.file_size === "number") {
+      if (media.file_size !== buffer.length) {
+        // if mismatch, prefer actual buffer length but reject if exceeds limit
+        if (buffer.length > MAX_FILE_SIZE) throw new Error("File too large");
+      }
+    }
+
+    if (buffer.length > MAX_FILE_SIZE) throw new Error("File too large");
+
+    await fs.promises.writeFile(absolutePath, buffer);
+  }
+
+  return dbPath;
+}
+
 const updateMediaInDatabase = async (id, media) => {
   if (!id || !media) {
     return { success: false, status: 400, error: "Missing parameters." };
   }
 
+  // Do not accept user-provided filepath. We will not move files here.
   const query = `
     UPDATE media SET
       filename = $1,
-      filepath = $2,
-      file_size = $3,
-      video_length = $4,
-      update_date_utc = $5
-    WHERE id = $6 AND deleted = 0
+      file_size = $2,
+      video_length = $3,
+      update_date_utc = $4
+    WHERE id = $5 AND deleted = 0
     RETURNING id;
   `;
 
   const values = [
     media.filename,
-    media.filepath,
     media.file_size,
     media.video_length ?? null,
     new Date(),

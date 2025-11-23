@@ -31,7 +31,12 @@ function fromJson(json) {
       throw new Error("Invalid filename");
     }
   }
-  return new Media(json);
+  // Ignore any user-provided filepath -- server will generate it
+  const clean = { ...json };
+  if (clean && Object.prototype.hasOwnProperty.call(clean, "filepath")) {
+    delete clean.filepath;
+  }
+  return new Media(clean);
 }
 
 /**

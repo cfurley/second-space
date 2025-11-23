@@ -47,7 +47,17 @@ const createMedia = async (req, res) => {
   }
 
   try {
-    const result = await mediaService.insertMediaToDatabase(req.body);
+    // Construct a server-safe payload (do not include user-provided filepath)
+    const payload = {
+      container_id: req.body.container_id,
+      filename: req.body.filename,
+      file_size: req.body.file_size,
+      video_length: req.body.video_length,
+      base64: req.body.base64, // optional file content
+      create_date_utc: req.body.create_date_utc,
+    };
+
+    const result = await mediaService.insertMediaToDatabase(payload);
     if (!result.success) {
       return res.status(result.status).json({ message: result.error });
     }
@@ -73,7 +83,14 @@ const updateMedia = async (req, res) => {
     }
   }
   try {
-    const result = await mediaService.updateMediaInDatabase(mediaId, req.body);
+    // Only allow updating specific fields
+    const payload = {
+      filename: req.body.filename,
+      file_size: req.body.file_size,
+      video_length: req.body.video_length,
+    };
+
+    const result = await mediaService.updateMediaInDatabase(mediaId, payload);
     if (!result.success) {
       return res.status(result.status).json({ message: result.error });
     }
