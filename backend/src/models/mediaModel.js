@@ -1,3 +1,30 @@
+/*
+  mediaModel.js
+
+  Purpose and high-level architecture notes
+  - Model class representing the `media` row shape used across controllers/services.
+  - `fromJson()` is used by controllers to perform lightweight validation of
+    user-provided fields before passing data to the service layer.
+
+  Important behavior implemented here:
+  - Filename validation (to limit path attacks and unexpected extensions).
+  - Any `filepath` provided by the client is stripped away: the server
+    is responsible for generating and assigning the stored filepath.
+
+  Why these choices?
+  - Keeping storage paths under server control prevents directory traversal
+    or accidental overwrites; filenames are validated separately and stored
+    only as metadata (the original user filename remains in the DB).
+
+  Potential improvements (future work)
+  - Move validation and normalization to a dedicated `upload`/`storage` service
+    to keep the model layer pure (POJO) and reduce coupling.
+  - Return richer validation errors (codes) to the controller so the API can
+    present localized or more specific messages. Current design purposely
+    returns minimal messages (e.g., "Invalid filename").
+  - Use a schema/validation library (Joi, Zod) for consistent validation.
+*/
+
 class Media {
   constructor({
     id = null,

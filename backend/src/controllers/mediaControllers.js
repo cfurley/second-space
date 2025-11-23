@@ -1,3 +1,28 @@
+/*
+  mediaControllers.js
+
+  Role of controller layer
+  - Validate incoming HTTP-level inputs (delegates to `mediaModel.fromJson` for
+    filename validation), build a server-controlled payload and call the
+    service layer for DB/storage operations.
+
+  Key responsibilities implemented here
+  - Ensure `filepath` from the client is NOT passed to the service.
+  - Only pass allowed fields to the service (container_id, filename, file_size,
+    video_length, and optional base64 for actual file data).
+
+  Notes / potential updates
+  - For large file uploads switch to multipart/form-data and a dedicated
+    middleware (e.g., `multer`) to stream the upload to disk or to cloud
+    storage. Handling base64 in the controller is acceptable for small files
+    or prototypes only.
+  - Consider returning the created media record (or at least its id and file
+    path) from `insertMediaToDatabase()` to the caller instead of a generic
+    success message.
+  - Consider centralizing error handling via express error middleware to
+    avoid repeated try/catch blocks and to ensure consistent HTTP responses.
+*/
+
 import mediaService from "../services/mediaServices.js";
 import mediaModel from "../models/mediaModel.js";
 

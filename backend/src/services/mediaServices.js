@@ -6,6 +6,53 @@ import crypto from "crypto";
 // maximum file size allowed (bytes). 20 MB default.
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
+/*
+  mediaServices.js
+
+  Overview / How this layer fits in
+  - The controller accepts validated metadata from clients (via `mediaModel.fromJson`).
+  - The controller then calls into these service functions which are responsible
+    for storage decisions (generating server-side filepaths) and for performing
+    database operations.
+  - insertMediaToDatabase() currently does two distinct things:
+    1) If provided, it writes the file payload (base64) to disk under
+       `backend/uploads/<type>/<hash><ext>`.
+    2) It inserts the media metadata row into the DB referencing that path.
+
+  Important notes and tradeoffs
+  - Atomicity: the current flow writes the file to disk first, then inserts
+    the DB row. If the DB insert fails, the file will be left on disk. For
+    robust operations you should consider one of these strategies:
+      * write to a temporary location, perform the DB insert within a
+        transaction, and on success move the file into final place; on
+        failure delete the temp file.
+      * perform the DB insert first with a temporary placeholder filepath,
+        then write the file and finalize the record; if file write fails,
+        roll back the DB insert.
+      * use an external object store (S3) and do single-operation uploads
+        that are externally consistent, possibly using signed upload URLs.
+
+  - Security: filename validation is intentionally strict (one period, no
+    slashes, constrained extensions). Additional hardening steps:
+      * Inspect MIME type / magic bytes of the decoded buffer to verify
+        that the declared extension matches file content.
+      * Scan user uploads with a virus/malware scanner before moving to
+        permanent storage.
+      * Enforce per-user storage quotas and rate limits to avoid abuse.
+
+  - Performance: base64 uploads are memory-heavy. For larger files use
+    streaming multipart uploads (e.g., `multer` or write stream handling)
+    rather than decoding base64 in-memory.
+
+  - Configuration: the uploads root is resolved heuristically. Consider
+    exposing `UPLOADS_ROOT` as an environment variable for predictable
+    behavior across environments (local dev, CI, Docker, production).
+
+  - Tests: current service tests write to `backend/uploads`. For faster and
+    more hermetic tests you can mock `fs.promises.writeFile` or use a
+    temporary directory which the tests clean up.
+*/
+
 /**
  * Get media either by the owner userId (via containers.created_by_user_id)
  * or by media id directly.
