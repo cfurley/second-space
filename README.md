@@ -128,6 +128,20 @@ git push origin feature/your-feature-name
 
 ---
 
+## 🔒 Security
+
+### Password Security
+
+User passwords are hashed using **bcryptjs** (12 rounds) before storage. Plain-text passwords are never stored in the database.
+
+### Environment Variables
+
+Database credentials are configured via environment variables. When using Docker Compose, these are automatically set. See `backend/.env.example` for the required variables.
+
+> **Note:** See `backend/SECURITY_CHANGELOG.md` for detailed security implementation notes.
+
+---
+
 ## 🧪 Testing
 
 ### Running Tests
