@@ -61,7 +61,7 @@ app.get("/", (req, res) => {
     endpoints: {
       users: "/user",
       spaces: "/spaces",
-      // media: "/media",
+      media: "/media",
     },
   });
 });
