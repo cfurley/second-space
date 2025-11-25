@@ -2,10 +2,11 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { FloatingMenu } from '../FloatingMenu';
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
 describe('FloatingMenu Component', () => {
-  const mockOnContentAdded = jest.fn();
-  const mockOnSearchChange = jest.fn();
+  const mockOnContentAdded = vi.fn();
+  const mockOnSearchChange = vi.fn();
 
   beforeEach(() => {
     mockOnContentAdded.mockClear();
@@ -92,7 +93,7 @@ describe('FloatingMenu Component', () => {
   });
 
   it('calls onContentAdded when content is created', async () => {
-    const alertMock = jest.spyOn(window, 'alert').mockImplementation();
+    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
     
     render(<FloatingMenu currentSpaceId="test-space" currentUserId="test-user" onContentAdded={mockOnContentAdded} />);
     
