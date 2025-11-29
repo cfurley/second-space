@@ -15,6 +15,28 @@ export default function App() {
   // Simple demo auth: app starts unauthenticated and shows login screen
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  
+  // User and space IDs for FloatingMenu
+  const [currentUserId, setCurrentUserId] = useState<string>('demo-user-123');
+  const [currentSpaceId, setCurrentSpaceId] = useState<string>('space-my-ideas');
+  
+  // Content items stored by space
+  const [spaceContent, setSpaceContent] = useState<{[key: string]: any[]}>({
+    'My Ideas': [],
+    'Work': [],
+    'Personal': [],
+  });
+  
+  // Search query state
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  
+  // Function to add new content to current space
+  const addContentToSpace = (content: any) => {
+    setSpaceContent(prev => ({
+      ...prev,
+      [activeSpace]: [...(prev[activeSpace] || []), content]
+    }));
+  };
 
   // If not authenticated, show the landing page with "Open Login" button
   if (!isAuthenticated) {
@@ -141,8 +163,13 @@ export default function App() {
 
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
-      <FloatingMenu onAddAdvertisement={() => alert('test')} />
-      <div className="h-screen w-screen bg-[radial-gradient(circle_at_top,_#ffffff_0%_,_#e5e7eb_100%)
+      <FloatingMenu 
+        currentSpaceId={currentSpaceId} 
+        currentUserId={currentUserId}
+        onContentAdded={addContentToSpace}
+        onSearchChange={setSearchQuery}
+      />
+      <div className="h-screen w-screen bg-[radial-gradient(circle_at_top,_#ffffff_0%_,_#e5e7eb_100%)]
         dark:bg-[radial-gradient(circle_at_bottom,_#0a0a0a_0%,_#1a1a1a_100%)]
         transition-colors duration-500">
         <div className="w-full h-full bg-black text-foreground">
@@ -153,6 +180,8 @@ export default function App() {
               activeSpace={activeSpace}
               activeFilter={activeFilter}
               onFilterChange={setActiveFilter}
+              spaceContent={spaceContent[activeSpace] || []}
+              searchQuery={searchQuery}
             />
           </div>
         </div>
