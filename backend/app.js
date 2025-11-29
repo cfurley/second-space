@@ -37,6 +37,9 @@ app.use(
   })
 );
 
+// Explicitly handle preflight for all routes (some proxies/CDNs require this)
+app.options('*', cors());
+
 // Middleware for JSON support
 app.use(express.json());
 
