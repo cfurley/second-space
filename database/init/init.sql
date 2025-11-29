@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS public.space
 CREATE INDEX idx_space_user_deleted 
     ON public.space (created_by_user_id, deleted);
 
-INSERT INTO space (created_by_user_id, title, icon, create_date_utc, 
+INSERT INTO space (id, created_by_user_id, title, icon, create_date_utc, 
 update_date_utc, delete_date_utc, deleted)
 VALUES
 (1, 'My first space!', '🧡', NOW(), NULL, NULL, 0),
@@ -313,6 +313,23 @@ CREATE INDEX idx_containers_space_deleted
     ON public.containers (space_id, deleted);
 CREATE INDEX idx_containers_user_deleted
     ON public.containers (created_by_user_id, deleted);
+INSERT INTO public.containers (
+    space_id,
+    title,
+    link,
+    viewed_date_utc,
+    container_type_id,
+    created_by_user_id,
+    create_date_utc,
+    update_date_utc,
+    delete_date_utc,
+    deleted
+)
+VALUES
+    (1, 'Title 1', NULL, NOW(), 1, 1, NOW(), NULL, NULL, 0),
+    (2, 'Title 2', NULL, NOW(), 1, 1, NOW(), NULL, NULL, 0),
+    (3, 'Title 3', NULL, NOW(), 1, 1, NOW(), NULL, NULL, 0),
+    (4, 'Title 4', NULL, NOW(), 1, 1, NOW(), NULL, NULL, 0);
 
 -- Media holds files that are connected to media containers.
 CREATE TABLE IF NOT EXISTS public.media
