@@ -10,7 +10,16 @@ vi.mock("../../db/index.js", () => ({
   },
 }));
 
+// Mock the password service
+vi.mock("../../services/passwordService.js", () => ({
+  default: {
+    validatePassword: vi.fn(),
+    hashPassword: vi.fn(),
+  },
+}));
+
 import pool from "../../db/index.js";
+import passwordService from "../../services/passwordService.js";
 
 // Helper to create an express-like response mock
 const createResMock = () => ({
@@ -35,24 +44,29 @@ describe("User Controller - authenticate", () => {
 
     const res = createResMock();
 
-    // Arrange: make pool.query return a row for the select, and OK for the update
+    // Arrange: make pool.query return a row with password hash for the select, and OK for the update
     pool.query
       .mockResolvedValueOnce({
         rows: [
           {
             id: 1,
             username: "testuser",
+            password: "$2a$12$hashedpassword", // Mock hashed password
             display_name: "Test User",
           },
         ],
       })
       .mockResolvedValueOnce({ rows: [] }); // update query doesn't need rows
 
+    // Mock password validation to return true
+    passwordService.validatePassword.mockResolvedValueOnce(true);
+
     // Act
     await userControllers.authenticate(req, res);
 
     // Assert
     expect(pool.query).toHaveBeenCalled();
+    expect(passwordService.validatePassword).toHaveBeenCalledWith("Password1!", "$2a$12$hashedpassword");
     expect(res.set).toHaveBeenCalledWith(
       expect.objectContaining({
         "Cache-Control": expect.any(String),
@@ -217,7 +231,7 @@ describe("User Controller - authenticate", () => {
     const res = createResMock();
 
     // Return an error to be caught
-    pool.query.mockRejectedValue(new Error("Database connection failed"));
+    pool.query.mockRejectedValueOnce(new Error("Database connection failed"));
 
     // Act
     await userControllers.authenticate(req, res);
