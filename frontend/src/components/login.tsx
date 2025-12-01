@@ -11,6 +11,15 @@ import {
 } from "../utils/passwordValidator";
 import ReactDOM from "react-dom";
 import { api } from "../utils/api";
+import {
+  isLockedOut,
+  getRemainingLockoutTime,
+  recordFailedAttempt,
+  resetAttempts,
+  shouldShowWarning,
+  getAttemptCount,
+  formatRemainingTime,
+} from "../utils/loginTimeout";
 
 interface LoginProps {
   isOpen: boolean;
@@ -37,6 +46,12 @@ export default function Login({ isOpen, onClose }: LoginProps) {
   const [verifyInput, setVerifyInput] = useState("");
   // Remember-me state: persist username to localStorage when true
   const [remember, setRemember] = useState(false);
+  
+  // Login timeout state
+  const [isLocked, setIsLocked] = useState(false);
+  const [remainingTime, setRemainingTime] = useState(0);
+  const [showWarning, setShowWarning] = useState(false);
+  const [attemptCount, setAttemptCount] = useState(0);
 
   useEffect(() => {
     if (!isOpen) {
@@ -63,8 +78,43 @@ export default function Login({ isOpen, onClose }: LoginProps) {
       } catch (e) {
         // localStorage may be unavailable (private mode); ignore
       }
+      
+      // Check lockout status when modal opens
+      checkLockoutStatus();
     }
   }, [isOpen]);
+
+  // Timer effect to update remaining lockout time
+  useEffect(() => {
+    if (!isLocked) return;
+
+    const interval = setInterval(() => {
+      const remaining = getRemainingLockoutTime();
+      if (remaining > 0) {
+        setRemainingTime(remaining);
+      } else {
+        // Lockout expired
+        setIsLocked(false);
+        setRemainingTime(0);
+        setShowWarning(false);
+        setAttemptCount(0);
+      }
+    }, 100); // Update every 100ms for smooth countdown
+
+    return () => clearInterval(interval);
+  }, [isLocked]);
+
+  const checkLockoutStatus = () => {
+    const locked = isLockedOut();
+    setIsLocked(locked);
+    
+    if (locked) {
+      setRemainingTime(getRemainingLockoutTime());
+    } else {
+      setShowWarning(shouldShowWarning());
+      setAttemptCount(getAttemptCount());
+    }
+  };
 
   // helper to compute username validity from the validator functions
   const computeUsernameValidity = (u: string) => {
@@ -115,10 +165,22 @@ export default function Login({ isOpen, onClose }: LoginProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Check if user is locked out
+    if (isLockedOut()) {
+      alert(`Too many failed attempts. Please wait ${formatRemainingTime(getRemainingLockoutTime())} before trying again.`);
+      return;
+    }
+
     try {
       const data = await api.login(username, password);
       
-      // Login successful
+      // Login successful - reset attempts
+      resetAttempts();
+      setIsLocked(false);
+      setShowWarning(false);
+      setAttemptCount(0);
+      setRemainingTime(0);
+      
       console.log("Login successful:", data);
       alert(`Welcome back, ${data.display_name || data.username}!`);
       // Persist or remove remembered username according to the checkbox
@@ -135,7 +197,24 @@ export default function Login({ isOpen, onClose }: LoginProps) {
       onClose(true); // Pass true to indicate successful authentication
     } catch (error) {
       console.error("Login error:", error);
-      alert("Login failed. Please check your credentials and try again.");
+      
+      // Record failed attempt
+      const state = recordFailedAttempt();
+      setAttemptCount(state.attempts);
+      
+      // Check if this triggers a lockout
+      if (state.attempts >= 5) {
+        setIsLocked(true);
+        setRemainingTime(getRemainingLockoutTime());
+        setShowWarning(false);
+        alert(`Too many failed attempts. You are locked out for 1 minute.`);
+      } else if (state.attempts === 4) {
+        // Show warning on 4th attempt
+        setShowWarning(true);
+        alert("Warning: One more failed attempt will result in a 1-minute timeout.");
+      } else {
+        alert("Login failed. Please check your credentials and try again.");
+      }
     }
   };
 
@@ -196,6 +275,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
+                  disabled={isLocked}
                   style={{
                     width: "100%",
                     height: 56,
@@ -205,6 +285,8 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                     border: "1px solid rgba(255,255,255,0.08)",
                     color: "white",
                     fontSize: 16,
+                    opacity: isLocked ? 0.5 : 1,
+                    cursor: isLocked ? 'not-allowed' : 'text',
                   }}
                 />
               </div>
@@ -247,6 +329,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  disabled={isLocked}
                   style={{
                     width: "100%",
                     height: 56,
@@ -256,24 +339,70 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                     border: "1px solid rgba(255,255,255,0.08)",
                     color: "white",
                     fontSize: 16,
+                    opacity: isLocked ? 0.5 : 1,
+                    cursor: isLocked ? 'not-allowed' : 'text',
                   }}
                 />
               </div>
+
+              {/* Warning message after 4 failed attempts */}
+              {showWarning && !isLocked && (
+                <div style={{
+                  padding: '12px 16px',
+                  borderRadius: 8,
+                  background: 'rgba(251, 191, 36, 0.15)',
+                  border: '1px solid rgba(251, 191, 36, 0.4)',
+                  marginBottom: 12,
+                }}>
+                  <p style={{
+                    color: '#fbbf24',
+                    fontSize: 14,
+                    margin: 0,
+                    fontWeight: 500,
+                  }}>
+                    ⚠️ Warning: One more failed attempt will result in a 1-minute timeout.
+                  </p>
+                </div>
+              )}
+
+              {/* Lockout message */}
+              {isLocked && (
+                <div style={{
+                  padding: '12px 16px',
+                  borderRadius: 8,
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  marginBottom: 12,
+                }}>
+                  <p style={{
+                    color: '#ef4444',
+                    fontSize: 14,
+                    margin: 0,
+                    fontWeight: 500,
+                  }}>
+                    🔒 Too many failed attempts. Please wait {formatRemainingTime(remainingTime)} before trying again.
+                  </p>
+                </div>
+              )}
+
               <div style={{ marginTop: 20 }}>
                 <button
                   type="submit"
+                  disabled={isLocked}
                   style={{
                     width: "100%",
                     height: 56,
                     borderRadius: 12,
-                    background: "#2563eb",
+                    background: isLocked ? "#6b7280" : "#2563eb",
                     border: "none",
                     color: "white",
                     fontSize: 16,
                     fontWeight: 600,
+                    cursor: isLocked ? 'not-allowed' : 'pointer',
+                    opacity: isLocked ? 0.6 : 1,
                   }}
                 >
-                  Submit
+                  {isLocked ? `Locked (${formatRemainingTime(remainingTime)})` : 'Submit'}
                 </button>
               </div>
 
