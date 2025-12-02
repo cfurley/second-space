@@ -125,7 +125,7 @@ const insertMediaToDatabase = async (media) => {
     return {
       success: true,
       status: 200,
-      message: `Created media ${result.rows[0].id} succesfully`,
+      message: `Created media ${result.rows[0].id} successfully`,
     };
   } catch (error) {
     console.log(error);
