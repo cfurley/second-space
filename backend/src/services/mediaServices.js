@@ -229,7 +229,7 @@ const updateMediaInDatabase = async (id, media) => {
     return {
       success: true,
       status: 200,
-      message: `Updated media succesfully`,
+      message: `Updated media successfully`,
     };
   } catch (error) {
     console.log(error);
@@ -261,7 +261,7 @@ const deleteMediaFromDatabase = async (id) => {
     return {
       success: true,
       status: 200,
-      message: `Deleted media succesfully`,
+      message: `Deleted media successfully`,
     };
   } catch (error) {
     console.log(error);
