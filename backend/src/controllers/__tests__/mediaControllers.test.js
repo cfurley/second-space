@@ -62,7 +62,7 @@ describe("Media Controller", () => {
     const req = {
       body: {
         container_id: 1,
-        filename: "bad.name.png",
+        filename: "..//file//name.png",
         filepath: "/x",
         file_size: 1,
       },
