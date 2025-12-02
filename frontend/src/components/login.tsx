@@ -15,11 +15,17 @@ import {
   isLockedOut,
   getRemainingLockoutTime,
   recordFailedAttempt,
-  resetAttempts,
   shouldShowWarning,
   getAttemptCount,
   formatRemainingTime,
 } from "../utils/loginTimeout";
+import {
+  LockoutState,
+  handleRememberUsername,
+  getResetLockoutState,
+  getLoginFailureStrategy,
+  getLockoutMessage,
+} from "../utils/loginHelpers";
 
 interface LoginProps {
   isOpen: boolean;
@@ -47,11 +53,13 @@ export default function Login({ isOpen, onClose }: LoginProps) {
   // Remember-me state: persist username to localStorage when true
   const [remember, setRemember] = useState(false);
   
-  // Login timeout state
-  const [isLocked, setIsLocked] = useState(false);
-  const [remainingTime, setRemainingTime] = useState(0);
-  const [showWarning, setShowWarning] = useState(false);
-  const [attemptCount, setAttemptCount] = useState(0);
+  // Consolidated login timeout state
+  const [lockoutState, setLockoutState] = useState<LockoutState>({
+    isLocked: false,
+    remainingTime: 0,
+    showWarning: false,
+    attemptCount: 0,
+  });
 
   useEffect(() => {
     if (!isOpen) {
@@ -86,33 +94,43 @@ export default function Login({ isOpen, onClose }: LoginProps) {
 
   // Timer effect to update remaining lockout time
   useEffect(() => {
-    if (!isLocked) return;
+    if (!lockoutState.isLocked) return;
 
     const interval = setInterval(() => {
       const remaining = getRemainingLockoutTime();
       if (remaining > 0) {
-        setRemainingTime(remaining);
+        setLockoutState((prev) => ({ ...prev, remainingTime: remaining }));
       } else {
-        // Lockout expired
-        setIsLocked(false);
-        setRemainingTime(0);
-        setShowWarning(false);
-        setAttemptCount(0);
+        // Lockout expired - reset all lockout state
+        setLockoutState({
+          isLocked: false,
+          remainingTime: 0,
+          showWarning: false,
+          attemptCount: 0,
+        });
       }
     }, 100); // Update every 100ms for smooth countdown
 
     return () => clearInterval(interval);
-  }, [isLocked]);
+  }, [lockoutState.isLocked]);
 
   const checkLockoutStatus = () => {
     const locked = isLockedOut();
-    setIsLocked(locked);
     
     if (locked) {
-      setRemainingTime(getRemainingLockoutTime());
+      setLockoutState({
+        isLocked: true,
+        remainingTime: getRemainingLockoutTime(),
+        showWarning: false,
+        attemptCount: getAttemptCount(),
+      });
     } else {
-      setShowWarning(shouldShowWarning());
-      setAttemptCount(getAttemptCount());
+      setLockoutState({
+        isLocked: false,
+        remainingTime: 0,
+        showWarning: shouldShowWarning(),
+        attemptCount: getAttemptCount(),
+      });
     }
   };
 
@@ -162,59 +180,52 @@ export default function Login({ isOpen, onClose }: LoginProps) {
 
   if (!isOpen) return null;
 
+  // Extracted: Handle successful login
+  const handleLoginSuccess = (data: any) => {
+    console.log("Login successful:", data);
+    alert(`Welcome back, ${data.display_name || data.username}!`);
+    
+    // Reset lockout state using helper
+    setLockoutState(getResetLockoutState());
+    
+    // Handle remembered username using helper
+    handleRememberUsername(remember, username);
+    
+    // TODO: Store user data in state/context for app use
+    onClose(true); // Pass true to indicate successful authentication
+  };
+
+  // Extracted: Handle failed login with strategy pattern
+  const handleLoginFailure = (error: any) => {
+    console.error("Login error:", error);
+    
+    // Record failed attempt
+    const state = recordFailedAttempt();
+    
+    // Use strategy pattern to determine response
+    const strategy = getLoginFailureStrategy(state.attempts);
+    
+    // Update UI state based on strategy
+    setLockoutState(strategy.newState);
+    
+    // Show appropriate message
+    alert(strategy.message);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check if user is locked out
+    // Guard clause: Check if user is locked out
     if (isLockedOut()) {
-      alert(`Too many failed attempts. Please wait ${formatRemainingTime(getRemainingLockoutTime())} before trying again.`);
+      alert(getLockoutMessage(getRemainingLockoutTime()));
       return;
     }
 
     try {
       const data = await api.login(username, password);
-      
-      // Login successful - reset attempts
-      resetAttempts();
-      setIsLocked(false);
-      setShowWarning(false);
-      setAttemptCount(0);
-      setRemainingTime(0);
-      
-      console.log("Login successful:", data);
-      alert(`Welcome back, ${data.display_name || data.username}!`);
-      // Persist or remove remembered username according to the checkbox
-      try {
-        if (remember && username && username.trim().length > 0) {
-          localStorage.setItem("ss_remembered_username", username.trim());
-        } else {
-          localStorage.removeItem("ss_remembered_username");
-        }
-      } catch (e) {
-        // Ignore storage errors
-      }
-      // TODO: Store user data in state/context for app use
-      onClose(true); // Pass true to indicate successful authentication
+      handleLoginSuccess(data);
     } catch (error) {
-      console.error("Login error:", error);
-      
-      // Record failed attempt
-      const state = recordFailedAttempt();
-      setAttemptCount(state.attempts);
-      
-      // Check if this triggers a lockout
-      if (state.attempts >= 5) {
-        setIsLocked(true);
-        setRemainingTime(getRemainingLockoutTime());
-        setShowWarning(false);
-        alert(`Too many failed attempts. You are locked out for 1 minute.`);
-      } else if (state.attempts === 4) {
-        // Show warning on 4th attempt
-        setShowWarning(true);
-        alert("Warning: One more failed attempt will result in a 1-minute timeout.");
-      } else {
-        alert("Login failed. Please check your credentials and try again.");
-      }
+      handleLoginFailure(error);
     }
   };
 
@@ -275,7 +286,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
-                  disabled={isLocked}
+                  disabled={lockoutState.isLocked}
                   style={{
                     width: "100%",
                     height: 56,
@@ -285,8 +296,8 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                     border: "1px solid rgba(255,255,255,0.08)",
                     color: "white",
                     fontSize: 16,
-                    opacity: isLocked ? 0.5 : 1,
-                    cursor: isLocked ? 'not-allowed' : 'text',
+                    opacity: lockoutState.isLocked ? 0.5 : 1,
+                    cursor: lockoutState.isLocked ? 'not-allowed' : 'text',
                   }}
                 />
               </div>
@@ -329,7 +340,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  disabled={isLocked}
+                  disabled={lockoutState.isLocked}
                   style={{
                     width: "100%",
                     height: 56,
@@ -339,14 +350,14 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                     border: "1px solid rgba(255,255,255,0.08)",
                     color: "white",
                     fontSize: 16,
-                    opacity: isLocked ? 0.5 : 1,
-                    cursor: isLocked ? 'not-allowed' : 'text',
+                    opacity: lockoutState.isLocked ? 0.5 : 1,
+                    cursor: lockoutState.isLocked ? 'not-allowed' : 'text',
                   }}
                 />
               </div>
 
               {/* Warning message after 4 failed attempts */}
-              {showWarning && !isLocked && (
+              {lockoutState.showWarning && !lockoutState.isLocked && (
                 <div style={{
                   padding: '12px 16px',
                   borderRadius: 8,
@@ -366,7 +377,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
               )}
 
               {/* Lockout message */}
-              {isLocked && (
+              {lockoutState.isLocked && (
                 <div style={{
                   padding: '12px 16px',
                   borderRadius: 8,
@@ -380,7 +391,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                     margin: 0,
                     fontWeight: 500,
                   }}>
-                    🔒 Too many failed attempts. Please wait {formatRemainingTime(remainingTime)} before trying again.
+                    🔒 Too many failed attempts. Please wait {formatRemainingTime(lockoutState.remainingTime)} before trying again.
                   </p>
                 </div>
               )}
@@ -388,21 +399,21 @@ export default function Login({ isOpen, onClose }: LoginProps) {
               <div style={{ marginTop: 20 }}>
                 <button
                   type="submit"
-                  disabled={isLocked}
+                  disabled={lockoutState.isLocked}
                   style={{
                     width: "100%",
                     height: 56,
                     borderRadius: 12,
-                    background: isLocked ? "#6b7280" : "#2563eb",
+                    background: lockoutState.isLocked ? "#6b7280" : "#2563eb",
                     border: "none",
                     color: "white",
                     fontSize: 16,
                     fontWeight: 600,
-                    cursor: isLocked ? 'not-allowed' : 'pointer',
-                    opacity: isLocked ? 0.6 : 1,
+                    cursor: lockoutState.isLocked ? 'not-allowed' : 'pointer',
+                    opacity: lockoutState.isLocked ? 0.6 : 1,
                   }}
                 >
-                  {isLocked ? `Locked (${formatRemainingTime(remainingTime)})` : 'Submit'}
+                  {lockoutState.isLocked ? `Locked (${formatRemainingTime(lockoutState.remainingTime)})` : 'Submit'}
                 </button>
               </div>
 

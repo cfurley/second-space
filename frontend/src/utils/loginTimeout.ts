@@ -66,29 +66,33 @@ export function isLockedOut(): boolean {
 
 /**
  * Record a failed login attempt
- * Returns the updated timeout state
+ * Returns the updated timeout state (immutable - creates new state object)
  */
 export function recordFailedAttempt(): TimeoutData {
-  const state = getTimeoutState();
+  const currentState = getTimeoutState();
   const now = Date.now();
   
   // If we're past a previous lockout, reset the counter
-  if (state.lockedUntil > 0 && state.lockedUntil < now) {
+  if (currentState.lockedUntil > 0 && currentState.lockedUntil < now) {
     // User had a timeout but it expired - they get fresh attempts
-    state.attempts = 0;
-    state.lockedUntil = 0;
+    const resetState: TimeoutData = {
+      attempts: 1, // This is the first attempt after reset
+      lockedUntil: 0,
+    };
+    saveTimeoutState(resetState);
+    return resetState;
   }
   
-  // Increment attempts
-  state.attempts += 1;
+  // Increment attempts (immutable pattern)
+  const newAttempts = currentState.attempts + 1;
   
   // If this is the 5th attempt or any attempt after being locked out, apply timeout
-  if (state.attempts >= 5) {
-    state.lockedUntil = now + TIMEOUT_DURATION;
-  }
+  const newState: TimeoutData = newAttempts >= 5
+    ? { attempts: newAttempts, lockedUntil: now + TIMEOUT_DURATION }
+    : { ...currentState, attempts: newAttempts };
   
-  saveTimeoutState(state);
-  return state;
+  saveTimeoutState(newState);
+  return newState;
 }
 
 /**
