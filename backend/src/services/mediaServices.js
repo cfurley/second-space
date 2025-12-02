@@ -177,15 +177,53 @@ async function generateFilepath(media) {
   if (media.base64 && typeof media.base64 === "string") {
     const buffer = Buffer.from(media.base64, "base64");
 
-    // validate buffer's size against max file size
-    if (buffer.length > MAX_FILE_SIZE) {
-      throw new Error("File too large");
+    // validate size against file_size if provided and MAX_FILE_SIZE
+    if (media.file_size && typeof media.file_size === "number") {
+      if (media.file_size !== buffer.length) {
+        // if mismatch, prefer actual buffer length but reject if exceeds limit
+        if (buffer.length > MAX_FILE_SIZE) throw new Error("File too large");
+      }
     }
 
-    await fs.promises.writeFile(absolutePath, buffer);
-  }
+    if (buffer.length > MAX_FILE_SIZE) throw new Error("File too large");
 
+    await writeFileWithUniqueName(destDir, ext, buffer);
+  }
   return dbPath;
+  /**
+   * Helper to write a file with a unique name using 'wx' flag.
+   * Retries up to 5 times if a collision occurs.
+   * Returns the dbPath for the written file.
+   */
+  async function writeFileWithUniqueName(
+    destDir,
+    ext,
+    buffer,
+    maxAttempts = 5
+  ) {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const hash = crypto.randomBytes(16).toString("hex");
+      const filename = `${hash}${ext}`;
+      const absolutePath = path.join(destDir, filename);
+      try {
+        const fileHandle = await fs.promises.open(absolutePath, "wx");
+        await fileHandle.write(buffer);
+        await fileHandle.close();
+        // Return the dbPath for the written file
+        return `/uploads/${path.basename(destDir)}/${filename}`;
+      } catch (err) {
+        if (err.code === "EEXIST") {
+          // Collision, try again
+          continue;
+        } else {
+          throw err;
+        }
+      }
+    }
+    throw new Error(
+      "Failed to generate unique filename after multiple attempts"
+    );
+  }
 }
 
 const updateMediaInDatabase = async (id, media) => {
