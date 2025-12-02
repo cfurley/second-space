@@ -39,8 +39,14 @@ const authenticateLogin = async (username, password) => {
 
   try {
     const result = await pool.query(selectQuery, selectValues);
+    
+    // Dummy hash for timing attack prevention (bcrypt hash of empty string)
+    const dummyHash = "$2a$12$DummyHashForTimingAttackPreventionXYZ";
+    
     if (result.rows.length === 0) {
-      console.log("Invalid Login - User not found");
+      // Call validatePassword with dummy hash to maintain constant timing
+      await passwordService.validatePassword(password, dummyHash);
+      console.log("Invalid Login");
       return { success: false, status: 404, error: "Invalid Login" };
     }
 
@@ -50,7 +56,7 @@ const authenticateLogin = async (username, password) => {
     const isPasswordValid = await passwordService.validatePassword(password, user.password);
     
     if (!isPasswordValid) {
-      console.log("Invalid Login - Password mismatch");
+      console.log("Invalid Login");
       return { success: false, status: 404, error: "Invalid Login" };
     }
 
@@ -90,7 +96,12 @@ const updatePassword = async (userId, password) => {
   }
 
   // Hash the password before storing
-  const hashedPassword = await passwordService.hashPassword(password);
+  let hashedPassword;
+  try {
+    hashedPassword = await passwordService.hashPassword(password);
+  } catch (error) {
+    return { success: false, status: error.statusCode || 500, error: error.message };
+  }
 
   const query = `
   UPDATE "user" SET password = $1, update_date_utc = NOW()
@@ -123,7 +134,12 @@ const updatePassword = async (userId, password) => {
  */
 const createUser = async (user) => {
   // Hash the password before storing
-  const hashedPassword = await passwordService.hashPassword(user.password);
+  let hashedPassword;
+  try {
+    hashedPassword = await passwordService.hashPassword(user.password);
+  } catch (error) {
+    return { success: false, status: error.statusCode || 500, error: error.message };
+  }
 
   const query = `INSERT INTO "user" (username, password, display_name, first_name,
   last_name, create_date_utc, last_login_date_utc)

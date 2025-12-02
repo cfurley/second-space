@@ -9,16 +9,20 @@ const SALT_ROUNDS = 12; // Industry standard for secure hashing
  */
 export const hashPassword = async (plainTextPassword) => {
   if (!plainTextPassword || typeof plainTextPassword !== 'string') {
-    throw new Error('Invalid password provided');
+    const error = new Error('Invalid password provided');
+    error.statusCode = 400;
+    throw error;
   }
   
   try {
     const hash = await bcrypt.hash(plainTextPassword, SALT_ROUNDS);
-    console.log('🔐 Password hashed successfully');
+    console.log('Password hashed successfully');
     return hash;
   } catch (error) {
-    console.error('❌ Password hashing failed:', error);
-    throw new Error('Password hashing failed');
+    console.error('Password hashing failed:', error);
+    const hashError = new Error('Password hashing failed');
+    hashError.statusCode = 500;
+    throw hashError;
   }
 };
 
@@ -36,15 +40,12 @@ export const validatePassword = async (plainTextPassword, storedHash) => {
   try {
     const isMatch = await bcrypt.compare(plainTextPassword, storedHash);
     
-    if (isMatch) {
-      console.log('✅ Password validated');
-    } else {
-      console.log('❌ Password validation failed');
-    }
+    // For security, do not log authentication outcome details
+    // console.log('Password validation attempted');
     
     return isMatch;
   } catch (error) {
-    console.error('❌ Password validation error:', error);
+    console.error('Password validation error:', error);
     return false;
   }
 };

@@ -156,6 +156,9 @@ describe("User Controller - authenticate", () => {
     // Arrange: make pool.query return empty list
     pool.query.mockResolvedValueOnce({ rows: [] });
 
+    // Mock password validation (called with dummy hash for timing attack prevention)
+    passwordService.validatePassword.mockResolvedValueOnce(false);
+
     // Act
     await userControllers.authenticate(req, res);
 
@@ -167,8 +170,46 @@ describe("User Controller - authenticate", () => {
     );
   });
 
-  // 404 Credentials Invalid
-  test("returns 404 and login invalid when credentials invalid", async () => {
+  // 404 Password validation fails (user exists but wrong password)
+  test("returns 404 when password validation fails", async () => {
+    const req = {
+      body: {
+        username: "testuser",
+        password: "WrongPassword1!",
+      },
+    };
+
+    const res = createResMock();
+
+    // Arrange: make pool.query return a user
+    pool.query.mockResolvedValueOnce({
+      rows: [
+        {
+          id: 1,
+          username: "testuser",
+          password: "$2a$12$hashedpassword",
+          display_name: "Test User",
+        },
+      ],
+    });
+
+    // Mock password validation to return false
+    passwordService.validatePassword.mockResolvedValueOnce(false);
+
+    // Act
+    await userControllers.authenticate(req, res);
+
+    // Assert
+    expect(pool.query).toHaveBeenCalled();
+    expect(passwordService.validatePassword).toHaveBeenCalledWith("WrongPassword1!", "$2a$12$hashedpassword");
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ error: "Invalid Login" })
+    );
+  });
+
+  // 404 Credentials Invalid (duplicate test for user not found scenario)
+  test("returns 404 and login invalid when user not found", async () => {
     const req = {
       body: {
         username: "testuser",
@@ -180,6 +221,9 @@ describe("User Controller - authenticate", () => {
 
     // Arrange: make pool.query return empty list
     pool.query.mockResolvedValueOnce({ rows: [] });
+
+    // Mock password validation (called with dummy hash for timing attack prevention)
+    passwordService.validatePassword.mockResolvedValueOnce(false);
 
     // Act
     await userControllers.authenticate(req, res);
