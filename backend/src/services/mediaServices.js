@@ -177,15 +177,10 @@ async function generateFilepath(media) {
   if (media.base64 && typeof media.base64 === "string") {
     const buffer = Buffer.from(media.base64, "base64");
 
-    // validate size against file_size if provided and MAX_FILE_SIZE
-    if (media.file_size && typeof media.file_size === "number") {
-      if (media.file_size !== buffer.length) {
-        // if mismatch, prefer actual buffer length but reject if exceeds limit
-        if (buffer.length > MAX_FILE_SIZE) throw new Error("File too large");
-      }
+    // validate buffer's size against max file size
+    if (buffer.length > MAX_FILE_SIZE) {
+      throw new Error("File too large");
     }
-
-    if (buffer.length > MAX_FILE_SIZE) throw new Error("File too large");
 
     await writeFileWithUniqueName(destDir, ext, buffer);
   }
