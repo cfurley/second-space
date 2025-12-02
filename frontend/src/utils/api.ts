@@ -40,7 +40,12 @@ async function apiFetch(endpoint: string, options: RequestInit = {}) {
     const data = await response.json();
     
     if (!response.ok) {
-      throw new Error(data.message || `API Error: ${response.status}`);
+      // Surface backend error fields consistently. Backend often uses { error: "..." }
+      const backendMessage =
+        (data && (data.message || data.error)) ||
+        (typeof data === 'string' ? data : null) ||
+        undefined;
+      throw new Error(backendMessage || `API Error: ${response.status}`);
     }
     
     return data;

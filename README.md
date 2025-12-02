@@ -1,14 +1,10 @@
-[![Run Tests](https://github.com/cfurley/second-space/actions/workflows/test.yml/badge.svg)](https://github.com/cfurley/second-space/actions/workflows/test.yml)
+[![Run Tests](https://github.com/cfurley/second-space/actions/workflows/test.yml/badge.svg)](https://github.com/cfurley/second-space/actions/workflows/test.yml)<br>
 [![Deploy to GitHub Pages](https://github.com/cfurley/second-space/actions/workflows/deploy.yml/badge.svg)](https://github.com/cfurley/second-space/actions/workflows/deploy.yml)
 
-<small>CS3203 Group D</small>
-
 # Second Space
-
 <img src='./resources/FigmaMarkupV1.png'>
 
 ## 🎯 What is Second Space?
-
 **Second Space** is an AI-powered hub for creating and organizing visual mood boards and think spaces. Save and curate media from your device or social media profiles in beautiful, customizable spaces.
 
 **🌐 Live App:** https://cfurley.github.io/second-space/

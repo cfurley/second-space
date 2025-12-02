@@ -3,6 +3,8 @@
 # Editor
 *.vscode
 .idea/
+.vs
+.idea
 
 # Dependencies
 *node_modules
