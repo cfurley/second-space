@@ -74,8 +74,16 @@ function fromJson(json) {
  */
 function isValidFilename(name) {
   if (typeof name !== "string") return false;
+
   // disallow slashes
   if (name.indexOf("/") !== -1 || name.indexOf("\\") !== -1) return false;
+
+  // Reject URL-encoded path separators and control characters
+  if (name.match(/%2[fF]|%5[cC]|%00/)) return false;
+  // Reject after URL decoding
+  const decoded = decodeURIComponent(name);
+  if (decoded.indexOf("/") !== -1 || decoded.indexOf("\\") !== -1) return false;
+
   const ext = name.slice(name.lastIndexOf(".")).toLowerCase();
   const allowed = [
     ".png",
