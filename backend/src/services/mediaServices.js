@@ -88,6 +88,7 @@ const getMedia = async (userId, mediaId) => {
   }
 };
 
+// TODO: Generate filepath inserts media without verifying the database will take it
 const insertMediaToDatabase = async (media) => {
   if (!media) {
     return { success: false, status: 400, error: "Media was not given." };
@@ -236,6 +237,7 @@ const updateMediaInDatabase = async (id, media) => {
   }
 };
 
+// TODO: Delete fhe file from disk
 const deleteMediaFromDatabase = async (id) => {
   if (!id) {
     return { success: false, status: 400, error: "Missing media id." };

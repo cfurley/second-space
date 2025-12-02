@@ -133,9 +133,7 @@ const deleteMedia = async (req, res) => {
     }
     return res.status(result.status).json({ message: result.message });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Server Error", details: error.message });
+    return res.status(500).json({ error: "Server Error" });
   }
 };
 
