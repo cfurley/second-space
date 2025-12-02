@@ -156,7 +156,6 @@ const getMedia = async (userId, mediaId) => {
   }
 };
 
-// TODO: Generate filepath inserts media without verifying the database will take it
 const insertMediaToDatabase = async (media) => {
   if (!media) {
     return { success: false, status: 400, error: "Media was not given." };
@@ -164,6 +163,9 @@ const insertMediaToDatabase = async (media) => {
   // Generate server-side filepath; do NOT use user-provided filepath
   try {
     const filepath = await generateFilepath(media);
+
+    // Remember whether generateFilepath wrote a file to disk (it writes only when base64 provided)
+    const wroteFile = !!(media.base64 && typeof media.base64 === "string");
 
     const query = `
       INSERT INTO media (
@@ -185,17 +187,78 @@ const insertMediaToDatabase = async (media) => {
       0,
     ];
 
-    const result = await pool.query(query, values);
-    if (!result || result.rows.length === 0) {
-      console.log("Media did not insert:", values);
-      return { success: false, status: 500, error: "Media did not insert" };
-    }
+    try {
+      const result = await pool.query(query, values);
+      if (!result || result.rows.length === 0) {
+        // Cleanup any written file to avoid orphaning
+        if (wroteFile && filepath) {
+          try {
+            const relPath = filepath.startsWith("/")
+              ? filepath.slice(1)
+              : filepath;
+            const cwdBase = path.basename(process.cwd());
+            const uploadsRoot =
+              cwdBase === "backend"
+                ? path.join(process.cwd(), "uploads")
+                : path.join(process.cwd(), "backend", "uploads");
+            const absolutePath = path.join(
+              uploadsRoot,
+              relPath.replace(/\\/g, "/")
+            );
+            await fs.promises.unlink(absolutePath);
+          } catch (err) {
+            if (err.code !== "ENOENT") {
+              console.log("Failed to cleanup orphaned file");
+              return {
+                success: false,
+                status: 500,
+                error: `Failed to cleanup orphaned file`,
+              };
+            }
+            // ENOENT is fine (file already gone)
+          }
+        }
 
-    return {
-      success: true,
-      status: 200,
-      message: `Created media successfully`,
-    };
+        console.log("Media did not insert:", values);
+        return { success: false, status: 500, error: "Media did not insert" };
+      }
+
+      return {
+        success: true,
+        status: 200,
+        message: `Created media successfully`,
+      };
+    } catch (dbError) {
+      // Attempt to cleanup written file on DB error
+      if (wroteFile && filepath) {
+        try {
+          const relPath = filepath.startsWith("/")
+            ? filepath.slice(1)
+            : filepath;
+          const cwdBase = path.basename(process.cwd());
+          const uploadsRoot =
+            cwdBase === "backend"
+              ? path.join(process.cwd(), "uploads")
+              : path.join(process.cwd(), "backend", "uploads");
+          const absolutePath = path.join(
+            uploadsRoot,
+            relPath.replace(/\\/g, "/")
+          );
+          await fs.promises.unlink(absolutePath);
+        } catch (err) {
+          if (err.code !== "ENOENT") {
+            console.log("Failed to cleanup orphaned file after DB error");
+            return {
+              success: false,
+              status: 500,
+              error: `Failed to cleanup orphaned file.`,
+            };
+          }
+        }
+      }
+      console.log(dbError);
+      return { success: false, status: 500, error: "Database Error." };
+    }
   } catch (error) {
     console.log(error);
     return { success: false, status: 500, error: "Server Error" };
