@@ -2,9 +2,69 @@ import pool from "../db/index.js";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
+import { fileTypeFromBuffer } from "file-type";
 
 // maximum file size allowed (bytes). 20 MB default.
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
+
+/**
+ * Whitelist of allowed file extensions with their corresponding MIME types.
+ * Maps extensions to accepted MIME types detected via magic bytes.
+ */
+const ALLOWED_EXTENSIONS = {
+  ".png": ["image/png"],
+  ".jpg": ["image/jpeg"],
+  ".jpeg": ["image/jpeg"],
+  ".gif": ["image/gif"],
+  ".webp": ["image/webp"],
+  ".bmp": ["image/bmp"],
+  ".svg": ["image/svg+xml"],
+  ".txt": ["text/plain"],
+  ".json": ["application/json"],
+};
+
+/**
+ * Validates that the file buffer's actual MIME type (detected via magic bytes)
+ * matches the declared extension.
+ *
+ * @param {Buffer} buffer - The file content buffer
+ * @param {string} ext - The file extension (e.g., ".jpg")
+ * @returns {Promise<boolean>} - true if MIME type matches, false otherwise
+ * @throws {Error} - if extension is not in whitelist
+ */
+async function validateMimeType(buffer, ext) {
+  const extLower = ext.toLowerCase();
+
+  // Verify extension is whitelisted
+  if (!ALLOWED_EXTENSIONS[extLower]) {
+    throw new Error(`File extension "${ext}" is not allowed.`);
+  }
+
+  // Detect actual file type from magic bytes
+  const fileType = await fileTypeFromBuffer(buffer);
+
+  if (!fileType) {
+    // For plain text and JSON files, magic bytes detection might not work
+    // Fallback to allowing .txt and .json if no MIME type detected
+    if ([".txt", ".json"].includes(extLower)) {
+      return true;
+    }
+    throw new Error(
+      `Could not determine MIME type for file with extension "${ext}".`
+    );
+  }
+
+  // Check if detected MIME type is in the whitelist for this extension
+  const allowedMimes = ALLOWED_EXTENSIONS[extLower];
+  if (!allowedMimes.includes(fileType.mime)) {
+    throw new Error(
+      `File content MIME type "${fileType.mime}" does not match extension "${ext}". ` +
+        `Expected one of: ${allowedMimes.join(", ")}`
+    );
+  }
+
+  return true;
+}
 
 /*
   mediaServices.js
@@ -33,12 +93,20 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024;
         that are externally consistent, possibly using signed upload URLs.
 
   - Security: filename validation is intentionally strict (one period, no
-    slashes, constrained extensions). Additional hardening steps:
-      * Inspect MIME type / magic bytes of the decoded buffer to verify
-        that the declared extension matches file content.
+    slashes, constrained extensions). Additional hardening steps implemented:
+      * Extension whitelist validation to prevent unsupported file types
+      * MIME type validation via magic bytes (file-type library) to ensure
+        file content matches the declared extension. This prevents:
+        - Attackers bypassing extension checks by uploading malicious files
+          with misleading extensions (e.g., executable as .txt)
+        - Models or controllers inadvertently accepting dangerous types
+      * File size validation (20MB limit) to prevent denial of service
+    
+    Additional security recommendations for future enhancements:
       * Scan user uploads with a virus/malware scanner before moving to
-        permanent storage.
-      * Enforce per-user storage quotas and rate limits to avoid abuse.
+        permanent storage
+      * Enforce per-user storage quotas and rate limits to avoid abuse
+      * Consider moving uploads to isolated storage or cloud object store
 
   - Performance: base64 uploads are memory-heavy. For larger files use
     streaming multipart uploads (e.g., `multer` or write stream handling)
@@ -136,14 +204,23 @@ const insertMediaToDatabase = async (media) => {
 
 /**
  * Generate a safe filepath for storage based on filename extension and a hash.
+ * - validates extension against whitelist
+ * - validates file content MIME type via magic bytes
  * - organizes by type under ./uploads/<type>/
  * - returns path stored in DB like `/uploads/<type>/<hash><ext>`
  * - writes file if `media.base64` is present (base64 encoded file content)
+ *
+ * @throws {Error} - if extension is not whitelisted or MIME type doesn't match
  */
 async function generateFilepath(media) {
   if (!media || !media.filename) throw new Error("Missing filename");
 
   const ext = path.extname(media.filename).toLowerCase();
+
+  // Validate extension against whitelist
+  if (!ALLOWED_EXTENSIONS[ext]) {
+    throw new Error(`File extension "${ext}" is not allowed.`);
+  }
 
   // map extensions to folders
   const imageExts = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg"];
@@ -167,12 +244,6 @@ async function generateFilepath(media) {
   // ensure directory exists
   await fs.promises.mkdir(destDir, { recursive: true });
 
-  // create a hashed name
-  const hash = crypto.randomBytes(16).toString("hex");
-  const filename = `${hash}${ext}`;
-  const absolutePath = path.join(destDir, filename);
-  const dbPath = `/uploads/${folder}/${filename}`; // store unix-style
-
   // write file only if base64 content provided
   if (media.base64 && typeof media.base64 === "string") {
     const buffer = Buffer.from(media.base64, "base64");
@@ -182,9 +253,17 @@ async function generateFilepath(media) {
       throw new Error("File too large");
     }
 
-    await writeFileWithUniqueName(destDir, ext, buffer);
+    // Validate MIME type matches the declared extension via magic bytes
+    await validateMimeType(buffer, ext);
+
+    return await writeFileWithUniqueName(destDir, ext, buffer);
   }
-  return dbPath;
+
+  // If no base64 content, still return a default path
+  // (actual file won't be written, but path is returned for metadata)
+  const hash = crypto.randomBytes(16).toString("hex");
+  const filename = `${hash}${ext}`;
+  return `/uploads/${folder}/${filename}`;
   /**
    * Helper to write a file with a unique name using 'wx' flag.
    * Retries up to 5 times if a collision occurs.
