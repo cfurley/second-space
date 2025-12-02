@@ -305,26 +305,121 @@ const updateMediaInDatabase = async (id, media) => {
     return { success: false, status: 400, error: "Missing parameters." };
   }
 
-  // Do not accept user-provided filepath. We will not move files here.
-  const query = `
-    UPDATE media SET
-      filename = $1,
-      file_size = $2,
-      video_length = $3,
-      update_date_utc = $4
-    WHERE id = $5 AND deleted = 0
-    RETURNING id;
-  `;
-
-  const values = [
-    media.filename,
-    media.file_size,
-    media.video_length ?? null,
-    new Date(),
-    id,
-  ];
-
+  // Fetch current media row to get filepath and filename
+  const selectQuery = `SELECT filename, filepath FROM media WHERE id = $1 AND deleted = 0`;
   try {
+    const selectResult = await pool.query(selectQuery, [id]);
+    if (!selectResult || selectResult.rows.length === 0) {
+      return {
+        success: false,
+        status: 404,
+        error: "Media not found.",
+      };
+    }
+    const { filename: oldFilename, filepath: oldFilepath } =
+      selectResult.rows[0];
+
+    // Compute absolute path to old file
+    let oldAbsolutePath;
+    if (oldFilepath && typeof oldFilepath === "string") {
+      const relPath = oldFilepath.startsWith("/")
+        ? oldFilepath.slice(1)
+        : oldFilepath;
+      const cwdBase = path.basename(process.cwd());
+      const uploadsRoot =
+        cwdBase === "backend"
+          ? path.join(process.cwd(), "uploads")
+          : path.join(process.cwd(), "backend", "uploads");
+      oldAbsolutePath = path.join(uploadsRoot, relPath.replace(/\\/g, "/"));
+    }
+
+    // Determine new extension and folder
+    const newExt = path.extname(media.filename).toLowerCase();
+    const imageExts = [
+      ".png",
+      ".jpg",
+      ".jpeg",
+      ".gif",
+      ".webp",
+      ".bmp",
+      ".svg",
+    ];
+    const textExts = [".txt"];
+    const jsonExts = [".json"];
+    let folder = "others";
+    if (imageExts.includes(newExt)) folder = "images";
+    else if (textExts.includes(newExt)) folder = "text";
+    else if (jsonExts.includes(newExt)) folder = "json";
+    const cwdBase = path.basename(process.cwd());
+    const uploadsRoot =
+      cwdBase === "backend"
+        ? path.join(process.cwd(), "uploads")
+        : path.join(process.cwd(), "backend", "uploads");
+    const newDestDir = path.join(uploadsRoot, folder);
+    await fs.promises.mkdir(newDestDir, { recursive: true });
+
+    // If filename or extension changed, rename file
+    let newFilename = media.filename;
+    let newAbsolutePath = oldAbsolutePath;
+    let newDbFilepath = oldFilepath;
+    if (oldFilename !== media.filename && oldAbsolutePath) {
+      // Generate new hashed filename for consistency
+      const hash = crypto.randomBytes(16).toString("hex");
+      newFilename = `${hash}${newExt}`;
+      newAbsolutePath = path.join(newDestDir, newFilename);
+      newDbFilepath = `/uploads/${folder}/${newFilename}`;
+      try {
+        await fs.promises.rename(oldAbsolutePath, newAbsolutePath);
+      } catch (err) {
+        // If file does not exist, treat as success; otherwise, abort
+        if (err.code !== "ENOENT") {
+          return {
+            success: false,
+            status: 500,
+            error: `Failed to rename file on disk.`,
+          };
+        }
+        // ENOENT: file already gone, continue
+      }
+    }
+
+    // If new base64 content is provided, overwrite file
+    if (media.base64 && typeof media.base64 === "string" && newAbsolutePath) {
+      const buffer = Buffer.from(media.base64, "base64");
+      if (buffer.length > MAX_FILE_SIZE) {
+        return { success: false, status: 400, error: "File too large" };
+      }
+      await validateMimeType(buffer, newExt);
+      try {
+        await fs.promises.writeFile(newAbsolutePath, buffer);
+      } catch (err) {
+        return {
+          success: false,
+          status: 500,
+          error: `Failed to update file on disk.`,
+        };
+      }
+    }
+
+    // Update DB row
+    const query = `
+      UPDATE media SET
+        filename = $1,
+        filepath = $2,
+        file_size = $3,
+        video_length = $4,
+        update_date_utc = $5
+      WHERE id = $6 AND deleted = 0
+      RETURNING id;
+    `;
+    const values = [
+      newFilename,
+      newDbFilepath,
+      media.file_size,
+      media.video_length ?? null,
+      new Date(),
+      id,
+    ];
     const result = await pool.query(query, values);
     if (!result || result.rows.length === 0) {
       return {
