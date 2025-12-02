@@ -1,19 +1,24 @@
 /**
  * Login Timeout Manager
  * 
- * Tracks failed login attempts and enforces timeout penalties.
+ * Tracks failed login attempts and enforces escalating timeout penalties.
  * - After 4 failed attempts, shows a warning
  * - After 5 failed attempts, enforces a 1-minute timeout
- * - Each subsequent failure after timeout adds another 1-minute timeout
+ * - Each subsequent failure after a timeout increases the duration:
+ *   - 1st lockout: 1 minute
+ *   - 2nd lockout: 2 minutes
+ *   - 3rd lockout: 3 minutes
+ *   - And so on...
  */
 
-const TIMEOUT_DURATION = 60 * 1000; // 1 minute in milliseconds
+const BASE_TIMEOUT_DURATION = 60 * 1000; // 1 minute in milliseconds
 const STORAGE_KEY = 'ss_login_timeout';
 const ATTEMPTS_KEY = 'ss_login_attempts';
 
 interface TimeoutData {
-  lockedUntil: number; // Timestamp when the user can try again
-  attempts: number;     // Number of failed attempts
+  lockedUntil: number;   // Timestamp when the user can try again
+  attempts: number;      // Number of failed attempts
+  lockoutCount: number;  // Number of times user has been locked out (for escalation)
 }
 
 /**
@@ -28,7 +33,7 @@ export function getTimeoutState(): TimeoutData {
   } catch (e) {
     console.error('Error reading timeout state:', e);
   }
-  return { lockedUntil: 0, attempts: 0 };
+  return { lockedUntil: 0, attempts: 0, lockoutCount: 0 };
 }
 
 /**
@@ -67,30 +72,49 @@ export function isLockedOut(): boolean {
 /**
  * Record a failed login attempt
  * Returns the updated timeout state (immutable - creates new state object)
+ * Implements escalating timeouts: 1min, 2min, 3min, etc.
  */
 export function recordFailedAttempt(): TimeoutData {
   const currentState = getTimeoutState();
   const now = Date.now();
   
-  // If we're past a previous lockout, reset the counter
+  // If we're past a previous lockout, this is a new attempt after timeout expired
   if (currentState.lockedUntil > 0 && currentState.lockedUntil < now) {
-    // User had a timeout but it expired - they get fresh attempts
-    const resetState: TimeoutData = {
-      attempts: 1, // This is the first attempt after reset
-      lockedUntil: 0,
+    // User had a timeout but it expired - this failure triggers escalated lockout
+    const newLockoutCount = currentState.lockoutCount + 1;
+    const escalatedTimeout = BASE_TIMEOUT_DURATION * newLockoutCount;
+    
+    const escalatedState: TimeoutData = {
+      attempts: 1, // Reset attempts counter after lockout
+      lockedUntil: now + escalatedTimeout,
+      lockoutCount: newLockoutCount,
     };
-    saveTimeoutState(resetState);
-    return resetState;
+    saveTimeoutState(escalatedState);
+    return escalatedState;
   }
   
   // Increment attempts (immutable pattern)
   const newAttempts = currentState.attempts + 1;
   
-  // If this is the 5th attempt or any attempt after being locked out, apply timeout
-  const newState: TimeoutData = newAttempts >= 5
-    ? { attempts: newAttempts, lockedUntil: now + TIMEOUT_DURATION }
-    : { ...currentState, attempts: newAttempts };
+  // If this is the 5th attempt, apply first timeout
+  if (newAttempts >= 5) {
+    const newLockoutCount = currentState.lockoutCount + 1;
+    const timeoutDuration = BASE_TIMEOUT_DURATION * newLockoutCount;
+    
+    const newState: TimeoutData = {
+      attempts: newAttempts,
+      lockedUntil: now + timeoutDuration,
+      lockoutCount: newLockoutCount,
+    };
+    saveTimeoutState(newState);
+    return newState;
+  }
   
+  // Less than 5 attempts - just increment
+  const newState: TimeoutData = {
+    ...currentState,
+    attempts: newAttempts,
+  };
   saveTimeoutState(newState);
   return newState;
 }
@@ -121,6 +145,14 @@ export function resetAttempts(): void {
 export function getAttemptCount(): number {
   const state = getTimeoutState();
   return state.attempts;
+}
+
+/**
+ * Get the current lockout count (for escalating timeouts)
+ */
+export function getLockoutCount(): number {
+  const state = getTimeoutState();
+  return state.lockoutCount;
 }
 
 /**

@@ -9,6 +9,7 @@ import {
   getRemainingLockoutTime,
   resetAttempts,
   formatRemainingTime,
+  getLockoutCount,
 } from "./loginTimeout";
 
 export interface LockoutState {
@@ -64,6 +65,7 @@ export function getResetLockoutState(): LockoutState {
 
 /**
  * Strategy pattern for handling different login failure scenarios
+ * Supports escalating timeouts
  */
 export function getLoginFailureStrategy(attempts: number): LoginFailureResponse {
   const baseState: LockoutState = {
@@ -73,16 +75,26 @@ export function getLoginFailureStrategy(attempts: number): LoginFailureResponse 
     attemptCount: attempts,
   };
 
-  // Strategy for 5+ attempts: Lock out the user
+  // Strategy for 5+ attempts: Lock out the user with escalating timeout
   if (attempts >= 5) {
+    const lockoutCount = getLockoutCount();
+    const remainingTime = getRemainingLockoutTime();
+    const minutes = Math.ceil(remainingTime / 60000);
+    
+    let message = `Too many failed attempts. You are locked out for ${minutes} minute${minutes > 1 ? 's' : ''}.`;
+    
+    if (lockoutCount > 1) {
+      message += ` (Lockout #${lockoutCount})`;
+    }
+    
     return {
       shouldLock: true,
       shouldWarn: false,
-      message: "Too many failed attempts. You are locked out for 1 minute.",
+      message,
       newState: {
         ...baseState,
         isLocked: true,
-        remainingTime: getRemainingLockoutTime(),
+        remainingTime,
       },
     };
   }
@@ -92,7 +104,7 @@ export function getLoginFailureStrategy(attempts: number): LoginFailureResponse 
     return {
       shouldLock: false,
       shouldWarn: true,
-      message: "Warning: One more failed attempt will result in a 1-minute timeout.",
+      message: "Warning: One more failed attempt will result in a timeout.",
       newState: {
         ...baseState,
         showWarning: true,
