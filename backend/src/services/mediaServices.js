@@ -90,7 +90,7 @@ const getMedia = async (userId, mediaId) => {
 
 const insertMediaToDatabase = async (media) => {
   if (!media) {
-    return { success: false, status: 400, error: "Media is not given." };
+    return { success: false, status: 400, error: "Media was not given." };
   }
   // Generate server-side filepath; do NOT use user-provided filepath
   try {
@@ -125,7 +125,7 @@ const insertMediaToDatabase = async (media) => {
     return {
       success: true,
       status: 200,
-      message: `Created media ${result.rows[0].id} successfully`,
+      message: `Created media successfully`,
     };
   } catch (error) {
     console.log(error);
@@ -228,7 +228,7 @@ const updateMediaInDatabase = async (id, media) => {
     return {
       success: true,
       status: 200,
-      message: `Updated media ${id} succesfully`,
+      message: `Updated media succesfully`,
     };
   } catch (error) {
     console.log(error);
@@ -259,7 +259,7 @@ const deleteMediaFromDatabase = async (id) => {
     return {
       success: true,
       status: 200,
-      message: `Deleted media ${id} succesfully`,
+      message: `Deleted media succesfully`,
     };
   } catch (error) {
     console.log(error);

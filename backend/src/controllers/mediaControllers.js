@@ -36,7 +36,7 @@ const getAllMedia = async (req, res) => {
 
   const result = await mediaService.getMedia(userId, null);
   if (!result.success) {
-    return res.status(result.status).json({ message: result.error });
+    return res.status(result.status).json({ error: result.error });
   } else {
     const media = result.data;
     return res.status(result.status).json({ media });
@@ -44,11 +44,12 @@ const getAllMedia = async (req, res) => {
 };
 
 const getById = async (req, res) => {
+  // TODO: Make sure this is actually passed by frontend
   let mediaId;
   try {
     mediaId = req.params.id;
   } catch (error) {
-    return res.status(400).json({ message: "No media id provided." });
+    return res.status(400).json({ error: "No media id provided." });
   }
 
   const result = await mediaService.getMedia(null, mediaId);
@@ -66,9 +67,9 @@ const createMedia = async (req, res) => {
   } catch (error) {
     // keep filename-related messages minimal
     if (error && error.message === "Invalid filename") {
-      return res.status(400).json({ message: "Invalid filename" });
+      return res.status(400).json({ error: "Invalid filename" });
     }
-    return res.status(400).json({ message: "Invalid parameters" });
+    return res.status(400).json({ error: "Invalid parameters" });
   }
 
   try {
@@ -84,13 +85,11 @@ const createMedia = async (req, res) => {
 
     const result = await mediaService.insertMediaToDatabase(payload);
     if (!result.success) {
-      return res.status(result.status).json({ message: result.error });
+      return res.status(result.status).json({ error: result.error });
     }
     return res.status(result.status).json({ message: result.message });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ error: "Database Error.", details: error.message });
+    return res.status(500).json({ error: "Database Error." });
   }
 };
 
@@ -102,9 +101,9 @@ const updateMedia = async (req, res) => {
       mediaModel.fromJson(req.body);
     } catch (error) {
       if (error && error.message === "Invalid filename") {
-        return res.status(400).json({ message: "Invalid filename" });
+        return res.status(400).json({ error: "Invalid filename" });
       }
-      return res.status(400).json({ message: "Invalid parameters" });
+      return res.status(400).json({ error: "Invalid parameters" });
     }
   }
   try {
@@ -117,13 +116,11 @@ const updateMedia = async (req, res) => {
 
     const result = await mediaService.updateMediaInDatabase(mediaId, payload);
     if (!result.success) {
-      return res.status(result.status).json({ message: result.error });
+      return res.status(result.status).json({ error: result.error });
     }
     return res.status(result.status).json({ message: result.message });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Server Error", details: error.message });
+    return res.status(500).json({ error: "Database Error." });
   }
 };
 

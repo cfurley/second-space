@@ -73,7 +73,7 @@ describe("Media Controller", () => {
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Invalid filename" })
+      expect.objectContaining({ error: "Invalid filename" })
     );
   });
 
@@ -108,7 +108,7 @@ describe("Media Controller", () => {
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Invalid filename" })
+      expect.objectContaining({ error: "Invalid filename" })
     );
   });
 
