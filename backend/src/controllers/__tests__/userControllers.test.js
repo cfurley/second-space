@@ -288,3 +288,58 @@ describe("User Controller - authenticate", () => {
     );
   });
 });
+
+describe("User Services - updatePassword", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // Error when password hashing fails
+  test("returns error when password hashing fails", async () => {
+    // Mock hashPassword to throw an error with statusCode
+    const hashError = new Error("Password hashing failed");
+    hashError.statusCode = 500;
+    passwordService.hashPassword.mockRejectedValueOnce(hashError);
+
+    // Act
+    const result = await userServices.updatePassword(1, "newPassword123!");
+
+    // Assert
+    expect(result).toEqual({
+      success: false,
+      status: 500,
+      error: "Password hashing failed",
+    });
+  });
+});
+
+describe("User Services - createUser", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // Error when password hashing fails
+  test("returns error when password hashing fails", async () => {
+    const user = {
+      username: "testuser",
+      password: "Password1!",
+      first_name: "Test",
+      last_name: "User",
+    };
+
+    // Mock hashPassword to throw an error with statusCode
+    const hashError = new Error("Password hashing failed");
+    hashError.statusCode = 500;
+    passwordService.hashPassword.mockRejectedValueOnce(hashError);
+
+    // Act
+    const result = await userServices.createUser(user);
+
+    // Assert
+    expect(result).toEqual({
+      success: false,
+      status: 500,
+      error: "Password hashing failed",
+    });
+  });
+});

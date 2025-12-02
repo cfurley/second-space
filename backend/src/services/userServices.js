@@ -40,8 +40,8 @@ const authenticateLogin = async (username, password) => {
   try {
     const result = await pool.query(selectQuery, selectValues);
     
-    // Dummy hash for timing attack prevention (bcrypt hash of empty string)
-    const dummyHash = "$2a$12$DummyHashForTimingAttackPreventionXYZ";
+    // Dummy hash for timing attack prevention (valid bcrypt hash)
+    const dummyHash = "$2a$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW";
     
     if (result.rows.length === 0) {
       // Call validatePassword with dummy hash to maintain constant timing
