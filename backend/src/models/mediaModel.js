@@ -76,9 +76,6 @@ function isValidFilename(name) {
   if (typeof name !== "string") return false;
   // disallow slashes
   if (name.indexOf("/") !== -1 || name.indexOf("\\") !== -1) return false;
-  // count periods
-  const periodCount = (name.match(/\./g) || []).length;
-  if (periodCount !== 1) return false;
   const ext = name.slice(name.lastIndexOf(".")).toLowerCase();
   const allowed = [
     ".png",
