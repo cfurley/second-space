@@ -344,21 +344,64 @@ const updateMediaInDatabase = async (id, media) => {
   }
 };
 
-// TODO: Delete fhe file from disk
+// TODO: Delete the file from disk
 const deleteMediaFromDatabase = async (id) => {
   if (!id) {
     return { success: false, status: 400, error: "Missing media id." };
   }
 
-  const query = `
-    UPDATE media SET deleted = 1, delete_date_utc = $1
-    WHERE id = $2 AND deleted = 0
-    RETURNING id;
-  `;
-
+  // First, fetch the media row to get the filepath
+  const selectQuery = `SELECT filepath FROM media WHERE id = $1 AND deleted = 0`;
   try {
-    const result = await pool.query(query, [new Date(), id]);
-    if (!result || result.rows.length === 0) {
+    const selectResult = await pool.query(selectQuery, [id]);
+    if (!selectResult || selectResult.rows.length === 0) {
+      return {
+        success: false,
+        status: 404,
+        error: "Media not found or already deleted.",
+      };
+    }
+    const { filepath } = selectResult.rows[0];
+
+    // Compute absolute path to file
+    let absolutePath;
+    if (filepath && typeof filepath === "string") {
+      // Remove leading slash if present
+      const relPath = filepath.startsWith("/") ? filepath.slice(1) : filepath;
+      // Determine uploads root
+      const cwdBase = path.basename(process.cwd());
+      const uploadsRoot =
+        cwdBase === "backend"
+          ? path.join(process.cwd(), "uploads")
+          : path.join(process.cwd(), "backend", "uploads");
+      absolutePath = path.join(uploadsRoot, relPath.replace(/\\/g, "/"));
+    }
+
+    // Delete file from disk if it exists
+    if (absolutePath) {
+      try {
+        await fs.promises.unlink(absolutePath);
+      } catch (err) {
+        // If file does not exist, treat as success; otherwise, abort
+        if (err.code !== "ENOENT") {
+          return {
+            success: false,
+            status: 500,
+            error: `Failed to delete file from disk: ${err.message}`,
+          };
+        }
+        // ENOENT: file already gone, continue
+      }
+    }
+
+    // Now, mark as deleted in DB
+    const updateQuery = `
+      UPDATE media SET deleted = 1, delete_date_utc = $1
+      WHERE id = $2 AND deleted = 0
+      RETURNING id;
+    `;
+    const updateResult = await pool.query(updateQuery, [new Date(), id]);
+    if (!updateResult || updateResult.rows.length === 0) {
       return {
         success: false,
         status: 404,
