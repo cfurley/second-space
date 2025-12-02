@@ -22,13 +22,16 @@ describe("mediaServices.generateFilepath and insertMediaToDatabase", () => {
   afterEach(async () => {
     vi.clearAllMocks();
     // cleanup uploads folder contents created by tests
-    try {
-      const files = await fs.promises.readdir(path.join(uploadsRoot, "text"));
-      for (const f of files) {
-        await fs.promises.unlink(path.join(uploadsRoot, "text", f));
+    const folders = ['text', 'images', 'json', 'others'];
+    for (const folder of folders) {
+      try {
+        const files = await fs.promises.readdir(path.join(uploadsRoot, folder));
+        for (const f of files) {
+          await fs.promises.unlink(path.join(uploadsRoot, folder, f));
+        }
+      } catch (e) {
+        // ignore if folder doesn't exist
       }
-    } catch (e) {
-      // ignore
     }
   });
 
