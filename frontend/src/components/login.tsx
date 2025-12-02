@@ -11,6 +11,7 @@ import {
 } from "../utils/passwordValidator";
 import ReactDOM from "react-dom";
 import { api } from "../utils/api";
+import CaptchaType67 from "./CaptchaType67";
 
 interface LoginProps {
   isOpen: boolean;
@@ -34,7 +35,6 @@ export default function Login({ isOpen, onClose }: LoginProps) {
   const [mode, setMode] = useState<"login" | "signup" | "verify">("login");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [verified, setVerified] = useState(false);
-  const [verifyInput, setVerifyInput] = useState("");
   // Remember-me state: persist username to localStorage when true
   const [remember, setRemember] = useState(false);
 
@@ -853,104 +853,15 @@ export default function Login({ isOpen, onClose }: LoginProps) {
         )}
 
         {mode === "verify" && (
-          <div
-            style={{
-              width: "100%",
-              maxWidth: 460,
-              margin: "0 auto",
-              padding: 18,
-              background: "#0f0f0f",
-              border: "1px solid rgba(255,255,255,0.06)",
-              borderRadius: 16,
+          <CaptchaType67
+            onSuccess={() => {
+              setVerified(true);
+              setMode("signup");
             }}
-          >
-            <h3
-              style={{
-                fontSize: 18,
-                fontWeight: 600,
-                textAlign: "center",
-                marginBottom: 12,
-              }}
-            >
-              Verify human
-            </h3>
-            <p
-              style={{
-                textAlign: "center",
-                color: "rgba(255,255,255,0.72)",
-                marginBottom: 12,
-              }}
-            >
-              Type 67
-            </p>
-            <input
-              value={verifyInput}
-              onChange={(e) => setVerifyInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  // perform same verification logic as the Submit button
-                  if (verifyInput.trim() === "67") {
-                    setVerified(true);
-                    setMode("signup");
-                    setVerifyInput("");
-                  } else {
-                    alert("Verification failed — please type 67");
-                  }
-                }
-              }}
-              style={{
-                width: "100%",
-                height: 44,
-                padding: "0 12px",
-                borderRadius: 8,
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                color: "white",
-                marginBottom: 12,
-              }}
-            />
-            <div style={{ display: "flex", gap: 12 }}>
-              <button
-                type="button"
-                onClick={() => {
-                  if (verifyInput.trim() === "67") {
-                    setVerified(true);
-                    setMode("signup");
-                    setVerifyInput("");
-                  } else {
-                    alert("Verification failed — please type 67");
-                  }
-                }}
-                style={{
-                  flex: 1,
-                  height: 44,
-                  borderRadius: 8,
-                  background: "#2563eb",
-                  color: "white",
-                }}
-              >
-                Submit
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setMode("signup");
-                  setVerifyInput("");
-                }}
-                style={{
-                  flex: 1,
-                  height: 44,
-                  borderRadius: 8,
-                  background: "rgba(255,255,255,0.03)",
-                  color: "white",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
+            onCancel={() => {
+              setMode("signup");
+            }}
+          />
         )}
       </div>
     </div>,
