@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
 interface ContentCardProps {
@@ -10,26 +10,81 @@ interface ContentCardProps {
     image?: string;
     domain?: string;
     timestamp: string;
+    description?: string;
+    isBookmarked?: boolean;
   };
+  onToggleBookmark?: () => void;
 }
 
-export function ContentCard({ type, content }: ContentCardProps) {
+export function ContentCard({ type, content, onToggleBookmark }: ContentCardProps) {
+  const [isFlipped, setIsFlipped] = useState(false);
+  
   const getCardContent = () => {
     switch (type) {
       case 'image':
         return (
-          <div className="aspect-[3/4] rounded-xl overflow-hidden">
-            {content.image ? (
-              <ImageWithFallback
-                src={content.image}
-                alt={content.title || 'Content image'}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white/70">
-                {content.title || '[Design Inspiration]'}
+          <div 
+            className="rounded-xl overflow-hidden relative cursor-pointer"
+            onClick={() => content.description && setIsFlipped(!isFlipped)}
+            style={{ perspective: '1000px' }}
+          >
+            <div 
+              className="relative transition-transform duration-500"
+              style={{
+                transformStyle: 'preserve-3d',
+                transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+              }}
+            >
+              {/* Front of card - Image with title and timestamp */}
+              <div 
+                style={{ backfaceVisibility: 'hidden' }}
+              >
+                {content.image ? (
+                  <div className="relative">
+                    <ImageWithFallback
+                      src={content.image}
+                      alt={content.title || 'Content image'}
+                      className="w-full h-auto"
+                    />
+                    {/* Title and timestamp overlay on front */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 pl-8">
+                      {content.title && (
+                        <h3 className="text-white font-semibold text-sm mb-1">{content.title}</h3>
+                      )}
+                      <p className="text-white/70 text-xs">{content.timestamp}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white/70">
+                    {content.title || '[Design Inspiration]'}
+                  </div>
+                )}
               </div>
-            )}
+
+              {/* Back of card - Description */}
+              {content.description && (
+                <div 
+                  className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 p-6 flex flex-col justify-center"
+                  style={{ 
+                    backfaceVisibility: 'hidden',
+                    transform: 'rotateY(180deg)'
+                  }}
+                >
+                  <div className="text-white/90 text-sm leading-relaxed overflow-y-auto">
+                    {content.description}
+                  </div>
+                  {/* Bubble instruction at bottom right */}
+                  <div className="absolute bottom-4 right-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-md px-4 py-2 rounded-full text-xs text-white font-medium border border-white/30 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)] transition-all duration-300">
+                    <span className="flex items-center gap-1.5">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Click to flip back
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         );
       
@@ -67,13 +122,51 @@ export function ContentCard({ type, content }: ContentCardProps) {
   };
 
   return (
-    <div className="glass rounded-xl p-5 text-foreground hover:scale-[1.01]">
-      {getCardContent()}
+    <div className="glass rounded-xl p-5 text-foreground hover:scale-[1.01] relative group">
+      {/* Bookmark toggle button - appears on hover */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleBookmark?.();
+        }}
+        className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+        title={content.isBookmarked ? "Unpin from top" : "Pin to top"}
+      >
+        {content.isBookmarked ? (
+          <div className="bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-500 rounded-full p-2 shadow-[0_0_20px_rgba(250,204,21,0.6)]">
+            <svg className="w-5 h-5 text-yellow-600 drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+          </div>
+        ) : (
+          <div className="bg-black/60 backdrop-blur-sm rounded-full p-2 shadow-lg hover:bg-black/70 transition-colors">
+            <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+          </div>
+        )}
+      </button>
+
+      {/* Pinned indicator - always visible when bookmarked */}
+      {content.isBookmarked && (
+        <div className="absolute -top-3 -right-3 bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-500 rounded-full p-2.5 shadow-[0_0_20px_rgba(250,204,21,0.6)] z-10 animate-pulse pointer-events-none">
+          <svg className="w-6 h-6 text-yellow-400 drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+        </div>
+      )}
       
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10 text-xs text-white/50">
-        <span>{getTypeLabel()}</span>
-        <span>{content.timestamp}</span>
+      <div className={content.isBookmarked ? 'pt-2' : ''}>
+        {getCardContent()}
       </div>
+      
+      {/* Only show bottom bar for non-image types, since images have title/timestamp in overlay */}
+      {type !== 'image' && (
+        <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10 text-xs text-white/50">
+          <span>{getTypeLabel()}</span>
+          <span>{content.timestamp}</span>
+        </div>
+      )}
     </div>
   );
 }
