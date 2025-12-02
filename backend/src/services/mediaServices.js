@@ -193,9 +193,11 @@ const insertMediaToDatabase = async (media) => {
         // Cleanup any written file to avoid orphaning
         if (wroteFile && filepath) {
           try {
-            const relPath = filepath.startsWith("/")
+            let relPath = filepath.startsWith("/")
               ? filepath.slice(1)
               : filepath;
+            if (relPath.startsWith("uploads/"))
+              relPath = relPath.slice("uploads/".length);
             const cwdBase = path.basename(process.cwd());
             const uploadsRoot =
               cwdBase === "backend"
@@ -232,9 +234,9 @@ const insertMediaToDatabase = async (media) => {
       // Attempt to cleanup written file on DB error
       if (wroteFile && filepath) {
         try {
-          const relPath = filepath.startsWith("/")
-            ? filepath.slice(1)
-            : filepath;
+          let relPath = filepath.startsWith("/") ? filepath.slice(1) : filepath;
+          if (relPath.startsWith("uploads/"))
+            relPath = relPath.slice("uploads/".length);
           const cwdBase = path.basename(process.cwd());
           const uploadsRoot =
             cwdBase === "backend"
@@ -385,9 +387,11 @@ const updateMediaInDatabase = async (id, media) => {
     // Compute absolute path to old file
     let oldAbsolutePath;
     if (oldFilepath && typeof oldFilepath === "string") {
-      const relPath = oldFilepath.startsWith("/")
+      let relPath = oldFilepath.startsWith("/")
         ? oldFilepath.slice(1)
         : oldFilepath;
+      if (relPath.startsWith("uploads/"))
+        relPath = relPath.slice("uploads/".length);
       const cwdBase = path.basename(process.cwd());
       const uploadsRoot =
         cwdBase === "backend"
@@ -525,7 +529,9 @@ const deleteMediaFromDatabase = async (id) => {
     let absolutePath;
     if (filepath && typeof filepath === "string") {
       // Remove leading slash if present
-      const relPath = filepath.startsWith("/") ? filepath.slice(1) : filepath;
+      let relPath = filepath.startsWith("/") ? filepath.slice(1) : filepath;
+      if (relPath.startsWith("uploads/"))
+        relPath = relPath.slice("uploads/".length);
       // Determine uploads root
       const cwdBase = path.basename(process.cwd());
       const uploadsRoot =

@@ -100,6 +100,51 @@ describe("Media Controller", () => {
     );
   });
 
+  test("createMedia handles base64 upload and returns 200", async () => {
+    const base64 = Buffer.from("controller content").toString("base64");
+    const req = {
+      body: {
+        container_id: 2,
+        filename: "notes.txt",
+        file_size: 17,
+        base64,
+      },
+    };
+    const res = createResMock();
+
+    // DB insert returns id
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 11 }] });
+
+    await mediaControllers.createMedia(req, res);
+
+    expect(pool.query).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.any(String) })
+    );
+  });
+
+  test("createMedia returns 500 when service throws", async () => {
+    const req = {
+      body: {
+        container_id: 1,
+        filename: "image.png",
+        file_size: 1,
+      },
+    };
+    const res = createResMock();
+
+    // Simulate DB/service error by making pool.query throw
+    pool.query.mockRejectedValueOnce(new Error("db down"));
+
+    await mediaControllers.createMedia(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ error: "Database Error." })
+    );
+  });
+
   test("updateMedia validates filename and returns 400 on bad filename", async () => {
     const req = { params: { id: 2 }, body: { filename: "bad/name.png" } };
     const res = createResMock();
@@ -116,12 +161,31 @@ describe("Media Controller", () => {
     const req = { params: { id: 3 } };
     const res = createResMock();
 
+    // select returns filepath, update returns id
+    pool.query.mockResolvedValueOnce({
+      rows: [{ filepath: "/uploads/images/existing.png" }],
+    });
     pool.query.mockResolvedValueOnce({ rows: [{ id: 3 }] });
 
     await mediaControllers.deleteMedia(req, res);
 
     expect(pool.query).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.any(String) })
+    );
+  });
+
+  test("deleteMedia returns 404 when media not found", async () => {
+    const req = { params: { id: 77 } };
+    const res = createResMock();
+
+    // simulate service returning not found by returning empty rows
+    pool.query.mockResolvedValueOnce({ rows: [] });
+
+    await mediaControllers.deleteMedia(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({ message: expect.any(String) })
     );
