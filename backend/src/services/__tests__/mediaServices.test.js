@@ -84,4 +84,11 @@ describe("mediaServices.generateFilepath and insertMediaToDatabase", () => {
       expect.objectContaining({ success: false, status: 400 })
     );
   });
+
+  test("insertMediaToDatabase returns 400 when given null", async () => {
+    const result = await mediaServices.insertMediaToDatabase(null);
+    expect(result).toEqual(
+      expect.objectContaining({ success: false, status: 400 })
+    );
+  });
 });
