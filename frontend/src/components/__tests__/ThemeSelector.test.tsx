@@ -12,32 +12,31 @@ describe("ThemeSelector", () => {
 
   test("renders in light mode by default", () => {
     render(<ThemeSelector />);
-
     const button = screen.getByRole("button");
-    expect(button).toHaveTextContent("Dark Mode");
+    // The selector now renders only an emoji: 🌙 for light, 🌞 for dark
+    expect(button).toHaveTextContent("🌙");
     expect(document.documentElement.classList.contains("dark")).toBe(false);
   });
 
   test("loads saved dark theme from localStorage", () => {
     localStorage.setItem("theme", "dark");
     render(<ThemeSelector />);
-
     expect(document.documentElement.classList.contains("dark")).toBe(true);
     const button = screen.getByRole("button");
-    expect(button).toHaveTextContent("Light Mode");
+    expect(button).toHaveTextContent("🌞");
   });
 
   test("toggles from light → dark mode when clicked", () => {
     render(<ThemeSelector />);
 
     const button = screen.getByRole("button");
-    expect(button).toHaveTextContent("Dark Mode");
+    expect(button).toHaveTextContent("🌙");
 
     fireEvent.click(button);
 
     expect(document.documentElement.classList.contains("dark")).toBe(true);
     expect(localStorage.getItem("theme")).toBe("dark");
-    expect(button).toHaveTextContent("Light Mode");
+    expect(button).toHaveTextContent("🌞");
   });
 
   test("toggles from dark → light mode when clicked twice", () => {
@@ -54,7 +53,7 @@ describe("ThemeSelector", () => {
     fireEvent.click(button);
     expect(document.documentElement.classList.contains("dark")).toBe(false);
     expect(localStorage.getItem("theme")).toBe("light");
-    expect(button).toHaveTextContent("Dark Mode");
+    expect(button).toHaveTextContent("🌙");
   });
 
   test("does not crash if localStorage is unavailable", () => {
