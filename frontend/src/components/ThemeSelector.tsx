@@ -13,6 +13,19 @@ const LIGHT_THEME_ID = 2; // Or use null if 0/null is your default
 export function ThemeSelector() {
   const isClient = typeof document !== "undefined";
 
+  // Determine API base from Vite build-time env var, with a safe fallback.
+  const API_BASE = (() => {
+    try {
+      // `import.meta.env` is available in Vite-built bundles; guard against test/runtime environments
+      // where `import.meta` may be undefined or typed differently.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const env = (typeof import.meta !== "undefined" ? (import.meta as any).env : undefined) || {};
+      return env.VITE_API_URL || "http://localhost:8080";
+    } catch {
+      return "http://localhost:8080";
+    }
+  })();
+
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (!isClient) return false;
     return document.documentElement.classList.contains("dark");
@@ -55,6 +68,43 @@ export function ThemeSelector() {
     fetchUserTheme();
   }, []);
 
+  // Fetch user's persisted theme from backend (if available) and apply it.
+  useEffect(() => {
+    if (!isClient) return;
+    let cancelled = false;
+    const controller = new AbortController();
+
+    (async () => {
+      try {
+        // backend endpoint: GET /theme/theme -> { theme_id: 1|2 }
+        const res = await fetch(`${API_BASE}/theme/theme`, { signal: controller.signal });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (cancelled) return;
+        if (data?.theme_id === 1) {
+          document.documentElement.classList.add("dark");
+          setIsDark(true);
+          try {
+            localStorage.setItem("theme", "dark");
+          } catch {}
+        } else if (data?.theme_id === 2) {
+          document.documentElement.classList.remove("dark");
+          setIsDark(false);
+          try {
+            localStorage.setItem("theme", "light");
+          } catch {}
+        }
+      } catch {
+        // ignore fetch errors (network, CORS, etc.)
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [API_BASE, isClient]);
+
   const toggleTheme = () => {
     if (!isClient) return;
     const html = document.documentElement;
@@ -65,6 +115,17 @@ export function ThemeSelector() {
       // ignore
     }
     setIsDark(newIsDark);
+
+    // Persist to backend (fire-and-forget). Backend expects { theme_id: 1 } for dark, 2 for light.
+    try {
+      fetch(`${API_BASE}/theme/theme`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ theme_id: newIsDark ? 1 : 2 }),
+      }).catch(() => {});
+    } catch {
+      // ignore
+    }
   };
 
   return (
