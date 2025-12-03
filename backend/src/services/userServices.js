@@ -329,6 +329,7 @@ const validatePassword = async (password) => {
   return { success: true };
 };
 
+
 export default {
   authenticateLogin,
   updatePassword,

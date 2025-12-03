@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
 
+// NOTE: Replace this with your actual backend API URL
+// In a real application, you should import this from a central utility file (like 'frontend/src/utils/api.ts').
+const API_BASE_URL = "http://localhost:8080"; 
+
+// --- NOTE ON THEME IDs ---
+// We will use 1 for Dark and 2 for Light/Default.
+// You must ensure these IDs match your theme table in your PostgreSQL database.
+const DARK_THEME_ID = 1;
+const LIGHT_THEME_ID = 2; // Or use null if 0/null is your default
+
 export function ThemeSelector() {
   const isClient = typeof document !== "undefined";
 
@@ -24,7 +34,20 @@ export function ThemeSelector() {
       document.documentElement.classList.remove("dark");
       setIsDark(false);
     }
-  }, []);
+  };
+
+  // 1. Load theme from backend first, fall back to localStorage/default
+  useEffect(() => {
+    const fetchUserTheme = async () => {
+      try {
+        // Fetch the theme ID the user saved last
+        const response = await fetch(`${API_BASE_URL}/theme/theme`, {
+          method: "GET",
+          headers: {
+            // IMPORTANT: Include your authentication token here
+            // "Authorization": `Bearer ${userToken}`,
+          },
+        });
 
   const toggleTheme = () => {
     if (!isClient) return;
