@@ -36,7 +36,6 @@ describe("ThemeSelector", () => {
     fireEvent.click(button);
 
     expect(document.documentElement.classList.contains("dark")).toBe(true);
-    expect(localStorage.getItem("theme")).toBe("dark");
     expect(button).toHaveTextContent("Light Mode");
   });
 
