@@ -1,8 +1,9 @@
 import pool from "../db/index.js";
 import userModel from "../models/userModel.js";
+import passwordService from "./passwordService.js";
 
 /**
- * Authenticates user using name and password; Not secure.
+ * Authenticates user using name and password; Uses bcrypt for secure password validation.
  * @param {string} username
  * @param {string} password
  */
@@ -14,10 +15,12 @@ const authenticateLogin = async (username, password) => {
     return { success: false, status: 500, error: "Password is null." };
   }
 
+  // Step 1: Fetch user by username only (not password)
   const selectQuery = `
    SELECT
     id,
     username,
+    password,
     display_name,
     profile_picture_id,
     theme_id,
@@ -30,31 +33,49 @@ const authenticateLogin = async (username, password) => {
     update_date_utc
     FROM "user"
     WHERE deleted = $1 
-    AND username = $2
-    AND password = $3;
+    AND username = $2;
   `;
-  const selectValues = [0, username, password];
+  const selectValues = [0, username];
 
   try {
     const result = await pool.query(selectQuery, selectValues);
+    
+    // Dummy hash for timing attack prevention (valid bcrypt hash)
+    const dummyHash = "$2a$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW";
+    
     if (result.rows.length === 0) {
+      // Call validatePassword with dummy hash to maintain constant timing
+      await passwordService.validatePassword(password, dummyHash);
       console.log("Invalid Login");
       return { success: false, status: 404, error: "Invalid Login" };
-    } else {
-      // Updates last_login_date_utc to NOW()
-      const updateQuery = `
+    }
+
+    const user = result.rows[0];
+    
+    // Step 2: Validate password using bcrypt
+    const isPasswordValid = await passwordService.validatePassword(password, user.password);
+    
+    if (!isPasswordValid) {
+      console.log("Invalid Login");
+      return { success: false, status: 404, error: "Invalid Login" };
+    }
+
+    // Step 3: Update last login timestamp
+    const updateQuery = `
       UPDATE "user" SET last_login_date_utc = NOW()
       WHERE id = $1;
-      `;
-      await pool.query(updateQuery, [result.rows[0].id]);
+    `;
+    await pool.query(updateQuery, [user.id]);
 
-      // Return selected user JSON
-      return {
-        success: true,
-        status: 200,
-        data: result.rows[0],
-      };
-    }
+    // Remove password from response
+    const { password: _, ...userWithoutPassword } = user;
+
+    // Return selected user JSON (without password)
+    return {
+      success: true,
+      status: 200,
+      data: userWithoutPassword,
+    };
   } catch (error) {
     console.log(error.stack);
     return { success: false, status: 500, error: "Database Error" };
@@ -62,7 +83,7 @@ const authenticateLogin = async (username, password) => {
 };
 
 /**
- * Updates a user's password
+ * Updates a user's password (hashes before storing)
  * @param {int} userId
  * @param {string} password
  */
@@ -74,12 +95,20 @@ const updatePassword = async (userId, password) => {
     return { success: false, status: 500, error: "No password provided" };
   }
 
+  // Hash the password before storing
+  let hashedPassword;
+  try {
+    hashedPassword = await passwordService.hashPassword(password);
+  } catch (error) {
+    return { success: false, status: error.statusCode || 500, error: error.message };
+  }
+
   const query = `
   UPDATE "user" SET password = $1, update_date_utc = NOW()
   WHERE id = $2
   RETURNING id;
   `;
-  const values = [password, userId];
+  const values = [hashedPassword, userId];
 
   try {
     const result = await pool.query(query, values);
@@ -100,18 +129,26 @@ const updatePassword = async (userId, password) => {
 };
 
 /**
- * Creates a user from a given user object
+ * Creates a user from a given user object (hashes password before storing)
  * @param {userModel} user
  */
 const createUser = async (user) => {
+  // Hash the password before storing
+  let hashedPassword;
+  try {
+    hashedPassword = await passwordService.hashPassword(user.password);
+  } catch (error) {
+    return { success: false, status: error.statusCode || 500, error: error.message };
+  }
+
   const query = `INSERT INTO "user" (username, password, display_name, first_name,
   last_name, create_date_utc, last_login_date_utc)
   VALUES($1, $2, $3, $4, $5, NOW(), NOW())
-  RETURNING *;`;
+  RETURNING id, username, display_name, first_name, last_name, create_date_utc;`;
 
   const values = [
     user.username,
-    user.password,
+    hashedPassword,
     user.username,
     user.first_name,
     user.last_name,

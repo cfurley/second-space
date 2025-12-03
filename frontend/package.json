@@ -65,7 +65,7 @@
             "tailwindcss": "^4.1.14",
             "typescript": "^5.9.3",
             "vite": "^6.4.0",
-            "vitest": "^4.0.4"
+            "vitest": "^4.0.15"
       },
       "scripts": {
             "dev": "vite",
