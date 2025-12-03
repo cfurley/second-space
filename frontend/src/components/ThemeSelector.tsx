@@ -11,30 +11,28 @@ const DARK_THEME_ID = 1;
 const LIGHT_THEME_ID = 2; // Or use null if 0/null is your default
 
 export function ThemeSelector() {
-  const [isDark, setIsDark] = useState(
-    document.documentElement.classList.contains("dark")
-  );
-  
-  // Utility function to call the backend
-  const updateBackendTheme = async (themeId: number | null) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/themes/theme`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          // IMPORTANT: Add Authorization header here if your route requires it
-          // "Authorization": `Bearer ${userToken}`,
-        },
-        body: JSON.stringify({ themeId }),
-      });
+  const isClient = typeof document !== "undefined";
 
-      if (!response.ok) {
-        // Handle failure (e.g., theme ID doesn't exist, auth failed)
-        console.error("Failed to save theme preference to server.");
-        // Optionally show a toast notification here
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (!isClient) return false;
+    return document.documentElement.classList.contains("dark");
+  });
+
+  // Load saved theme from localStorage safely on mount
+  useEffect(() => {
+    if (!isClient) return;
+    try {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark") {
+        document.documentElement.classList.add("dark");
+        setIsDark(true);
+      } else {
+        document.documentElement.classList.remove("dark");
+        setIsDark(false);
       }
-    } catch (error) {
-      console.error("Network error saving theme:", error);
+    } catch {
+      document.documentElement.classList.remove("dark");
+      setIsDark(false);
     }
   };
 
@@ -51,89 +49,26 @@ export function ThemeSelector() {
           },
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          const themeId = data.theme_id;
-
-          const newIsDark = themeId === DARK_THEME_ID;
-          setIsDark(newIsDark);
-          
-          if (newIsDark) {
-            document.documentElement.classList.add("dark");
-          } else {
-            document.documentElement.classList.remove("dark");
-          }
-          
-          // Update local storage as a quick cache (if available)
-          if (typeof localStorage !== "undefined") {
-            localStorage.setItem("theme", newIsDark ? "dark" : "light");
-          }
-        } else {
-          // Fallback if backend theme data retrieval fails
-          if (typeof localStorage !== "undefined") {
-            const savedTheme = localStorage.getItem("theme");
-            if (savedTheme === "dark") {
-              document.documentElement.classList.add("dark");
-              setIsDark(true);
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching user theme, falling back to local:", error);
-        // Fallback to local storage theme if API call fails entirely
-        if (typeof localStorage !== "undefined") {
-          const savedTheme = localStorage.getItem("theme");
-          if (savedTheme === "dark") {
-            document.documentElement.classList.add("dark");
-            setIsDark(true);
-          }
-        }
-      }
-    };
-
-    fetchUserTheme();
-  }, []); // Run only once on mount
-
-  // 2. Toggle and save theme to backend
   const toggleTheme = () => {
+    if (!isClient) return;
     const html = document.documentElement;
-    
-    // Determine the new state
-    const isCurrentlyDark = html.classList.contains("dark");
-    const newIsDark = !isCurrentlyDark;
-    
-    // Apply theme locally first for instant feedback
-    if (newIsDark) {
-        html.classList.add("dark");
-    } else {
-        html.classList.remove("dark");
+    const newIsDark = html.classList.toggle("dark");
+    try {
+      localStorage.setItem("theme", newIsDark ? "dark" : "light");
+    } catch {
+      // ignore
     }
-    
-    // Determine the theme ID to send to the backend
-    const newThemeId = newIsDark ? DARK_THEME_ID : LIGHT_THEME_ID;
-
-    // Send the new state to the backend
-    updateBackendTheme(newThemeId);
-    
-    // Update local storage and component state (if available)
-    if (typeof localStorage !== "undefined") {
-      try {
-        localStorage.setItem("theme", newIsDark ? "dark" : "light");
-      } catch {
-        // Ignore if localStorage fails
-      }
-    }
-
     setIsDark(newIsDark);
   };
 
   return (
     <button
       onClick={toggleTheme}
-      className="w-full flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-lg py-2.5 transition-all duration-300"
+      aria-label="Toggle theme"
+      title={isDark ? "Switch to light" : "Switch to dark"}
+      className="fixed left-6 bottom-6 z-50 w-12 h-12 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 text-white transition-all duration-200 shadow-md"
     >
-      <span className="text-lg">{isDark ? "🌞" : "🌙"}</span>
-      <span className="text-sm">{isDark ? "Light Mode" : "Dark Mode"}</span>
+      <span className="text-lg select-none">{isDark ? "🌞" : "🌙"}</span>
     </button>
   );
 }

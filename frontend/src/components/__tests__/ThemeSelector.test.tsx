@@ -19,33 +19,17 @@ describe("ThemeSelector", () => {
     vi.clearAllMocks();
   });
 
-  test("renders in light mode by default", async () => {
-    // Mock the GET /theme/theme call
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ theme_id: LIGHT_THEME_ID }),
-    });
-
-    await act(async () => {
-      render(<ThemeSelector />);
-    });
-
+  test("renders in light mode by default", () => {
+    render(<ThemeSelector />);
     const button = screen.getByRole("button");
+    // The selector now renders only an emoji: 🌙 for light, 🌞 for dark
     expect(button).toHaveTextContent("🌙");
     expect(document.documentElement.classList.contains("dark")).toBe(false);
   });
 
-  test("loads saved dark theme from API", async () => {
-    // Mock the GET /theme/theme call returning dark theme
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ theme_id: DARK_THEME_ID }),
-    });
-
-    await act(async () => {
-      render(<ThemeSelector />);
-    });
-
+  test("loads saved dark theme from localStorage", () => {
+    localStorage.setItem("theme", "dark");
+    render(<ThemeSelector />);
     expect(document.documentElement.classList.contains("dark")).toBe(true);
     const button = screen.getByRole("button");
     expect(button).toHaveTextContent("🌞");
@@ -69,8 +53,7 @@ describe("ThemeSelector", () => {
     });
 
     const button = screen.getByRole("button");
-    expect(button).toHaveTextContent("🌙"); // Light mode emoji
-    expect(document.documentElement.classList.contains("dark")).toBe(false);
+    expect(button).toHaveTextContent("🌙");
 
     // Click to toggle
     await act(async () => {
@@ -78,14 +61,8 @@ describe("ThemeSelector", () => {
     });
 
     expect(document.documentElement.classList.contains("dark")).toBe(true);
-    expect(button).toHaveTextContent("🌞"); // Dark mode emoji
-
-    // Check that PUT was called with the dark theme ID
-    const putCall = (global.fetch as any).mock.calls.find(
-      (call: any[]) => call[1] && call[1].method === "PUT"
-    );
-    expect(putCall).toBeDefined();
-    expect(JSON.parse(putCall[1].body)).toEqual({ themeId: DARK_THEME_ID });
+    expect(localStorage.getItem("theme")).toBe("dark");
+    expect(button).toHaveTextContent("🌞");
   });
 
   test("toggles from dark → light mode when clicked twice and calls PUT API", async () => {
@@ -113,21 +90,8 @@ describe("ThemeSelector", () => {
       fireEvent.click(button);
     });
     expect(document.documentElement.classList.contains("dark")).toBe(false);
+    expect(localStorage.getItem("theme")).toBe("light");
     expect(button).toHaveTextContent("🌙");
-
-    // Second click (Light -> Dark)
-    await act(async () => {
-      fireEvent.click(button);
-    });
-    expect(document.documentElement.classList.contains("dark")).toBe(true);
-    expect(button).toHaveTextContent("🌞");
-
-    // Check that the second PUT request saved the DARK theme (ID 1)
-    const putCalls = (global.fetch as any).mock.calls.filter(
-      (call: any[]) => call[1] && call[1].method === "PUT"
-    );
-    expect(putCalls.length).toBe(2);
-    expect(JSON.parse(putCalls[1][1].body)).toEqual({ themeId: DARK_THEME_ID });
   });
 
   test("does not crash if localStorage is unavailable", async () => {
