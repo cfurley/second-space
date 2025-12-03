@@ -1,0 +1,40 @@
+name: Test Docker Compose (frontend)
+
+on:
+  push:
+    branches: [ feature/ThemeSelection-API ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  docker-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure curl is available
+        run: sudo apt-get update && sudo apt-get install -y curl
+
+      - name: Build and start services with Docker Compose
+        run: |
+          docker compose -f docker-compose.yaml up --build -d
+
+      - name: Wait for frontend to respond
+        run: |
+          echo "Waiting for frontend at http://localhost:8081 ..."
+          for i in {1..20}; do
+            if curl -fsS http://localhost:8081 >/dev/null 2>&1; then
+              echo "frontend is up"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "frontend did not respond in time" >&2
+          docker compose -f docker-compose.yaml ps
+          docker compose -f docker-compose.yaml logs frontend || true
+          exit 1
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.yaml down --volumes
