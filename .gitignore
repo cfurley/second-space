@@ -37,6 +37,7 @@ Thumbs.db
 *.sql.backup
 *.db
 *.sqlite
+backend/uploads/*
 
 # Test coverage
 coverage/
