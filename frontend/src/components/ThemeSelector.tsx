@@ -34,7 +34,7 @@ export function ThemeSelector() {
       document.documentElement.classList.remove("dark");
       setIsDark(false);
     }
-  };
+  }, []);
 
   // 1. Load theme from backend first, fall back to localStorage/default
   useEffect(() => {
@@ -48,6 +48,13 @@ export function ThemeSelector() {
             // "Authorization": `Bearer ${userToken}`,
           },
         });
+        // TODO: Handle the response and set theme accordingly
+      } catch {
+        // Handle error silently
+      }
+    };
+    fetchUserTheme();
+  }, [isClient]);
 
   const toggleTheme = () => {
     if (!isClient) return;
