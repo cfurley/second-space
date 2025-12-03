@@ -43,7 +43,7 @@ export function ThemeSelector() {
     const fetchUserTheme = async () => {
       try {
         // Fetch the theme ID the user saved last
-        const response = await fetch(`${API_BASE_URL}/themes/theme`, {
+        const response = await fetch(`${API_BASE_URL}/theme/theme`, {
           method: "GET",
           headers: {
             // IMPORTANT: Include your authentication token here
@@ -64,23 +64,29 @@ export function ThemeSelector() {
             document.documentElement.classList.remove("dark");
           }
           
-          // Update local storage as a quick cache
-          localStorage.setItem("theme", newIsDark ? "dark" : "light");
+          // Update local storage as a quick cache (if available)
+          if (typeof localStorage !== "undefined") {
+            localStorage.setItem("theme", newIsDark ? "dark" : "light");
+          }
         } else {
           // Fallback if backend theme data retrieval fails
-          const savedTheme = localStorage.getItem("theme");
-          if (savedTheme === "dark") {
-            document.documentElement.classList.add("dark");
-            setIsDark(true);
+          if (typeof localStorage !== "undefined") {
+            const savedTheme = localStorage.getItem("theme");
+            if (savedTheme === "dark") {
+              document.documentElement.classList.add("dark");
+              setIsDark(true);
+            }
           }
         }
       } catch (error) {
         console.error("Error fetching user theme, falling back to local:", error);
         // Fallback to local storage theme if API call fails entirely
-        const savedTheme = localStorage.getItem("theme");
-        if (savedTheme === "dark") {
-          document.documentElement.classList.add("dark");
-          setIsDark(true);
+        if (typeof localStorage !== "undefined") {
+          const savedTheme = localStorage.getItem("theme");
+          if (savedTheme === "dark") {
+            document.documentElement.classList.add("dark");
+            setIsDark(true);
+          }
         }
       }
     };
@@ -109,11 +115,13 @@ export function ThemeSelector() {
     // Send the new state to the backend
     updateBackendTheme(newThemeId);
     
-    // Update local storage and component state (used for the button text)
-    try {
-      localStorage.setItem("theme", newIsDark ? "dark" : "light");
-    } catch {
-      // Ignore if localStorage fails
+    // Update local storage and component state (if available)
+    if (typeof localStorage !== "undefined") {
+      try {
+        localStorage.setItem("theme", newIsDark ? "dark" : "light");
+      } catch {
+        // Ignore if localStorage fails
+      }
     }
 
     setIsDark(newIsDark);
