@@ -221,14 +221,7 @@ export const api = {
   /**
    * Create new media
    */
-  async createMedia(mediaData: {
-    container_id: number;
-    filename: string;
-    file_size: number;
-    video_length?: number;
-    base64?: string;
-    create_date_utc?: string;
-  }) {
+  async createMedia(mediaData: MediaCreatePayload) {
     return apiFetch("/media", {
       method: "POST",
       body: JSON.stringify(mediaData),
@@ -238,15 +231,7 @@ export const api = {
   /**
    * Update media
    */
-  async updateMedia(
-    mediaId: string,
-    updates: {
-      filename?: string;
-      file_size?: number;
-      video_length?: number;
-      base64?: string;
-    }
-  ) {
+  async updateMedia(mediaId: string, updates: MediaUpdatePayload) {
     return apiFetch(`/media/${mediaId}`, {
       method: "PUT",
       body: JSON.stringify(updates),
@@ -317,10 +302,27 @@ export interface Media {
   filepath: string;
   file_size: number;
   video_length?: number;
+  base64?: string;
   create_date_utc: string;
   update_date_utc?: string;
   delete_date_utc?: string;
   deleted: number;
+}
+
+export interface MediaCreatePayload {
+  container_id: number;
+  filename: string;
+  file_size: number;
+  video_length?: number;
+  base64?: string;
+  create_date_utc?: string;
+}
+
+export interface MediaUpdatePayload {
+  filename?: string;
+  file_size?: number;
+  video_length?: number;
+  base64?: string;
 }
 
 export interface ApiError {
