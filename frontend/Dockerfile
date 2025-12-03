@@ -1,20 +1,25 @@
-FROM node:22 AS build
+FROM node:18-alpine AS build
 WORKDIR /app
-COPY ./package.json ./
+
+# Accept a build-arg so CI / docker-compose can inject the backend URL at build time
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
+# Install dependencies based on package-lock for reproducible builds
+COPY package.json package-lock.json ./
+RUN npm ci --production=false
+
+# Copy the rest and build
 COPY . ./
-
-RUN npm cache clean --force
-RUN rm -rf node_modules package-lock.json
-RUN npm install
-
-# Set API URL for Docker Compose local development
-ENV VITE_API_URL=http://localhost:8080
-
 RUN npm run build
 
-FROM nginx
+FROM nginx:stable-alpine AS runtime
+EXPOSE 80
+
+# Copy built assets from Vite output directory (vite.config.ts uses `build`)
 COPY --from=build /app/build /usr/share/nginx/html
+
+# If a custom nginx config was provided in the project, use it
 COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

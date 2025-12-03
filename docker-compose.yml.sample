@@ -1,0 +1,30 @@
+# Sample docker-compose that builds frontend with VITE_API_URL build-arg
+# Copy this to `docker-compose.yml` and adapt service names/ports as needed.
+version: '3.8'
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Inject the backend URL at *build time* so Vite can bake it into the bundle
+        VITE_API_URL: "http://backend:8080"
+    ports:
+      - "8081:80"  # maps nginx 80 -> host 8081 for quick local testing
+    depends_on:
+      - backend
+    networks:
+      - appnet
+
+networks:
+  appnet:
+    driver: bridge
