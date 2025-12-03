@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
 
 export function ThemeSelector() {
-  const [isDark, setIsDark] = useState(
-    document.documentElement.classList.contains("dark")
-  );
+  const isClient = typeof document !== "undefined";
 
-  // Load saved theme from localStorage safely
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (!isClient) return false;
+    return document.documentElement.classList.contains("dark");
+  });
+
+  // Load saved theme from localStorage safely on mount
   useEffect(() => {
+    if (!isClient) return;
     try {
-      const savedTheme =
-        typeof localStorage !== "undefined"
-          ? localStorage.getItem("theme")
-          : null;
-
+      const savedTheme = localStorage.getItem("theme");
       if (savedTheme === "dark") {
         document.documentElement.classList.add("dark");
         setIsDark(true);
@@ -21,33 +21,31 @@ export function ThemeSelector() {
         setIsDark(false);
       }
     } catch {
-      // Fallback if localStorage is unavailable
       document.documentElement.classList.remove("dark");
       setIsDark(false);
     }
   }, []);
 
-  // Toggle between dark and light mode
   const toggleTheme = () => {
+    if (!isClient) return;
     const html = document.documentElement;
     const newIsDark = html.classList.toggle("dark");
-
     try {
       localStorage.setItem("theme", newIsDark ? "dark" : "light");
     } catch {
-      // Ignore if localStorage fails (e.g., privacy mode)
+      // ignore
     }
-
     setIsDark(newIsDark);
   };
 
   return (
     <button
       onClick={toggleTheme}
-      className="w-full flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-lg py-2.5 transition-all duration-300"
+      aria-label="Toggle theme"
+      title={isDark ? "Switch to light" : "Switch to dark"}
+      className="fixed left-6 bottom-6 z-50 w-12 h-12 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 text-white transition-all duration-200 shadow-md"
     >
-      <span className="text-lg">{isDark ? "🌞" : "🌙"}</span>
-      <span className="text-sm">{isDark ? "Light Mode" : "Dark Mode"}</span>
+      <span className="text-lg select-none">{isDark ? "🌞" : "🌙"}</span>
     </button>
   );
 }
