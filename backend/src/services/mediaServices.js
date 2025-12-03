@@ -122,6 +122,35 @@ async function validateMimeType(buffer, ext) {
 */
 
 /**
+ * Get media by space ID via the containers relationship.
+ * Returns all media in a space that belongs to containers in that space.
+ */
+const getMediaBySpaceId = async (spaceId) => {
+  try {
+    if (spaceId == null) {
+      return { success: false, status: 400, error: "No space id provided." };
+    }
+
+    const query = `
+      SELECT m.* FROM media m
+      JOIN containers c ON m.container_id = c.id
+      WHERE c.space_id = $1 AND m.deleted = 0
+      ORDER BY m.create_date_utc DESC
+    `;
+    const result = await pool.query(query, [spaceId]);
+
+    if (!result || result.rows.length === 0) {
+      return { success: false, status: 404, error: "No media found." };
+    }
+
+    return { success: true, status: 200, data: result.rows };
+  } catch (error) {
+    console.log(error.stack);
+    return { success: false, status: 500, error: "Database Error." };
+  }
+};
+
+/**
  * Get media either by the owner userId (via containers.created_by_user_id)
  * or by media id directly.
  */
@@ -585,6 +614,7 @@ const deleteMediaFromDatabase = async (id) => {
 
 export default {
   getMedia,
+  getMediaBySpaceId,
   insertMediaToDatabase,
   updateMediaInDatabase,
   deleteMediaFromDatabase,

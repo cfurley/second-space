@@ -43,6 +43,23 @@ const getAllMedia = async (req, res) => {
   }
 };
 
+const getBySpaceId = async (req, res) => {
+  let spaceId;
+  try {
+    spaceId = req.params.id;
+  } catch (error) {
+    return res.status(400).json({ message: "No space id provided." });
+  }
+
+  const result = await mediaService.getMediaBySpaceId(spaceId);
+  if (!result.success) {
+    return res.status(result.status).json({ error: result.error });
+  } else {
+    const media = result.data;
+    return res.status(result.status).json({ media });
+  }
+};
+
 const getById = async (req, res) => {
   // TODO: Make sure this is actually passed by frontend
   let mediaId;
@@ -137,4 +154,11 @@ const deleteMedia = async (req, res) => {
   }
 };
 
-export default { getAllMedia, getById, createMedia, updateMedia, deleteMedia };
+export default {
+  getAllMedia,
+  getBySpaceId,
+  getById,
+  createMedia,
+  updateMedia,
+  deleteMedia,
+};
