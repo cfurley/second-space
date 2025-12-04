@@ -115,79 +115,67 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
   };
 
   return (
-    <div className="flex-1 bg-black p-10 overflow-y-auto">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-white text-4xl font-bold uppercase tracking-wide">
+    <div className="flex-1 bg-gray-50 dark:bg-[#0a0a0a] p-10 overflow-y-auto relative">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-gray-900 dark:text-white text-3xl font-bold uppercase tracking-wide">
           {activeSpace}
         </h1>
-        <FilterBar activeFilter={activeFilter} onFilterChange={onFilterChange} />
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-5 mt-8">
+      <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4 mt-8">
         {/* No results message */}
         {searchQuery && filteredContent.length === 0 && (
           <div className="col-span-full flex flex-col items-center justify-center py-20">
-            <svg className="w-16 h-16 text-white/30 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-16 h-16 text-gray-300 dark:text-white/30 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <h3 className="text-white/50 text-lg font-medium mb-2">No posts found</h3>
-            <p className="text-white/30 text-sm">Try a different search term</p>
+            <h3 className="text-gray-500 dark:text-white/50 text-lg font-medium mb-2">No posts found</h3>
+            <p className="text-gray-400 dark:text-white/30 text-sm">Try a different search term</p>
           </div>
         )}
         
-        {/* Pinned Section */}
-        {pinnedContent.length > 0 && (
-          <>
-            <div className="col-span-full mb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                  <h2 className="text-white/70 text-sm font-semibold uppercase tracking-wider">
-                    Pinned ({pinnedContent.length})
-                  </h2>
-                </div>
-                <div className="flex-1 h-px bg-gradient-to-r from-yellow-400/30 to-transparent"></div>
-              </div>
-            </div>
-            {pinnedContent.map((item, idx) => {
-              const originalIndex = allContent.findIndex(c => c === item);
-              return (
-                <ContentCard
-                  key={`pinned-${idx}`}
-                  type={item.type}
-                  content={item.content}
-                  onToggleBookmark={() => handleToggleBookmark(originalIndex)}
-                />
-              );
-            })}
-          </>
-        )}
-
-        {/* Unpinned Section */}
-        {pinnedContent.length > 0 && unpinnedContent.length > 0 && (
-          <div className="col-span-full mt-6 mb-4">
-            <div className="flex items-center gap-3">
-              <h2 className="text-white/50 text-sm font-semibold uppercase tracking-wider">
-                All Posts ({unpinnedContent.length})
-              </h2>
-              <div className="flex-1 h-px bg-white/10"></div>
-            </div>
-          </div>
-        )}
-        
-        {unpinnedContent.map((item, idx) => {
+        {/* Content Cards in Masonry Layout */}
+        {filteredContent.map((item, idx) => {
           const originalIndex = allContent.findIndex(c => c === item);
           return (
-            <ContentCard
-              key={`unpinned-${idx}`}
-              type={item.type}
-              content={item.content}
-              onToggleBookmark={() => handleToggleBookmark(originalIndex)}
-            />
+            <div key={`content-${idx}`} className="break-inside-avoid mb-4">
+              <ContentCard
+                type={item.type}
+                content={item.content}
+                onToggleBookmark={() => handleToggleBookmark(originalIndex)}
+              />
+            </div>
           );
         })}
+      </div>
+      
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-8 right-8 flex items-center gap-3">
+        <button 
+          className="w-14 h-14 rounded-full bg-white dark:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/15 backdrop-blur-md border border-gray-200 dark:border-white/20 flex items-center justify-center transition-all group shadow-md"
+          aria-label="Edit"
+        >
+          <svg className="w-5 h-5 text-gray-700 dark:text-white/80 group-hover:text-gray-900 dark:group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+        </button>
+        <button 
+          className="w-14 h-14 rounded-full bg-white dark:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/15 backdrop-blur-md border border-gray-200 dark:border-white/20 flex items-center justify-center transition-all group shadow-md"
+          aria-label="Add"
+        >
+          <svg className="w-6 h-6 text-gray-700 dark:text-white/80 group-hover:text-gray-900 dark:group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+        <button 
+          className="w-14 h-14 rounded-full bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-white/90 flex items-center justify-center transition-all shadow-lg"
+          aria-label="Search"
+        >
+          <svg className="w-5 h-5 text-white dark:text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-4.35-4.35"></path>
+          </svg>
+        </button>
       </div>
     </div>
   );
