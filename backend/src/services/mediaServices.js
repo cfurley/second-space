@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 import { fileTypeFromBuffer } from "file-type";
+import { resolveSafePath, sanitizeFilename } from "../utils/pathSecurity.js";
 
 // maximum file size allowed (bytes). 20 MB default.
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
@@ -308,6 +309,15 @@ const insertMediaToDatabase = async (media) => {
  */
 async function generateFilepath(media) {
   if (!media || !media.filename) throw new Error("Missing filename");
+
+  // Validate filename against path traversal attacks
+  try {
+    sanitizeFilename(media.filename);
+  } catch (error) {
+    throw new Error(
+      `Invalid filename: ${error.message}`
+    );
+  }
 
   const ext = path.extname(media.filename).toLowerCase();
 
