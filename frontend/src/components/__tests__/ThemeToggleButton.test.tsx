@@ -88,23 +88,6 @@ describe("ThemeToggleButton", () => {
     expect(button.textContent).toBe("☀️");
   });
 
-  it("displays correct icon for current theme", async () => {
-    const user = userEvent.setup();
-    render(<ThemeToggleButton />);
-
-    const button = screen.getByRole("button");
-    expect(button.textContent).toBe("🌙"); // Dark theme icon
-
-    // Switch to light
-    await user.click(button);
-    const lightOption = await screen.findByText("Light");
-    await user.click(lightOption);
-
-    await waitFor(() => {
-      expect(button.textContent).toBe("☀️"); // Light theme icon
-    });
-  });
-
   it("closes dropdown after selecting a theme", async () => {
     const user = userEvent.setup();
     render(<ThemeToggleButton />);

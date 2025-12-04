@@ -10,14 +10,10 @@ export function ThemeToggleButton() {
     if (savedTheme === 'light') {
       setCurrentTheme('light');
       document.documentElement.classList.remove('dark');
-    } else if (savedTheme === 'dark') {
+    } else {
+      // Default to dark mode
       setCurrentTheme('dark');
       document.documentElement.classList.add('dark');
-    } else {
-      // Default to light mode if no preference saved
-      setCurrentTheme('light');
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
     }
   }, []);
 
