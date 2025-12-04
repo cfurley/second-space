@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import {
   checkTimeout,
   recordFailedAttempt,
@@ -7,7 +7,29 @@ import {
   getAttemptCount,
   getLockoutCount,
   getTimeoutMinutes,
+  STORAGE_KEY,
 } from '../loginTimeout';
+
+// Mock localStorage if not available
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] || null,
+    setItem: (key: string, value: string) => {
+      store[key] = value.toString();
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
+  };
+})();
+
+if (typeof localStorage === 'undefined') {
+  (globalThis as any).localStorage = localStorageMock as Storage;
+}
 
 describe('loginTimeout', () => {
   beforeEach(() => {
@@ -15,6 +37,11 @@ describe('loginTimeout', () => {
     localStorage.clear();
     // Reset all mocks
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    // Ensure we're using real timers after each test
+    vi.useRealTimers();
   });
 
   describe('formatTimeRemaining', () => {
