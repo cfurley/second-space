@@ -68,41 +68,6 @@ sanitizeFilename('file\0.txt');              // ✓ 'file.txt' (null bytes remov
 - Removes dangerous shell characters (`<`, `>`, `:`, `"`, `|`, `?`, `*`)
 - Limits filename length to 255 characters
 
-#### `validateSafePathExists(rootDir, unsafePath)`
-Combines safe path resolution with file existence checking.
-
-```javascript
-const uploadsRoot = path.join(process.cwd(), 'uploads');
-
-try {
-  const exists = await validateSafePathExists(uploadsRoot, 'image.jpg');
-  if (exists) {
-    // File exists and is safe to access
-  }
-} catch (error) {
-  // Path traversal detected or file not found
-}
-```
-
-#### `validateSafeFileRead(rootDir, unsafePath)`
-Validates a file is safe to read (exists and is readable).
-
-```javascript
-const uploadsRoot = path.join(process.cwd(), 'uploads');
-
-try {
-  const safePath = await validateSafeFileRead(uploadsRoot, 'docs/file.pdf');
-  const content = await fs.promises.readFile(safePath);
-  // Safe to use content
-} catch (error) {
-  if (error.message.includes('Path traversal')) {
-    // Attack attempt
-  } else if (error.message.includes('not found')) {
-    // File doesn't exist
-  }
-}
-```
-
 ### 2. Integration with Media Services
 
 **Location:** `backend/src/services/mediaServices.js`

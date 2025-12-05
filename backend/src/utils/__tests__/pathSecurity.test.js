@@ -37,9 +37,14 @@ describe("Path Security Utilities", () => {
       expect(result).toBe("hidden.txt");
     });
 
-    it("should reject filenames with double dots (..)", () => {
+    it("should reject path traversal sequences (..)", () => {
       expect(() => sanitizeFilename("..")).toThrow();
       expect(() => sanitizeFilename("....")).toThrow();
+    });
+
+    it("should remove double dots in the middle of filenames", () => {
+      const result = sanitizeFilename("file..name.txt");
+      expect(result).toBe("filename.txt");
     });
 
     it("should remove null bytes", () => {
