@@ -1,0 +1,1 @@
+// Refer to userControllers.test.js for structure and examples of tests to include here
