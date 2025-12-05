@@ -222,20 +222,17 @@ const insertMediaToDatabase = async (media) => {
         // Cleanup any written file to avoid orphaning
         if (wroteFile && filepath) {
           try {
-            let relPath = filepath.startsWith("/")
-              ? filepath.slice(1)
-              : filepath;
-            if (relPath.startsWith("uploads/"))
-              relPath = relPath.slice("uploads/".length);
+            let relPath = filepath.startsWith("/") ? filepath.slice(1) : filepath;
+            // normalize both forward and back slashes and remove leading 'uploads' segment
+            relPath = relPath.replace(/^uploads[\\/]/, "");
             const cwdBase = path.basename(process.cwd());
             const uploadsRoot =
               cwdBase === "backend"
                 ? path.join(process.cwd(), "uploads")
                 : path.join(process.cwd(), "backend", "uploads");
-            const absolutePath = path.join(
-              uploadsRoot,
-              relPath.replace(/\\/g, "/")
-            );
+            // split path into parts so path.join uses correct platform separators
+            const relParts = relPath.split(/[/\\\\]+/).filter(Boolean);
+            const absolutePath = path.join(uploadsRoot, ...relParts);
             await fs.promises.unlink(absolutePath);
           } catch (err) {
             if (err.code !== "ENOENT") {
@@ -262,19 +259,16 @@ const insertMediaToDatabase = async (media) => {
     } catch (dbError) {
       // Attempt to cleanup written file on DB error
       if (wroteFile && filepath) {
-        try {
+          try {
           let relPath = filepath.startsWith("/") ? filepath.slice(1) : filepath;
-          if (relPath.startsWith("uploads/"))
-            relPath = relPath.slice("uploads/".length);
+          relPath = relPath.replace(/^uploads[\\/]/, "");
           const cwdBase = path.basename(process.cwd());
           const uploadsRoot =
             cwdBase === "backend"
               ? path.join(process.cwd(), "uploads")
               : path.join(process.cwd(), "backend", "uploads");
-          const absolutePath = path.join(
-            uploadsRoot,
-            relPath.replace(/\\/g, "/")
-          );
+          const relParts = relPath.split(/[/\\\\]+/).filter(Boolean);
+          const absolutePath = path.join(uploadsRoot, ...relParts);
           await fs.promises.unlink(absolutePath);
         } catch (err) {
           if (err.code !== "ENOENT") {

@@ -8,7 +8,7 @@ import userModel from "../models/userModel.js";
 const authenticate = async (req, res) => {
   const { username, password } = req.body;
   // identifier used to track attempts: prefer username, fallback to IP
-  const identifier = username || req.ip || req.socket.remoteAddress || "unknown";
+  const identifier = username || req.ip || req.socket?.remoteAddress || "unknown";
 
   // Check server-side lockout first
   try {
