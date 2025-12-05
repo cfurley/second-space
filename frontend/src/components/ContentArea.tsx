@@ -8,9 +8,25 @@ interface ContentAreaProps {
   onFilterChange: (filter: string) => void;
   spaceContent: any[];
   searchQuery?: string;
+  isDeleteMode?: boolean;
+  selectedItemIds?: string[];
+  onToggleItemSelection?: (itemId: string) => void;
+  isEditMode?: boolean;
+  onItemEdit?: (item: any, itemType: 'text' | 'image' | 'link') => void;
 }
 
-export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceContent, searchQuery = '' }: ContentAreaProps) {
+export function ContentArea({ 
+  activeSpace, 
+  activeFilter, 
+  onFilterChange, 
+  spaceContent, 
+  searchQuery = '',
+  isDeleteMode = false,
+  selectedItemIds = [],
+  onToggleItemSelection,
+  isEditMode = false,
+  onItemEdit
+}: ContentAreaProps) {
   const [localContent, setLocalContent] = useState<any[]>([]);
 
   const sampleContent = [
@@ -153,12 +169,18 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
             </div>
             {pinnedContent.map((item, idx) => {
               const originalIndex = allContent.findIndex(c => c === item);
+              const itemId = item.content?.id || `${item.type}-${originalIndex}`;
               return (
                 <ContentCard
                   key={`pinned-${idx}`}
                   type={item.type}
                   content={item.content}
                   onToggleBookmark={() => handleToggleBookmark(originalIndex)}
+                  isDeleteMode={isDeleteMode}
+                  isSelected={selectedItemIds.includes(itemId)}
+                  onToggleSelect={() => onToggleItemSelection?.(itemId)}
+                  isEditMode={isEditMode}
+                  onEdit={() => onItemEdit?.(item.content, item.type)}
                 />
               );
             })}
@@ -179,12 +201,18 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
         
         {unpinnedContent.map((item, idx) => {
           const originalIndex = allContent.findIndex(c => c === item);
+          const itemId = item.content?.id || `${item.type}-${originalIndex}`;
           return (
             <ContentCard
               key={`unpinned-${idx}`}
               type={item.type}
               content={item.content}
               onToggleBookmark={() => handleToggleBookmark(originalIndex)}
+              isDeleteMode={isDeleteMode}
+              isSelected={selectedItemIds.includes(itemId)}
+              onToggleSelect={() => onToggleItemSelection?.(itemId)}
+              isEditMode={isEditMode}
+              onEdit={() => onItemEdit?.(item.content, item.type)}
             />
           );
         })}

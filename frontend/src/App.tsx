@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { ContentArea } from './components/ContentArea';
@@ -6,7 +6,9 @@ import { BottomMenuBar } from './components/BottomMenuBar';
 import Board from './components/Board';
 import Login from './components/login';
 import { FloatingMenu } from './components/FloatingMenu';
+import { EditContentDialog } from './components/EditContentDialog';
 import AnimatedBackground from './components/AnimatedBackground';
+import { api } from './utils/api';
 
 export default function App() {
   const [activeNav, setActiveNav] = useState('Spaces');
@@ -30,12 +32,306 @@ export default function App() {
   // Search query state
   const [searchQuery, setSearchQuery] = useState<string>('');
   
+  // Delete mode state
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
+  
+  // Edit mode state
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  
+  // Load content from localStorage on mount
+  useEffect(() => {
+    const loadContent = () => {
+      try {
+        // Load all content types from localStorage
+        const posts = JSON.parse(localStorage.getItem('ss_posts') || '[]');
+        const media = JSON.parse(localStorage.getItem('ss_media') || '[]');
+        const bookmarks = JSON.parse(localStorage.getItem('ss_bookmarks') || '[]');
+        
+        // Combine all content
+        const allContent = [...posts, ...media, ...bookmarks];
+        
+        // Group content by space
+        const contentBySpace: {[key: string]: any[]} = {
+          'My Ideas': [],
+          'Work': [],
+          'Personal': [],
+        };
+        
+        allContent.forEach((item: any) => {
+          // Map spaceId to space name
+          let spaceName = 'My Ideas'; // default
+          if (item.spaceId === 'space-work') spaceName = 'Work';
+          else if (item.spaceId === 'space-personal') spaceName = 'Personal';
+          
+          // Convert to content format expected by ContentArea
+          if (item.type === 'text') {
+            contentBySpace[spaceName].push({
+              type: 'text',
+              content: {
+                id: item.id,
+                text: `${item.title}\n\n${item.content}`,
+                timestamp: new Date(item.createdAt).toLocaleString(),
+                isBookmarked: item.isBookmarked || false
+              }
+            });
+          } else if (item.type === 'image' || item.fileData) {
+            contentBySpace[spaceName].push({
+              type: 'image',
+              content: {
+                id: item.id,
+                title: item.title,
+                description: item.description,
+                image: item.fileData,
+                timestamp: new Date(item.createdAt).toLocaleString(),
+                isBookmarked: item.isBookmarked || false
+              }
+            });
+          } else if (item.type === 'bookmark') {
+            // Extract domain from URL
+            let domain = '';
+            try {
+              const urlObj = new URL(item.url);
+              domain = urlObj.hostname;
+            } catch (e) {
+              domain = item.url;
+            }
+            
+            contentBySpace[spaceName].push({
+              type: 'link',
+              content: {
+                id: item.id,
+                title: item.title,
+                text: item.notes || 'No description provided',
+                domain: domain,
+                timestamp: new Date(item.createdAt).toLocaleString(),
+                url: item.url,
+                isBookmarked: item.isBookmarked || false
+              }
+            });
+          }
+        });
+        
+        setSpaceContent(contentBySpace);
+      } catch (error) {
+        console.error('Error loading content from localStorage:', error);
+      }
+    };
+    
+    loadContent();
+  }, []);
+  
   // Function to add new content to current space
   const addContentToSpace = (content: any) => {
     setSpaceContent(prev => ({
       ...prev,
       [activeSpace]: [...(prev[activeSpace] || []), content]
     }));
+  };
+  
+  // Toggle delete mode
+  const toggleDeleteMode = () => {
+    setIsDeleteMode(!isDeleteMode);
+    setSelectedItemIds([]);
+  };
+  
+  // Toggle item selection
+  const toggleItemSelection = (itemId: string) => {
+    setSelectedItemIds(prev => 
+      prev.includes(itemId) 
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    );
+  };
+  
+  // Delete selected items
+  const deleteSelectedItems = async () => {
+    if (selectedItemIds.length === 0) {
+      alert('Please select at least one item to delete');
+      return;
+    }
+    
+    if (!window.confirm(`Delete ${selectedItemIds.length} item(s)? This cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      const allPosts = JSON.parse(localStorage.getItem('ss_posts') || '[]');
+      const allMedia = JSON.parse(localStorage.getItem('ss_media') || '[]');
+      const allBookmarks = JSON.parse(localStorage.getItem('ss_bookmarks') || '[]');
+      
+      const filteredPosts = allPosts.filter((item: any) => !selectedItemIds.includes(item.id));
+      const filteredMedia = allMedia.filter((item: any) => !selectedItemIds.includes(item.id));
+      const filteredBookmarks = allBookmarks.filter((item: any) => !selectedItemIds.includes(item.id));
+      
+      localStorage.setItem('ss_posts', JSON.stringify(filteredPosts));
+      localStorage.setItem('ss_media', JSON.stringify(filteredMedia));
+      localStorage.setItem('ss_bookmarks', JSON.stringify(filteredBookmarks));
+      
+      // Update local state by reloading content from localStorage
+      const allContent = [...filteredPosts, ...filteredMedia, ...filteredBookmarks];
+      
+      // Group content by space
+      const contentBySpace: {[key: string]: any[]} = {
+        'My Ideas': [],
+        'Work': [],
+        'Personal': [],
+      };
+      
+      allContent.forEach((item: any) => {
+        // Map spaceId to space name
+        let spaceName = 'My Ideas'; // default
+        if (item.spaceId === 'space-work') spaceName = 'Work';
+        else if (item.spaceId === 'space-personal') spaceName = 'Personal';
+        
+        // Convert to content format expected by ContentArea
+        if (item.type === 'text') {
+          contentBySpace[spaceName].push({
+            type: 'text',
+            content: {
+              id: item.id,
+              text: `${item.title}\n\n${item.content}`,
+              timestamp: new Date(item.createdAt).toLocaleString(),
+              isBookmarked: item.isBookmarked || false
+            }
+          });
+        } else if (item.type === 'image' || item.fileData) {
+          contentBySpace[spaceName].push({
+            type: 'image',
+            content: {
+              id: item.id,
+              title: item.title,
+              description: item.description,
+              image: item.fileData,
+              timestamp: new Date(item.createdAt).toLocaleString(),
+              isBookmarked: item.isBookmarked || false
+            }
+          });
+        } else if (item.type === 'bookmark') {
+          // Extract domain from URL
+          let domain = '';
+          try {
+            const urlObj = new URL(item.url);
+            domain = urlObj.hostname;
+          } catch (e) {
+            domain = item.url;
+          }
+          
+          contentBySpace[spaceName].push({
+            type: 'link',
+            content: {
+              id: item.id,
+              title: item.title,
+              text: item.notes || 'No description provided',
+              domain: domain,
+              timestamp: new Date(item.createdAt).toLocaleString(),
+              url: item.url,
+              isBookmarked: item.isBookmarked || false
+            }
+          });
+        }
+      });
+      
+      setSpaceContent(contentBySpace);
+      setSelectedItemIds([]);
+      setIsDeleteMode(false);
+      
+      alert(`Successfully deleted ${selectedItemIds.length} item(s)!`);
+    } catch (error) {
+      console.error('Error deleting items:', error);
+      alert('Failed to delete items');
+    }
+  };
+  
+  // Toggle edit mode
+  const toggleEditMode = () => {
+    setIsEditMode(!isEditMode);
+  };
+  
+  // Handle item click for editing
+  const handleItemEdit = (item: any, itemType: 'text' | 'image' | 'link') => {
+    setEditingItem({ ...item, itemType });
+    setShowEditDialog(true);
+  };
+  
+  // Handle content save after editing
+  const handleContentSave = (updatedContent: any) => {
+    // Reload content from localStorage
+    const loadContent = () => {
+      try {
+        const posts = JSON.parse(localStorage.getItem('ss_posts') || '[]');
+        const media = JSON.parse(localStorage.getItem('ss_media') || '[]');
+        const bookmarks = JSON.parse(localStorage.getItem('ss_bookmarks') || '[]');
+        
+        const allContent = [...posts, ...media, ...bookmarks];
+        
+        const contentBySpace: {[key: string]: any[]} = {
+          'My Ideas': [],
+          'Work': [],
+          'Personal': [],
+        };
+        
+        allContent.forEach((item: any) => {
+          let spaceName = 'My Ideas';
+          if (item.spaceId === 'space-work') spaceName = 'Work';
+          else if (item.spaceId === 'space-personal') spaceName = 'Personal';
+          
+          if (item.type === 'text') {
+            contentBySpace[spaceName].push({
+              type: 'text',
+              content: {
+                id: item.id,
+                text: `${item.title}\n\n${item.content}`,
+                timestamp: new Date(item.createdAt).toLocaleString(),
+                isBookmarked: item.isBookmarked || false
+              }
+            });
+          } else if (item.type === 'image' || item.fileData) {
+            contentBySpace[spaceName].push({
+              type: 'image',
+              content: {
+                id: item.id,
+                title: item.title,
+                description: item.description,
+                image: item.fileData,
+                timestamp: new Date(item.createdAt).toLocaleString(),
+                isBookmarked: item.isBookmarked || false
+              }
+            });
+          } else if (item.type === 'bookmark') {
+            let domain = '';
+            try {
+              const urlObj = new URL(item.url);
+              domain = urlObj.hostname;
+            } catch (e) {
+              domain = item.url;
+            }
+            
+            contentBySpace[spaceName].push({
+              type: 'link',
+              content: {
+                id: item.id,
+                title: item.title,
+                text: item.notes || 'No description provided',
+                domain: domain,
+                timestamp: new Date(item.createdAt).toLocaleString(),
+                url: item.url,
+                isBookmarked: item.isBookmarked || false
+              }
+            });
+          }
+        });
+        
+        setSpaceContent(contentBySpace);
+      } catch (error) {
+        console.error('Error loading content:', error);
+      }
+    };
+    
+    loadContent();
+    setShowEditDialog(false);
   };
 
   // If not authenticated, show the landing page with "Open Login" button
@@ -168,6 +464,19 @@ export default function App() {
         currentUserId={currentUserId}
         onContentAdded={addContentToSpace}
         onSearchChange={setSearchQuery}
+        isDeleteMode={isDeleteMode}
+        onToggleDeleteMode={toggleDeleteMode}
+        selectedCount={selectedItemIds.length}
+        onDeleteSelected={deleteSelectedItems}
+        isEditMode={isEditMode}
+        onToggleEditMode={toggleEditMode}
+      />
+      <EditContentDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        contentType={editingItem?.itemType || 'text'}
+        contentData={editingItem}
+        onSave={handleContentSave}
       />
       <div className="h-screen w-screen bg-[radial-gradient(circle_at_top,_#ffffff_0%_,_#e5e7eb_100%)]
         dark:bg-[radial-gradient(circle_at_bottom,_#0a0a0a_0%,_#1a1a1a_100%)]
@@ -182,6 +491,11 @@ export default function App() {
               onFilterChange={setActiveFilter}
               spaceContent={spaceContent[activeSpace] || []}
               searchQuery={searchQuery}
+              isDeleteMode={isDeleteMode}
+              selectedItemIds={selectedItemIds}
+              onToggleItemSelection={toggleItemSelection}
+              isEditMode={isEditMode}
+              onItemEdit={handleItemEdit}
             />
           </div>
         </div>
