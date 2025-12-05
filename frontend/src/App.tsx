@@ -9,13 +9,14 @@ import { FloatingMenu } from './components/FloatingMenu';
 import { EditContentDialog } from './components/EditContentDialog';
 import AnimatedBackground from './components/AnimatedBackground';
 import { api } from './utils/api';
+import { ThemeToggleButton } from './components/ThemeToggleButton';
 
 export default function App() {
   const [activeNav, setActiveNav] = useState('Spaces');
   const [activeSpace, setActiveSpace] = useState('My Ideas');
   const [activeFilter, setActiveFilter] = useState('Recent');
   // Simple demo auth: app starts unauthenticated and shows login screen
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Set to false to require login
   const [showLoginModal, setShowLoginModal] = useState(false);
   
   // User and space IDs for FloatingMenu
@@ -346,7 +347,6 @@ export default function App() {
           height: '100vh'
         }}
       >
-        <AnimatedBackground />
         
         {/* Landing page content with circular gradient blur exclusion zone */}
         <div className="relative z-10 flex flex-col items-center pointer-events-auto">
@@ -458,7 +458,10 @@ export default function App() {
   }
 
   return (
-    <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
+    <div className="h-screen w-screen bg-gray-100 dark:bg-black overflow-hidden relative">
+      {/* Theme Selector Button - Fixed on far left */}
+      <ThemeToggleButton />
+      
       <FloatingMenu 
         currentSpaceId={currentSpaceId} 
         currentUserId={currentUserId}
@@ -478,28 +481,28 @@ export default function App() {
         contentData={editingItem}
         onSave={handleContentSave}
       />
-      <div className="h-screen w-screen bg-[radial-gradient(circle_at_top,_#ffffff_0%_,_#e5e7eb_100%)]
-        dark:bg-[radial-gradient(circle_at_bottom,_#0a0a0a_0%,_#1a1a1a_100%)]
-        transition-colors duration-500">
-        <div className="w-full h-full bg-black text-foreground">
-          <Header activeNav={activeNav} onNavChange={setActiveNav} />
-          <div className="flex h-[calc(100vh-140px)]">
-            <Sidebar activeSpace={activeSpace} onSpaceChange={setActiveSpace} />
-            <ContentArea
-              activeSpace={activeSpace}
-              activeFilter={activeFilter}
-              onFilterChange={setActiveFilter}
-              spaceContent={spaceContent[activeSpace] || []}
-              searchQuery={searchQuery}
-              isDeleteMode={isDeleteMode}
-              selectedItemIds={selectedItemIds}
-              onToggleItemSelection={toggleItemSelection}
-              isEditMode={isEditMode}
-              onItemEdit={handleItemEdit}
-            />
-          </div>
+      <div className="w-full h-full flex flex-col relative z-10">
+        <Header 
+          activeNav={activeNav} 
+          onNavChange={setActiveNav}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
+        <div className="flex flex-1 overflow-hidden">
+          <Sidebar activeSpace={activeSpace} onSpaceChange={setActiveSpace} />
+          <ContentArea
+            activeSpace={activeSpace}
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+            spaceContent={spaceContent[activeSpace] || []}
+            searchQuery={searchQuery}
+            isDeleteMode={isDeleteMode}
+            selectedItemIds={selectedItemIds}
+            onToggleItemSelection={toggleItemSelection}
+            isEditMode={isEditMode}
+            onItemEdit={handleItemEdit}
+          />
         </div>
-        <div className="absolute bottom-0 left-0 w-full h-[300px] bg-gradient-to-t from-pink-500/20 via-purple-500/10 to-transparent blur-3xl animate-pulse pointer-events-none" />
       </div>
     </div>
   );

@@ -33,6 +33,7 @@
             "clsx": "*",
             "cmdk": "^1.1.1",
             "embla-carousel-react": "^8.6.0",
+            "framer-motion": "^12.23.25",
             "input-otp": "^1.4.2",
             "lucide-react": "^0.487.0",
             "motion": "*",
@@ -65,7 +66,7 @@
             "tailwindcss": "^4.1.14",
             "typescript": "^5.9.3",
             "vite": "^6.4.0",
-            "vitest": "^4.0.4"
+            "vitest": "^4.0.15"
       },
       "scripts": {
             "dev": "vite",

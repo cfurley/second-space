@@ -31,18 +31,19 @@ export function MediaUploadDialog({
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
 
-  // CWE-434: Security - Whitelist of allowed file types
-  const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'pdf', 'txt', 'md'];
+  // CWE-434: Security - Whitelist of allowed file types (matches backend)
+  const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'txt', 'json'];
   const ALLOWED_MIME_TYPES = [
     'image/png',
     'image/jpeg', 
     'image/gif',
     'image/webp',
-    'application/pdf',
+    'image/bmp',
+    'image/svg+xml',
     'text/plain',
-    'text/markdown'
+    'application/json'
   ];
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
   const validateFile = (file: File): { valid: boolean; errors: string[] } => {
     const errors: string[] = [];
@@ -70,9 +71,10 @@ export function MediaUploadDialog({
       'image/jpeg': ['jpg', 'jpeg'],
       'image/gif': ['gif'],
       'image/webp': ['webp'],
-      'application/pdf': ['pdf'],
+      'image/bmp': ['bmp'],
+      'image/svg+xml': ['svg'],
       'text/plain': ['txt'],
-      'text/markdown': ['md']
+      'application/json': ['json']
     };
     
     const validExtensions = mimeToExt[file.type];
@@ -128,40 +130,43 @@ export function MediaUploadDialog({
     }
 
     try {
-      const formData = new FormData();
-      formData.append('file', mediaFile);
-      formData.append('title', mediaTitle);
-      formData.append('description', mediaDescription);
-      formData.append('spaceId', currentSpaceId);
-      if (currentUserId) {
-        formData.append('userId', currentUserId);
-      }
-      formData.append('fileType', mediaFile.type);
-      formData.append('fileName', mediaFile.name);
-      formData.append('fileSize', mediaFile.size.toString());
-      formData.append('createdAt', new Date().toISOString());
-      
-      console.log("Uploading media:", {
-        title: mediaTitle,
-        description: mediaDescription,
-        fileName: mediaFile.name,
-        fileType: mediaFile.type,
-        fileSize: mediaFile.size,
-        spaceId: currentSpaceId
+      // Convert file to base64
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          // Remove data URL prefix (e.g., "data:image/png;base64,")
+          const base64Data = result.split(',')[1];
+          resolve(base64Data);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(mediaFile);
       });
       
-      // Upload to API (stored in localStorage)
-      const result = await api.uploadMedia(formData);
+      console.log("Uploading media:", {
+        filename: mediaFile.name,
+        file_size: mediaFile.size,
+        container_id: currentSpaceId
+      });
+      
+      // Create media using backend API
+      const result = await api.createMedia({
+        container_id: parseInt(currentSpaceId), // Assuming container_id is the space ID
+        filename: mediaFile.name,
+        file_size: mediaFile.size,
+        base64: base64,
+        create_date_utc: new Date().toISOString()
+      });
       
       // Notify parent component with the uploaded media data
       if (onMediaUploaded && result.success) {
         onMediaUploaded({
-          type: result.data.type,
+          type: 'image', // Adjust based on file type
           content: {
-            id: result.data.id,
+            id: result.data?.id,
             title: mediaTitle,
             description: mediaDescription,
-            image: result.data.fileData, // base64 data
+            image: `data:${mediaFile.type};base64,${base64}`,
             timestamp: 'just now',
             fileName: mediaFile.name,
             fileType: mediaFile.type,
@@ -170,7 +175,7 @@ export function MediaUploadDialog({
         });
       }
       
-      alert(`Media "${mediaTitle}" uploaded successfully!`);
+      alert(`Media "${mediaTitle || mediaFile.name}" uploaded successfully!`);
       
       // Reset form and close dialog
       setMediaTitle("");
@@ -180,7 +185,7 @@ export function MediaUploadDialog({
       onOpenChange(false);
     } catch (error) {
       console.error("Error uploading media:", error);
-      alert("Failed to upload media. Please try again.");
+      alert(`Failed to upload media: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -252,7 +257,7 @@ export function MediaUploadDialog({
                   </p>
                 </div>
                 <p className="text-xs text-gray-400 mt-2">
-                  Allowed: PNG, JPG, JPEG, GIF, WebP, PDF, TXT, MD (Max 10MB)
+                  Allowed: PNG, JPG, JPEG, GIF, WebP, BMP, SVG, TXT, JSON (Max 20MB)
                 </p>
               </div>
               <Input
@@ -260,7 +265,7 @@ export function MediaUploadDialog({
                 type="file"
                 onChange={handleFileChange}
                 className="hidden"
-                accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt,.md"
+                accept=".png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.txt,.json"
               />
             </div>
           </div>

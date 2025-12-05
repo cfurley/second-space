@@ -11,6 +11,7 @@ import {
 } from "../utils/passwordValidator";
 import ReactDOM from "react-dom";
 import { api } from "../utils/api";
+import CaptchaType67 from "./CaptchaType67";
 
 interface LoginProps {
   isOpen: boolean;
@@ -849,6 +850,18 @@ export default function Login({ isOpen, onClose }: LoginProps) {
               </div>
             </form>
           </div>
+        )}
+
+        {mode === "verify" && (
+          <CaptchaType67
+            onSuccess={() => {
+              setVerified(true);
+              setMode("signup");
+            }}
+            onCancel={() => {
+              setMode("signup");
+            }}
+          />
         )}
       </div>
     </div>,

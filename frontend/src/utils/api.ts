@@ -1,27 +1,28 @@
 /**
  * API Configuration and Client for Second Space
- * 
+ *
  * This file handles all API communication between frontend and backend.
  * It automatically switches between local development and production URLs.
  */
 
 // Determine the API base URL based on environment
-const API_BASE_URL = (import.meta as any).env.PROD 
-  ? (import.meta as any).env.VITE_API_URL || 'https://second-space-api.onrender.com'  // Production (update this URL after deploying to Render)
-  : 'http://localhost:8080';  // Local development with Docker
+const API_BASE_URL = (import.meta as any).env.PROD
+  ? (import.meta as any).env.VITE_API_URL ||
+    "https://second-space-api.onrender.com" // Production (update this URL after deploying to Render)
+  : "http://localhost:8080"; // Local development with Docker
 
-console.log('API Base URL:', API_BASE_URL);
+console.log("API Base URL:", API_BASE_URL);
 
 /**
  * Generic fetch wrapper with error handling
  */
 async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   const defaultHeaders = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
-  
+
   try {
     const response = await fetch(url, {
       ...options,
@@ -30,27 +31,27 @@ async function apiFetch(endpoint: string, options: RequestInit = {}) {
         ...options.headers,
       },
     });
-    
+
     // Handle non-JSON responses
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
       throw new Error(`Expected JSON response but got ${contentType}`);
     }
-    
+
     const data = await response.json();
-    
+
     if (!response.ok) {
       // Surface backend error fields consistently. Backend often uses { error: "..." }
       const backendMessage =
         (data && (data.message || data.error)) ||
-        (typeof data === 'string' ? data : null) ||
+        (typeof data === "string" ? data : null) ||
         undefined;
       throw new Error(backendMessage || `API Error: ${response.status}`);
     }
-    
+
     return data;
   } catch (error) {
-    console.error('API Error:', error);
+    console.error("API Error:", error);
     throw error;
   }
 }
@@ -60,17 +61,17 @@ async function apiFetch(endpoint: string, options: RequestInit = {}) {
  */
 export const api = {
   // ==================== USER ENDPOINTS ====================
-  
+
   /**
    * Authenticate user login
    */
   async login(username: string, password: string) {
-    return apiFetch('/user/authentication', {
-      method: 'POST',
+    return apiFetch("/user/authentication", {
+      method: "POST",
       body: JSON.stringify({ username, password }),
     });
   },
-  
+
   /**
    * Create a new user account
    */
@@ -89,56 +90,56 @@ export const api = {
       last_name: userData.lastName,
       email: userData.email,
     };
-    
-    return apiFetch('/user', {
-      method: 'POST',
+
+    return apiFetch("/user", {
+      method: "POST",
       body: JSON.stringify(payload),
     });
   },
-  
+
   /**
    * Get user by ID
    */
   async getUser(userId: string) {
     return apiFetch(`/user/${userId}`);
   },
-  
+
   /**
    * Update user password
    */
   async updatePassword(userId: string, newPassword: string) {
     return apiFetch(`/user/${userId}/password`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify({ password: newPassword }),
     });
   },
-  
+
   /**
    * Delete user account
    */
   async deleteUser(userId: string) {
     return apiFetch(`/user/${userId}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
-  
+
   // ==================== SPACE ENDPOINTS ====================
-  
+
   /**
    * Get all spaces for a user
    */
   async getSpaces(userId?: string) {
-    const query = userId ? `?userId=${userId}` : '';
+    const query = userId ? `?userId=${userId}` : "";
     return apiFetch(`/spaces${query}`);
   },
-  
+
   /**
    * Get a specific space by ID
    */
   async getSpace(spaceId: string) {
     return apiFetch(`/spaces/${spaceId}`);
   },
-  
+
   /**
    * Create a new space
    */
@@ -147,221 +148,107 @@ export const api = {
     description?: string;
     userId: string;
   }) {
-    return apiFetch('/spaces', {
-      method: 'POST',
+    return apiFetch("/spaces", {
+      method: "POST",
       body: JSON.stringify(spaceData),
     });
   },
-  
+
   /**
    * Update a space
    */
-  async updateSpace(spaceId: string, updates: {
-    name?: string;
-    description?: string;
-  }) {
+  async updateSpace(
+    spaceId: string,
+    updates: {
+      name?: string;
+      description?: string;
+    }
+  ) {
     return apiFetch(`/spaces/${spaceId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(updates),
     });
   },
-  
+
   /**
    * Delete a space
    */
   async deleteSpace(spaceId: string) {
     return apiFetch(`/spaces/${spaceId}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
-  
+
   // ==================== THEME ENDPOINTS ====================
-  
+
   /**
    * Get all available themes
    */
   async getThemes() {
-    return apiFetch('/themes');
+    return apiFetch("/themes");
   },
-  
+
   /**
    * Get a specific theme by ID
    */
   async getTheme(themeId: string) {
     return apiFetch(`/themes/${themeId}`);
   },
-  
+
   // ==================== MEDIA ENDPOINTS ====================
-  // Using localStorage for now since backend routes are commented out
-  
+
   /**
-   * Upload media to a space (stored locally)
-   * CWE-434: Implements secure file upload validation
+   * Get all media by user ID
    */
-  async uploadMedia(formData: FormData) {
-    try {
-      // Extract form data
-      const title = formData.get('title') as string;
-      const description = formData.get('description') as string;
-      const spaceId = formData.get('spaceId') as string;
-      const userId = formData.get('userId') as string;
-      const file = formData.get('file') as File;
-      
-      // CWE-434: Server-side validation (simulated for localStorage)
-      const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'pdf', 'txt', 'md'];
-      const ALLOWED_MIME_TYPES = [
-        'image/png',
-        'image/jpeg',
-        'image/gif',
-        'image/webp',
-        'application/pdf',
-        'text/plain',
-        'text/markdown'
-      ];
-      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
-      // Validate file size
-      if (file.size > MAX_FILE_SIZE) {
-        throw new Error(`File size exceeds maximum allowed size of ${MAX_FILE_SIZE / (1024 * 1024)}MB`);
-      }
-
-      // Validate file extension
-      const fileName = file.name.toLowerCase();
-      const extension = fileName.split('.').pop() || '';
-      if (!ALLOWED_EXTENSIONS.includes(extension)) {
-        throw new Error(`File type .${extension} not allowed. Server accepts only: ${ALLOWED_EXTENSIONS.join(', ')}`);
-      }
-
-      // Validate MIME type
-      if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-        throw new Error(`File MIME type ${file.type} not allowed`);
-      }
-
-      // Validate MIME type matches extension
-      const mimeToExt: Record<string, string[]> = {
-        'image/png': ['png'],
-        'image/jpeg': ['jpg', 'jpeg'],
-        'image/gif': ['gif'],
-        'image/webp': ['webp'],
-        'application/pdf': ['pdf'],
-        'text/plain': ['txt'],
-        'text/markdown': ['md']
-      };
-      
-      const validExtensions = mimeToExt[file.type];
-      if (validExtensions && !validExtensions.includes(extension)) {
-        throw new Error('File type and extension do not match. Possible MIME type spoofing detected.');
-      }
-
-      // Sanitize filename (prevent path traversal)
-      const sanitizedName = fileName
-        .replace(/[/\\]/g, '') // Remove path separators
-        .replace(/\0/g, '') // Remove null bytes
-        .replace(/^\.+/, '') // Remove leading dots
-        .replace(/[^a-zA-Z0-9._-]/g, '_'); // Replace special chars
-
-      // Generate safe filename with timestamp
-      const timestamp = Date.now();
-      const random = Math.random().toString(36).substr(2, 9);
-      const safeFileName = `${timestamp}_${random}_${sanitizedName}`;
-      
-      // Convert file to base64 for localStorage
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      
-      // Create media object with security metadata
-      const mediaItem = {
-        id: `media_${timestamp}_${random}`,
-        title,
-        description,
-        spaceId,
-        userId,
-        fileName: safeFileName, // Store sanitized filename
-        originalFileName: file.name, // Keep original for display
-        fileType: file.type,
-        fileSize: file.size,
-        fileData: base64, // Store the base64 encoded file
-        createdAt: new Date().toISOString(),
-        type: file.type.startsWith('image/') ? 'image' : 
-              file.type.startsWith('video/') ? 'video' :
-              file.type.startsWith('audio/') ? 'audio' : 'file',
-        validated: true, // Mark as validated
-        uploadedFrom: 'secure-client'
-      };
-      
-      // Get existing media from localStorage
-      const existingMedia = JSON.parse(localStorage.getItem('ss_media') || '[]');
-      
-      // Add new media
-      existingMedia.push(mediaItem);
-      
-      // Save back to localStorage
-      localStorage.setItem('ss_media', JSON.stringify(existingMedia));
-
-      // Log upload for security monitoring
-      console.log('[UPLOAD-LOG]', {
-        timestamp: new Date().toISOString(),
-        userId,
-        spaceId,
-        fileName: safeFileName,
-        fileType: file.type,
-        fileSize: file.size,
-        status: 'SUCCESS'
-      });
-      
-      return { 
-        success: true, 
-        message: 'Media uploaded successfully',
-        data: mediaItem 
-      };
-    } catch (error) {
-      // Log failed upload attempt
-      console.error('[UPLOAD-LOG]', {
-        timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : 'Unknown error',
-        status: 'FAILED'
-      });
-      
-      console.error('Error uploading media:', error);
-      throw new Error(error instanceof Error ? error.message : 'Failed to upload media');
-    }
+  async getMediaByUser(userId: string) {
+    return apiFetch(`/media/users/${userId}`);
   },
-  
+
   /**
-   * Get media for a space (from localStorage)
+   * Get all media by space ID
    */
-  async getMedia(spaceId: string) {
-    try {
-      const allMedia = JSON.parse(localStorage.getItem('ss_media') || '[]');
-      const spaceMedia = allMedia.filter((item: any) => item.spaceId === spaceId);
-      return { success: true, data: spaceMedia };
-    } catch (error) {
-      console.error('Error getting media:', error);
-      throw new Error('Failed to get media');
-    }
+  async getMediaBySpace(spaceId: string) {
+    return apiFetch(`/media/spaces/${spaceId}`);
   },
-  
+
   /**
-   * Delete media by ID (from localStorage)
+   * Get media by media ID
+   */
+  async getMediaById(mediaId: string) {
+    return apiFetch(`/media/${mediaId}`);
+  },
+
+  /**
+   * Create new media
+   */
+  async createMedia(mediaData: MediaCreatePayload) {
+    return apiFetch("/media", {
+      method: "POST",
+      body: JSON.stringify(mediaData),
+    });
+  },
+
+  /**
+   * Update media
+   */
+  async updateMedia(mediaId: string, updates: MediaUpdatePayload) {
+    return apiFetch(`/media/${mediaId}`, {
+      method: "PUT",
+      body: JSON.stringify(updates),
+    });
+  },
+
+  /**
+   * Delete media
    */
   async deleteMedia(mediaId: string) {
-    try {
-      const allMedia = JSON.parse(localStorage.getItem('ss_media') || '[]');
-      const filtered = allMedia.filter((item: any) => item.id !== mediaId);
-      localStorage.setItem('ss_media', JSON.stringify(filtered));
-      return { success: true, message: 'Media deleted successfully' };
-    } catch (error) {
-      console.error('Error deleting media:', error);
-      throw new Error('Failed to delete media');
-    }
+    return apiFetch(`/media/${mediaId}`, {
+      method: "DELETE",
+    });
   },
   
   // ==================== CONTENT ENDPOINTS ====================
-  // For text posts and bookmarks (stored locally)
+  // For text posts and bookmarks (stored locally until backend endpoints exist)
   
   /**
    * Create a text post
@@ -473,14 +360,14 @@ export const api = {
     }
   },
 
-  
+
   // ==================== HEALTH CHECK ====================
-  
+
   /**
    * Check if backend is alive
    */
   async healthCheck() {
-    return apiFetch('/');
+    return apiFetch("/");
   },
 };
 
@@ -520,6 +407,36 @@ export interface Theme {
   errorExtraColor: string;
   colorfulErrorColor: string;
   colorfulErrorExtraColor: string;
+}
+
+export interface Media {
+  id: number;
+  container_id: number;
+  filename: string;
+  filepath: string;
+  file_size: number;
+  video_length?: number;
+  base64?: string;
+  create_date_utc: string;
+  update_date_utc?: string;
+  delete_date_utc?: string;
+  deleted: number;
+}
+
+export interface MediaCreatePayload {
+  container_id: number;
+  filename: string;
+  file_size: number;
+  video_length?: number;
+  base64?: string;
+  create_date_utc?: string;
+}
+
+export interface MediaUpdatePayload {
+  filename?: string;
+  file_size?: number;
+  video_length?: number;
+  base64?: string;
 }
 
 export interface ApiError {

@@ -45,6 +45,7 @@ export function FloatingMenu({
   const [showSearchDialog, setShowSearchDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [editMode, setEditMode] = useState<'text' | 'media' | 'bookmark' | null>(null);
   
   // Form states for Text Post
   const [postTitle, setPostTitle] = useState("");
