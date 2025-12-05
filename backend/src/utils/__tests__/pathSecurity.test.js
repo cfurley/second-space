@@ -1,17 +1,15 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect } from "vitest";
 import {
   resolveSafePath,
   sanitizeFilename,
-  validateSafePathExists,
 } from "../pathSecurity.js";
 import path from "path";
-import fs from "fs";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 describe("Path Security Utilities", () => {
-  const testRoot = path.join(__dirname, "test-uploads");
+  const testRoot = path.join(__dirname, "../test-uploads");
 
   describe("sanitizeFilename", () => {
     it("should allow valid filenames", () => {
@@ -108,34 +106,14 @@ describe("Path Security Utilities", () => {
       expect(() => resolveSafePath(null, "file.txt")).toThrow();
       expect(() => resolveSafePath(testRoot, null)).toThrow();
     });
-  });
 
-  describe("validateSafePathExists", () => {
-    beforeAll(async () => {
-      // Create test directory and file
-      await fs.promises.mkdir(testRoot, { recursive: true });
-      await fs.promises.writeFile(
-        path.join(testRoot, "test.txt"),
-        "test content"
+    it("should reject paths that share a common prefix but aren't children", () => {
+      // This test ensures that a path like "uploads-backup" won't bypass
+      // the root check if the root is "uploads"
+      const uploadsRoot = path.join(testRoot, "uploads");
+      expect(() => resolveSafePath(uploadsRoot, "../uploads-backup/file.txt")).toThrow(
+        /Path traversal detected/
       );
-    });
-
-    afterAll(async () => {
-      // Cleanup
-      await fs.promises.rm(testRoot, { recursive: true, force: true });
-    });
-
-    it("should validate existing files within root", async () => {
-      const result = await validateSafePathExists(testRoot, "test.txt");
-      expect(result).toBe(true);
-    });
-
-    it("should reject non-existent files", async () => {
-      expect(validateSafePathExists(testRoot, "nonexistent.txt")).rejects.toThrow(/File not found/);
-    });
-
-    it("should reject path traversal attempts", async () => {
-      expect(validateSafePathExists(testRoot, "../../etc/passwd")).rejects.toThrow(/Path traversal detected/);
     });
   });
 });

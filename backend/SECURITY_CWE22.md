@@ -116,11 +116,14 @@ async function generateFilepath(media) {
   if (!media || !media.filename) throw new Error("Missing filename");
 
   // Validate filename against path traversal attacks
+  let sanitizedFilename;
   try {
-    sanitizeFilename(media.filename);
+    sanitizedFilename = sanitizeFilename(media.filename);
   } catch (error) {
     throw new Error(`Invalid filename: ${error.message}`);
   }
+
+  const ext = path.extname(sanitizedFilename).toLowerCase();
 
   // Continue with rest of filepath generation...
 }

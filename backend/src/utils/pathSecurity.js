@@ -44,8 +44,9 @@ export function resolveSafePath(rootDir, unsafePath) {
 
   // Verify the resolved path is within the root directory
   // Normalize both to handle platform differences and trailing slashes
-  const normalizedRoot = path.normalize(absoluteRoot) + path.sep;
-  const normalizedResolved = path.normalize(resolvedPath);
+  // Use lowercase comparison for Windows path safety
+  const normalizedRoot = path.normalize(absoluteRoot).toLowerCase() + path.sep;
+  const normalizedResolved = path.normalize(resolvedPath).toLowerCase();
 
   if (!normalizedResolved.startsWith(normalizedRoot)) {
     throw new Error(
@@ -78,7 +79,7 @@ export function resolveSafePath(rootDir, unsafePath) {
  */
 export function sanitizeFilename(filename, maxLength = 255) {
   if (!filename || typeof filename !== "string") {
-    throw new Error("Filename must be a non-empty string");
+    throw new Error("Filename is empty");
   }
 
   // Remove null bytes
@@ -108,75 +109,13 @@ export function sanitizeFilename(filename, maxLength = 255) {
 
   // Ensure the result is not empty
   if (!sanitized) {
-    throw new Error(
-      "Filename is invalid or empty after sanitization. Check for path traversal attempts."
-    );
+    throw new Error("Filename is invalid");
   }
 
   return sanitized;
 }
 
-/**
- * Validates that a path is within a designated root directory and the file exists.
- *
- * Combines safe path resolution with file existence checking.
- *
- * @param {string} rootDir - The allowed root directory
- * @param {string} unsafePath - The user-provided path
- * @returns {Promise<boolean>} - true if path is safe and file exists
- * @throws {Error} - if path traversal is detected or file doesn't exist
- *
- * @example
- * const uploadsRoot = path.join(process.cwd(), 'uploads');
- * const exists = await validateSafePathExists(uploadsRoot, 'images/photo.jpg');
- */
-export async function validateSafePathExists(rootDir, unsafePath) {
-  const safePath = resolveSafePath(rootDir, unsafePath);
-
-  try {
-    const stats = await fs.promises.stat(safePath);
-    return stats.isFile();
-  } catch (err) {
-    if (err.code === "ENOENT") {
-      throw new Error(`File not found: ${unsafePath}`);
-    }
-    throw err;
-  }
-}
-
-/**
- * Validates a file path for safe reading operations.
- *
- * Ensures:
- * 1. Path stays within the root directory
- * 2. File actually exists
- * 3. File is readable
- *
- * @param {string} rootDir - The allowed root directory
- * @param {string} unsafePath - The user-provided path
- * @returns {Promise<string>} - The validated absolute path
- * @throws {Error} - if path is unsafe or file cannot be read
- */
-export async function validateSafeFileRead(rootDir, unsafePath) {
-  const safePath = resolveSafePath(rootDir, unsafePath);
-
-  try {
-    // Check if file exists and is readable
-    await fs.promises.access(safePath, fs.constants.R_OK);
-    return safePath;
-  } catch (err) {
-    if (err.code === "ENOENT") {
-      throw new Error(`File not found: ${unsafePath}`);
-    } else if (err.code === "EACCES") {
-      throw new Error(`File is not readable: ${unsafePath}`);
-    }
-    throw err;
-  }
-}
-
 export default {
   resolveSafePath,
   sanitizeFilename,
-  validateSafePathExists,
-  validateSafeFileRead,
 };
