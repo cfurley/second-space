@@ -3,6 +3,7 @@ import cors from "cors";
 import spaceRouter from "./src/routes/spacesRoutes.js";
 import mediaRouter from "./src/routes/mediaRoutes.js";
 import userRouter from "./src/routes/userRoutes.js";
+import themeRouter from "./src/routes/themeRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -53,6 +54,7 @@ app.use((req, res, next) => {
 app.use("/spaces", spaceRouter);
 app.use("/media", mediaRouter);
 app.use("/user", userRouter);
+app.use("/themes", themeRouter);
 //app.use('/containers', containerRouter);
 
 // Handle homepage route - Health check
