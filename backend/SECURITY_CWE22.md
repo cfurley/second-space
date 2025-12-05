@@ -190,7 +190,8 @@ POST /api/media
 ```
 
 **Mitigation:**
-- `sanitizeFilename("../../etc/passwd")` throws error
+- `sanitizeFilename("../../etc/passwd")` strips path separators and dots, resulting in "etcpasswd"
+- The sanitized filename "etcpasswd" is rejected as invalid (e.g., missing extension or failing validation)
 - Upload is rejected before file write
 - Database is never updated
 
