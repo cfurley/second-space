@@ -8,7 +8,6 @@
  */
 
 import path from "path";
-import fs from "fs";
 
 /**
  * Resolves a file path safely, ensuring it stays within a designated root directory.
