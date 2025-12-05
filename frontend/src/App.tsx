@@ -14,7 +14,7 @@ export default function App() {
   const [activeSpace, setActiveSpace] = useState('My Ideas');
   const [activeFilter, setActiveFilter] = useState('Recent');
   // Simple demo auth: app starts unauthenticated and shows login screen
-  const [isAuthenticated, setIsAuthenticated] = useState(true); // Set to true to skip login and see main UI
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Set to false to require login
   const [showLoginModal, setShowLoginModal] = useState(false);
   
   // User and space IDs for FloatingMenu
