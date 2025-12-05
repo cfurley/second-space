@@ -260,7 +260,7 @@ describe("mediaServices.generateFilepath and insertMediaToDatabase", () => {
     };
 
     await expect(mediaServices.insertMediaToDatabase(media)).resolves.toEqual(
-      expect.objectContaining({ success: false, status: 500 })
+      expect.objectContaining({ success: false, status: 400 })
     );
   });
 
@@ -285,7 +285,7 @@ describe("mediaServices.generateFilepath and insertMediaToDatabase", () => {
     };
 
     await expect(mediaServices.insertMediaToDatabase(media)).resolves.toEqual(
-      expect.objectContaining({ success: false, status: 500 })
+      expect.objectContaining({ success: false, status: 400 })
     );
   });
 
@@ -303,7 +303,7 @@ describe("mediaServices.generateFilepath and insertMediaToDatabase", () => {
     };
 
     await expect(mediaServices.insertMediaToDatabase(media)).resolves.toEqual(
-      expect.objectContaining({ success: false, status: 500 })
+      expect.objectContaining({ success: false, status: 400 })
     );
   });
 
