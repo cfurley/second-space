@@ -8,6 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const HOST = "0.0.0.0";
 
+// Hello!
 // CORS Configuration - Allow frontend to communicate with backend
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
