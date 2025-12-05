@@ -54,8 +54,8 @@ import { sanitizeFilename } from '../utils/pathSecurity.js';
 sanitizeFilename('document.pdf');           // ✓ 'document.pdf'
 sanitizeFilename('my-file_2024.jpg');       // ✓ 'my-file_2024.jpg'
 
-// Dangerous characters are removed
-sanitizeFilename('../../etc/passwd');        // ✗ Throws error
+// Dangerous characters are removed or cause errors
+sanitizeFilename('../../etc/passwd');        // ✗ Throws "Filename is invalid" (all characters removed)
 sanitizeFilename('path/to/file.txt');        // ✓ 'pathtofile.txt' (slashes removed)
 sanitizeFilename('..hidden.txt');            // ✓ 'hidden.txt' (leading dots removed)
 sanitizeFilename('file\0.txt');              // ✓ 'file.txt' (null bytes removed)
