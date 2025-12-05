@@ -26,6 +26,12 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
   const [showBookmarkDialog, setShowBookmarkDialog] = useState(false);
   const [showSearchDialog, setShowSearchDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchHistory, setSearchHistory] = useState<string[]>(() => {
+    // Load search history from localStorage
+    const saved = localStorage.getItem('searchHistory');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showHistory, setShowHistory] = useState(false);
   
   // Form states for Text Post
   const [postTitle, setPostTitle] = useState("");
@@ -651,17 +657,33 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
       </Dialog>
 
       {/* Search Dialog */}
-      <Dialog open={showSearchDialog} onOpenChange={setShowSearchDialog}>
+      <Dialog 
+        open={showSearchDialog} 
+        onOpenChange={(isOpen) => {
+          if (!isOpen && searchQuery.trim()) {
+            // Save to history when closing dialog with search query
+            const newHistory = [searchQuery, ...searchHistory.filter(item => item !== searchQuery)].slice(0, 10);
+            setSearchHistory(newHistory);
+            localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+          }
+          setShowSearchDialog(isOpen);
+          if (!isOpen) {
+            setShowHistory(false);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">Search Posts</DialogTitle>
           </DialogHeader>
           <div className="py-4">
+            {/* Helper text above input */}
+            <p className="text-sm text-gray-400 mb-3">
+              {searchQuery ? `Searching for: "${searchQuery}"` : 'Type to search posts by title'}
+            </p>
+            
+            {/* Search input without icon */}
             <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8" strokeWidth="2"/>
-                <path d="m21 21-4.35-4.35" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
               <Input
                 id="searchInput"
                 value={searchQuery}
@@ -669,14 +691,64 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
                   setSearchQuery(e.target.value);
                   onSearchChange?.(e.target.value);
                 }}
-                className="pl-10 w-full"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && searchQuery.trim()) {
+                    // Save to history on Enter
+                    const newHistory = [searchQuery, ...searchHistory.filter(item => item !== searchQuery)].slice(0, 10);
+                    setSearchHistory(newHistory);
+                    localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+                    setShowHistory(false);
+                  }
+                }}
+                onFocus={() => setShowHistory(true)}
+                className="w-full"
                 placeholder="Search by title..."
                 autoFocus
               />
+              
+              {/* Search History Dropdown */}
+              {showHistory && searchHistory.length > 0 && (
+                <div className="absolute top-full left-0 w-1/4 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-[200px] overflow-y-auto z-50">
+                  {searchHistory.map((item, index) => (
+                    <div 
+                      key={index}
+                      className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 cursor-pointer group"
+                      onClick={() => {
+                        setSearchQuery(item);
+                        onSearchChange?.(item);
+                        setShowHistory(false);
+                      }}
+                    >
+                      <span className="text-sm text-gray-700 flex-1">{item}</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const newHistory = searchHistory.filter((_, i) => i !== index);
+                          setSearchHistory(newHistory);
+                          localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+                        }}
+                        className="ml-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Delete from history"
+                      >
+                        <svg 
+                          className="w-4 h-4" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={2} 
+                            d="M6 18L18 6M6 6l12 12" 
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <p className="text-sm text-gray-400 mt-3">
-              {searchQuery ? `Searching for: "${searchQuery}"` : 'Type to search posts by title'}
-            </p>
           </div>
           <DialogFooter>
             <Button 
@@ -685,6 +757,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
                 setSearchQuery("");
                 onSearchChange?.("");
                 setShowSearchDialog(false);
+                setShowHistory(false);
               }}
             >
               Clear Search
