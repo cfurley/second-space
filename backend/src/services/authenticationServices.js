@@ -55,6 +55,20 @@ function checkLockout(identifier) {
  */
 function recordFailedAttempt(identifier) {
   const rec = getRecord(identifier);
+  
+  // If already locked out and timeout is still active, don't modify the record
+  // Just return that they're already locked
+  if (isTimeoutActive(rec)) {
+    const minutes = Math.ceil(remainingMs(rec) / 60000) || 1;
+    return { shouldLock: true, timeoutMinutes: minutes, lockoutCount: rec.lockoutCount };
+  }
+  
+  // If timeout expired, reset count but keep lockoutCount for progressive timeout
+  if (rec.timeoutUntil && rec.timeoutUntil <= nowMs()) {
+    rec.count = 0;
+    rec.timeoutUntil = null;
+  }
+  
   rec.count = (rec.count || 0) + 1;
   rec.lastAttempt = nowMs();
 

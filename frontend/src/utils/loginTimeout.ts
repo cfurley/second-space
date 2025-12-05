@@ -122,8 +122,9 @@ export function checkTimeout(): { isTimedOut: boolean; remainingSeconds: number 
     return { isTimedOut: false, remainingSeconds: 0 };
   }
   
-  // Early return if timeout expired
+  // If timeout expired, clear it and update localStorage
   if (!isTimeoutActive(data.timeoutUntil, now)) {
+    clearExpiredTimeout(data);
     return { isTimedOut: false, remainingSeconds: 0 };
   }
   
@@ -177,6 +178,9 @@ function clearExpiredTimeout(data: LoginAttemptData): void {
   } else {
     data.count = 0;
   }
+  
+  // Save the updated data to localStorage
+  saveAttemptData(data);
 }
 
 /**
