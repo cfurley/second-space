@@ -3,42 +3,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Enable backdrop-blur utilities */
-@utility backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
-@utility backdrop-blur {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-@utility backdrop-blur-md {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-@utility backdrop-blur-lg {
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-@utility backdrop-blur-xl {
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-}
-
-@utility backdrop-blur-2xl {
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-}
-
-@utility backdrop-blur-3xl {
-  backdrop-filter: blur(64px);
-  -webkit-backdrop-filter: blur(64px);
-}
-
 :root {
   --font-size: 14px;
   --background: #ffffff;

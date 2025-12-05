@@ -6,19 +6,57 @@ interface HeaderProps {
   onNavChange: (nav: string) => void;
 }
 
+interface User {
+  id: string;
+  username: string;
+  first_name: string;
+  last_name: string;
+}
+
+// Helper function to generate initials from first and last name
+function generateInitials(firstName: string, lastName: string): string {
+  const first = firstName?.[0]?.toUpperCase() || '';
+  const last = lastName?.[0]?.toUpperCase() || '';
+  return (first + last).slice(0, 2) || 'US';
+}
+
 export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: HeaderProps & { searchQuery?: string; onSearchChange?: (query: string) => void }) {
   const navItems = ['Spaces', 'Recent', 'Shared'];
   const [profileMenuOpen, setProfileMenuOpen] = React.useState(false);
+  const [user, setUser] = React.useState<User | null>(null);
 
-  // Mock auth state - in a real app, this would come from an auth context/provider
-  const isLoggedIn = false; // Change to true to test logged-in state
+  // Fetch user data from localStorage on component mount
+  React.useEffect(() => {
+    try {
+      const userDataStr = localStorage.getItem('user');
+      if (userDataStr) {
+        const userData = JSON.parse(userDataStr);
+        setUser(userData);
+      }
+    } catch (error) {
+      console.error('Error loading user data from localStorage:', error);
+    }
+  }, []);
+
+  const userInitials = user ? generateInitials(user.first_name, user.last_name) : 'US';
+
+  const handleLogout = () => {
+    // Clear user data from localStorage
+    localStorage.removeItem('user');
+    // Reset user state
+    setUser(null);
+    // Close menu
+    setProfileMenuOpen(false);
+    // Navigate to home
+    window.location.href = '/';
+  };
 
   return (
     <header className="bg-white dark:bg-[#0a0a0a] border-b border-gray-200 dark:border-white/10 px-8 py-3">
       <div className="flex items-center justify-between">
         {/* Left: Second Space branding */}
         <div className="flex items-center">
-          <h1 className="text-gray-900 dark:text-white font-semibold" style={{ fontSize: '0.5in' }}>Second Space</h1>
+          <h1 className="text-gray-900 dark:text-white font-semibold" style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)' }}>Second Space</h1>
         </div>
         
         {/* Right: Search bar with AI button */}
@@ -48,7 +86,7 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
               onClick={() => setProfileMenuOpen(!profileMenuOpen)}
               className="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/15 flex items-center justify-center text-gray-700 dark:text-white font-semibold transition-all border border-gray-300 dark:border-white/20"
             >
-              AT
+              {userInitials}
             </button>
             
             {/* Dropdown Menu */}
@@ -56,9 +94,9 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
               <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-white/10 overflow-hidden z-50">
                 <div className="py-1">
                   <div className="px-4 py-2 text-sm text-gray-700 dark:text-white font-medium border-b border-gray-200 dark:border-white/10">
-                    Username
+                    {user?.username || 'Username'}
                   </div>
-                  <button className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                  <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
                     Logout
                   </button>
                 </div>

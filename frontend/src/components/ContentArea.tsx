@@ -85,19 +85,21 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
     return localItem ? { ...item, content: { ...item.content, isBookmarked: localItem.isBookmarked } } : item;
   });
 
-  // Apply search filter if query exists
+  // Apply search filter if query exists - preserve original index
   const filteredContent = searchQuery 
-    ? allContent.filter(item => {
-        const title = item.content?.title?.toLowerCase() || '';
-        const text = item.content?.text?.toLowerCase() || '';
-        const query = searchQuery.toLowerCase();
-        return title.includes(query) || text.includes(query);
-      })
-    : allContent;
+    ? allContent
+        .map((item, index) => ({ item, index }))
+        .filter(({ item }) => {
+          const title = item.content?.title?.toLowerCase() || '';
+          const text = item.content?.text?.toLowerCase() || '';
+          const query = searchQuery.toLowerCase();
+          return title.includes(query) || text.includes(query);
+        })
+    : allContent.map((item, index) => ({ item, index }));
 
   // Separate pinned and unpinned content
-  const pinnedContent = filteredContent.filter(item => item.content?.isBookmarked);
-  const unpinnedContent = filteredContent.filter(item => !item.content?.isBookmarked);
+  const pinnedContent = filteredContent.filter(({ item }) => item.content?.isBookmarked);
+  const unpinnedContent = filteredContent.filter(({ item }) => !item.content?.isBookmarked);
 
   const handleToggleBookmark = (index: number) => {
     const item = allContent[index];
@@ -135,18 +137,15 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
         )}
         
         {/* Content Cards in Masonry Layout */}
-        {filteredContent.map((item, idx) => {
-          const originalIndex = allContent.findIndex(c => c === item);
-          return (
-            <div key={`content-${idx}`} className="break-inside-avoid mb-4">
-              <ContentCard
-                type={item.type}
-                content={item.content}
-                onToggleBookmark={() => handleToggleBookmark(originalIndex)}
-              />
-            </div>
-          );
-        })}
+        {filteredContent.map(({ item, index }) => (
+          <div key={`content-${index}`} className="break-inside-avoid mb-4">
+            <ContentCard
+              type={item.type}
+              content={item.content}
+              onToggleBookmark={() => handleToggleBookmark(index)}
+            />
+          </div>
+        ))}
       </div>
       
       {/* Floating Action Buttons */}

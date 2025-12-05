@@ -14,7 +14,7 @@ describe("ThemeToggleButton", () => {
   it("renders the theme toggle button with dark theme by default", () => {
     render(<ThemeToggleButton />);
     
-    const button = screen.getByRole("button");
+    const button = screen.getByRole("button", { name: /toggle theme/i });
     expect(button).toBeDefined();
     expect(button.textContent).toBe("🌙");
   });
@@ -26,15 +26,37 @@ describe("ThemeToggleButton", () => {
     expect(localStorage.getItem("theme")).toBe(null);
   });
 
+  it("has proper accessibility labels", () => {
+    render(<ThemeToggleButton />);
+    
+    const button = screen.getByRole("button", { name: /toggle theme/i });
+    expect(button).toHaveAttribute("aria-label", "Toggle theme");
+    expect(button).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("updates aria-expanded when dropdown is toggled", async () => {
+    const user = userEvent.setup();
+    render(<ThemeToggleButton />);
+
+    const button = screen.getByRole("button", { name: /toggle theme/i });
+    expect(button).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(button);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+
+    await user.click(button);
+    expect(button).toHaveAttribute("aria-expanded", "false");
+  });
+
   it("opens dropdown menu when button is clicked", async () => {
     const user = userEvent.setup();
     render(<ThemeToggleButton />);
 
-    const button = screen.getByRole("button");
+    const button = screen.getByRole("button", { name: /toggle theme/i });
     await user.click(button);
 
-    const darkOption = await screen.findByText("Dark");
-    const lightOption = await screen.findByText("Light");
+    const darkOption = await screen.findByRole("menuitem", { name: /switch to dark theme/i });
+    const lightOption = await screen.findByRole("menuitem", { name: /switch to light theme/i });
 
     expect(darkOption).toBeDefined();
     expect(lightOption).toBeDefined();
@@ -45,11 +67,11 @@ describe("ThemeToggleButton", () => {
     render(<ThemeToggleButton />);
 
     // Open dropdown
-    const button = screen.getByRole("button");
+    const button = screen.getByRole("button", { name: /toggle theme/i });
     await user.click(button);
 
     // Click light theme
-    const lightOption = await screen.findByText("Light");
+    const lightOption = await screen.findByRole("menuitem", { name: /switch to light theme/i });
     await user.click(lightOption);
 
     // Verify dark class is removed and theme is saved
@@ -66,11 +88,11 @@ describe("ThemeToggleButton", () => {
     render(<ThemeToggleButton />);
 
     // Open dropdown
-    const button = screen.getByRole("button");
+    const button = screen.getByRole("button", { name: /toggle theme/i });
     await user.click(button);
 
     // Click dark theme
-    const darkOption = await screen.findByText("Dark");
+    const darkOption = await screen.findByRole("menuitem", { name: /switch to dark theme/i });
     await user.click(darkOption);
 
     // Verify dark class is added and theme is saved
@@ -84,7 +106,7 @@ describe("ThemeToggleButton", () => {
     render(<ThemeToggleButton />);
 
     expect(document.documentElement.classList.contains("dark")).toBe(false);
-    const button = screen.getByRole("button");
+    const button = screen.getByRole("button", { name: /toggle theme/i });
     expect(button.textContent).toBe("☀️");
   });
 
@@ -93,19 +115,19 @@ describe("ThemeToggleButton", () => {
     render(<ThemeToggleButton />);
 
     // Open dropdown
-    const button = screen.getByRole("button");
+    const button = screen.getByRole("button", { name: /toggle theme/i });
     await user.click(button);
 
     // Verify dropdown is open
-    expect(screen.queryByText("Dark")).toBeDefined();
+    const lightOption = await screen.findByRole("menuitem", { name: /switch to light theme/i });
+    expect(lightOption).toBeDefined();
 
     // Select light theme
-    const lightOption = await screen.findByText("Light");
     await user.click(lightOption);
 
     // Verify dropdown is closed
     await waitFor(() => {
-      expect(screen.queryByText("Light")).toBeNull();
+      expect(screen.queryByRole("menuitem", { name: /switch to light theme/i })).not.toBeInTheDocument();
     });
   });
 });

@@ -66,9 +66,12 @@ export function UserMenu({
 
   const handleLogout = () => {
     console.log('Logout');
-    // TODO: Implement actual logout logic
-    alert('Logged out!');
+    // Clear user data from localStorage
+    localStorage.removeItem('user');
+    // Close menu
     setIsOpen(false);
+    // Navigate to home
+    window.location.href = '/';
   };
 
   return (

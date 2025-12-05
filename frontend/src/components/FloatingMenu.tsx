@@ -25,7 +25,9 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
   const [showMediaDialog, setShowMediaDialog] = useState(false);
   const [showBookmarkDialog, setShowBookmarkDialog] = useState(false);
   const [showSearchDialog, setShowSearchDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [editMode, setEditMode] = useState<'text' | 'media' | 'bookmark' | null>(null);
   
   // Form states for Text Post
   const [postTitle, setPostTitle] = useState("");
@@ -345,7 +347,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
       )}
       <div style={{ display: 'flex', flexDirection: 'row', gap: '12px' }}>
         <button
-        onClick={() => alert('New Note')}
+        onClick={() => setShowEditDialog(true)}
         style={{
           width: '48px',
           height: '48px',
@@ -369,6 +371,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
           e.currentTarget.style.transform = 'scale(1)';
           e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
         }}
+        title="Edit Content"
       >
         ✏️
       </button>
@@ -688,6 +691,109 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
               }}
             >
               Clear Search
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Edit Content</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Select a content type to edit:
+            </p>
+            <div className="grid grid-cols-3 gap-3">
+              <Button 
+                onClick={() => setEditMode('text')}
+                variant={editMode === 'text' ? 'default' : 'outline'}
+                className="flex flex-col items-center gap-2 h-auto py-6"
+              >
+                <span className="text-2xl">📝</span>
+                <span className="text-xs">Text Post</span>
+              </Button>
+              <Button 
+                onClick={() => setEditMode('media')}
+                variant={editMode === 'media' ? 'default' : 'outline'}
+                className="flex flex-col items-center gap-2 h-auto py-6"
+              >
+                <span className="text-2xl">📷</span>
+                <span className="text-xs">Media</span>
+              </Button>
+              <Button 
+                onClick={() => setEditMode('bookmark')}
+                variant={editMode === 'bookmark' ? 'default' : 'outline'}
+                className="flex flex-col items-center gap-2 h-auto py-6"
+              >
+                <span className="text-2xl">🔖</span>
+                <span className="text-xs">Bookmark</span>
+              </Button>
+            </div>
+
+            {editMode === 'text' && (
+              <div className="space-y-3 mt-6 pt-4 border-t">
+                <Label htmlFor="editPostTitle">Post Title</Label>
+                <Input
+                  id="editPostTitle"
+                  placeholder="Enter post title to search for..."
+                  className="w-full"
+                />
+                <p className="text-xs text-gray-500">
+                  Enter the title of the post you want to edit. Search will find matching posts in your current space.
+                </p>
+              </div>
+            )}
+
+            {editMode === 'media' && (
+              <div className="space-y-3 mt-6 pt-4 border-t">
+                <Label htmlFor="editMediaTitle">Media Title</Label>
+                <Input
+                  id="editMediaTitle"
+                  placeholder="Enter media title to search for..."
+                  className="w-full"
+                />
+                <p className="text-xs text-gray-500">
+                  Enter the title of the media file you want to edit or delete.
+                </p>
+              </div>
+            )}
+
+            {editMode === 'bookmark' && (
+              <div className="space-y-3 mt-6 pt-4 border-t">
+                <Label htmlFor="editBookmarkTitle">Bookmark Title</Label>
+                <Input
+                  id="editBookmarkTitle"
+                  placeholder="Enter bookmark title to search for..."
+                  className="w-full"
+                />
+                <p className="text-xs text-gray-500">
+                  Enter the title of the bookmark you want to edit or remove.
+                </p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline"
+              onClick={() => {
+                setEditMode(null);
+                setShowEditDialog(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                alert(`Search mode for ${editMode} content activated. You can now find and edit your ${editMode} posts.`);
+                setEditMode(null);
+                setShowEditDialog(false);
+              }}
+              disabled={!editMode}
+            >
+              Search & Edit
             </Button>
           </DialogFooter>
         </DialogContent>

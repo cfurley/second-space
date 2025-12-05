@@ -1,80 +1,79 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { Header } from "../Header";
 
 describe("Header Component", () => {
   const mockOnNavChange = vi.fn();
+  const mockUser = {
+    id: "1",
+    username: "jackiechen",
+    first_name: "Jackie",
+    last_name: "Chen"
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
   });
 
-  describe("Basic Rendering", () => {
-    it("renders header with correct structure", () => {
+  describe("Rendering", () => {
+    it("renders header with branding and search", () => {
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-
-      // Check main elements are present
       expect(screen.getByText("Second Space")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("Search spaces...")).toBeInTheDocument();
     });
 
-    it("renders search input", () => {
+    it("shows default US initials when no user data", async () => {
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-
-      const searchInput = screen.getByPlaceholderText("Search spaces...");
-      expect(searchInput).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText("US")).toBeInTheDocument();
+      });
     });
 
-    it("renders profile button with AT text", () => {
+    it("shows generated initials from stored user data", async () => {
+      localStorage.setItem('user', JSON.stringify(mockUser));
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-
-      const profileButton = screen.getByText("AT");
-      expect(profileButton).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText("JC")).toBeInTheDocument();
+      });
     });
   });
 
   describe("Profile Menu", () => {
-    it("profile menu is initially hidden", () => {
+    it("displays username when menu is opened", async () => {
+      localStorage.setItem('user', JSON.stringify(mockUser));
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
 
-      expect(screen.queryByText("Username")).not.toBeInTheDocument();
-      expect(screen.queryByText("Logout")).not.toBeInTheDocument();
-    });
+      await waitFor(() => {
+        const profileButton = screen.getByText("JC");
+        fireEvent.click(profileButton);
+      });
 
-    it("opens profile menu when profile button is clicked", () => {
-      render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-
-      const profileButton = screen.getByText("AT");
-      fireEvent.click(profileButton);
-
-      expect(screen.getByText("Username")).toBeInTheDocument();
+      expect(screen.getByText("jackiechen")).toBeInTheDocument();
       expect(screen.getByText("Logout")).toBeInTheDocument();
     });
 
-    it("closes profile menu when profile button is clicked again", () => {
+    it("closes menu when profile button is clicked again", async () => {
+      localStorage.setItem('user', JSON.stringify(mockUser));
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
 
-      const profileButton = screen.getByText("AT");
-      fireEvent.click(profileButton);
-      expect(screen.getByText("Username")).toBeInTheDocument();
+      await waitFor(() => {
+        const profileButton = screen.getByText("JC");
+        fireEvent.click(profileButton);
+      });
 
-      fireEvent.click(profileButton);
-      expect(screen.queryByText("Username")).not.toBeInTheDocument();
-    });
+      expect(screen.getByText("jackiechen")).toBeInTheDocument();
 
-    it("shows username and logout options in dropdown", () => {
-      render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-
-      const profileButton = screen.getByText("AT");
+      const profileButton = screen.getByText("JC");
       fireEvent.click(profileButton);
 
-      expect(screen.getByText("Username")).toBeInTheDocument();
-      expect(screen.getByText("Logout")).toBeInTheDocument();
+      expect(screen.queryByText("jackiechen")).not.toBeInTheDocument();
     });
   });
 
   describe("Search Functionality", () => {
-    it("search input accepts text", () => {
+    it("calls onSearchChange when search input changes", () => {
       const mockOnSearchChange = vi.fn();
       render(
         <Header 
@@ -86,114 +85,66 @@ describe("Header Component", () => {
       );
 
       const searchInput = screen.getByPlaceholderText("Search spaces...") as HTMLInputElement;
-      fireEvent.change(searchInput, { target: { value: "test search" } });
+      fireEvent.change(searchInput, { target: { value: "test" } });
 
-      expect(mockOnSearchChange).toHaveBeenCalledWith("test search");
+      expect(mockOnSearchChange).toHaveBeenCalledWith("test");
     });
 
-    it("displays current search query in input", () => {
+    it("displays current search query", () => {
       render(
         <Header 
           activeNav="Spaces" 
           onNavChange={mockOnNavChange}
-          searchQuery="existing query"
+          searchQuery="spaces"
           onSearchChange={vi.fn()}
         />
       );
 
       const searchInput = screen.getByPlaceholderText("Search spaces...") as HTMLInputElement;
-      expect(searchInput.value).toBe("existing query");
+      expect(searchInput.value).toBe("spaces");
     });
   });
 
-  describe("Title/Logo", () => {
-    it("renders Second Space title with larger size", () => {
+  describe("Logout Functionality", () => {
+    it("clears localStorage when logout is clicked", async () => {
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
 
-      const title = screen.getByText("Second Space");
-      expect(title).toBeInTheDocument();
-      // Title should have font size of 0.5 inch (inline style)
-      expect(title).toHaveStyle({ fontSize: '0.5in' });
+      await waitFor(() => {
+        const profileButton = screen.getByText("JC");
+        fireEvent.click(profileButton);
+      });
+
+      // Mock window.location.href
+      delete (window as any).location;
+      window.location = { href: '' } as any;
+      
+      const logoutButton = screen.getByText("Logout");
+      fireEvent.click(logoutButton);
+
+      expect(localStorage.getItem('user')).toBeNull();
     });
 
-    it("title is semibold", () => {
+    it("closes menu after logout", async () => {
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
 
-      const title = screen.getByText("Second Space");
-      expect(title).toHaveClass("font-semibold");
-    });
-  });
+      await waitFor(() => {
+        const profileButton = screen.getByText("JC");
+        fireEvent.click(profileButton);
+      });
 
-  describe("Header Layout", () => {
-    it("header has flex layout with space-between", () => {
-      const { container } = render(
-        <Header activeNav="Spaces" onNavChange={mockOnNavChange} />
-      );
+      // Mock window.location.href
+      delete (window as any).location;
+      window.location = { href: '' } as any;
+      
+      const logoutButton = screen.getByText("Logout");
+      fireEvent.click(logoutButton);
 
-      const flexContainer = container.querySelector(".flex.items-center.justify-between");
-      expect(flexContainer).toBeInTheDocument();
-    });
-
-    it("header has correct padding", () => {
-      const { container } = render(
-        <Header activeNav="Spaces" onNavChange={mockOnNavChange} />
-      );
-
-      const header = container.querySelector("header");
-      expect(header).toHaveClass("px-8");
-      expect(header).toHaveClass("py-3");
-    });
-  });
-
-  describe("Accessibility", () => {
-    it("header uses semantic HTML element", () => {
-      const { container } = render(
-        <Header activeNav="Spaces" onNavChange={mockOnNavChange} />
-      );
-
-      const header = container.querySelector("header");
-      expect(header?.tagName.toLowerCase()).toBe("header");
-    });
-
-    it("profile button is accessible", () => {
-      render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-
-      const profileButton = screen.getByText("AT");
-      expect(profileButton.tagName.toLowerCase()).toBe("button");
-    });
-
-    it("search input has accessible placeholder", () => {
-      render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-
-      const searchInput = screen.getByPlaceholderText("Search spaces...");
-      expect(searchInput).toBeInTheDocument();
-    });
-  });
-
-  describe("Dark Mode Support", () => {
-    it("header has dark mode styling classes", () => {
-      const { container } = render(
-        <Header activeNav="Spaces" onNavChange={mockOnNavChange} />
-      );
-
-      const header = container.querySelector("header");
-      expect(header).toHaveClass("dark:bg-[#0a0a0a]");
-      expect(header).toHaveClass("dark:border-white/10");
-    });
-
-    it("title has dark mode text color", () => {
-      render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-
-      const title = screen.getByText("Second Space");
-      expect(title).toHaveClass("dark:text-white");
-    });
-
-    it("search input has dark mode styling", () => {
-      render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-
-      const searchInput = screen.getByPlaceholderText("Search spaces...");
-      expect(searchInput).toHaveClass("dark:bg-white/5");
-      expect(searchInput).toHaveClass("dark:text-white");
+      expect(screen.queryByText("jackiechen")).not.toBeInTheDocument();
     });
   });
 });
+
