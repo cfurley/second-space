@@ -323,6 +323,76 @@ describe('loginTimeout', () => {
       
       vi.useRealTimers();
     });
+
+    it('should properly handle expired timeout and allow correct credentials after multiple lockouts', () => {
+      vi.useFakeTimers();
+      
+      // Simulate multiple lockouts (11 failed attempts total)
+      // First lockout (attempts 1-5)
+      let result;
+      for (let i = 0; i < 5; i++) {
+        result = recordFailedAttempt();
+      }
+      expect(result?.shouldTimeout).toBe(true);
+      expect(getLockoutCount()).toBe(1);
+      expect(checkTimeout().isTimedOut).toBe(true);
+      
+      // Wait for timeout to expire
+      vi.advanceTimersByTime(61000);
+      
+      // When checkTimeout is called after expiry, it should clear expired timeout
+      let timeoutStatus = checkTimeout();
+      expect(timeoutStatus.isTimedOut).toBe(false);
+      
+      // After timeout expires with lockoutCount > 0, next failed attempt should immediately trigger lockout
+      result = recordFailedAttempt();
+      expect(result.shouldTimeout).toBe(true);
+      expect(getLockoutCount()).toBe(2);
+      expect(checkTimeout().isTimedOut).toBe(true);
+      
+      // Wait for 2nd timeout to expire
+      vi.advanceTimersByTime(121000);
+      timeoutStatus = checkTimeout();
+      expect(timeoutStatus.isTimedOut).toBe(false);
+      
+      // Next failed attempt immediately triggers 3rd lockout
+      result = recordFailedAttempt();
+      expect(result.shouldTimeout).toBe(true);
+      expect(getLockoutCount()).toBe(3);
+      expect(checkTimeout().isTimedOut).toBe(true);
+      
+      // Wait for 3rd timeout to expire (3 minutes)
+      vi.advanceTimersByTime(181000);
+      
+      // Verify timeout has fully expired
+      timeoutStatus = checkTimeout();
+      expect(timeoutStatus.isTimedOut).toBe(false);
+      
+      // Verify that checkTimeout cleared the expired timeout and saved data
+      const stored = localStorage.getItem(STORAGE_KEY);
+      expect(stored).not.toBeNull();
+      
+      if (stored) {
+        const data = JSON.parse(stored);
+        // lockoutCount should be preserved
+        expect(data.lockoutCount).toBe(3);
+        // count should be set to 4 (ready for immediate lockout on next failure)
+        expect(data.count).toBe(4);
+        // timeoutUntil should be null (cleared)
+        expect(data.timeoutUntil).toBeNull();
+      }
+      
+      // Now simulate successful login with correct credentials
+      // This should reset all attempts
+      resetAttempts();
+      expect(getAttemptCount()).toBe(0);
+      expect(getLockoutCount()).toBe(0);
+      
+      // Verify localStorage is cleared
+      expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+      
+      vi.useRealTimers();
+    });
   });
 
   describe('getLockoutCount', () => {
