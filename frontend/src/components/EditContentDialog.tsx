@@ -10,7 +10,6 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
-import { api } from "../utils/api";
 
 type EditContentDialogProps = {
   open: boolean;
@@ -69,6 +68,22 @@ export function EditContentDialog({
 
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
       errors.push('File MIME type not allowed');
+    }
+
+    // Check MIME type matches extension
+    const mimeToExt: Record<string, string[]> = {
+      'image/png': ['png'],
+      'image/jpeg': ['jpg', 'jpeg'],
+      'image/gif': ['gif'],
+      'image/webp': ['webp'],
+      'application/pdf': ['pdf'],
+      'text/plain': ['txt'],
+      'text/markdown': ['md']
+    };
+    
+    const validExtensions = mimeToExt[file.type];
+    if (validExtensions && !validExtensions.includes(extension)) {
+      errors.push('File type and extension do not match');
     }
 
     return { valid: errors.length === 0, errors };

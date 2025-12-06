@@ -174,13 +174,13 @@ export function FloatingMenu({
       const allBookmarks = JSON.parse(localStorage.getItem('ss_bookmarks') || '[]');
       
       // Filter out selected items
-      const filteredPosts = allPosts.filter((item: any) => !selectedItems.includes(item.id));
-      const filteredMedia = allMedia.filter((item: any) => !selectedItems.includes(item.id));
-      const filteredBookmarks = allBookmarks.filter((item: any) => !selectedItems.includes(item.id));
+      const updatedPosts = allPosts.filter((item: any) => !selectedItems.includes(item.id));
+      const updatedMedia = allMedia.filter((item: any) => !selectedItems.includes(item.id));
+      const updatedBookmarks = allBookmarks.filter((item: any) => !selectedItems.includes(item.id));
       
-      localStorage.setItem('ss_posts', JSON.stringify(filteredPosts));
-      localStorage.setItem('ss_media', JSON.stringify(filteredMedia));
-      localStorage.setItem('ss_bookmarks', JSON.stringify(filteredBookmarks));
+      localStorage.setItem('ss_posts', JSON.stringify(updatedPosts));
+      localStorage.setItem('ss_media', JSON.stringify(updatedMedia));
+      localStorage.setItem('ss_bookmarks', JSON.stringify(updatedBookmarks));
       
       alert(`Successfully deleted ${selectedItems.length} item(s)!`);
       setShowDeleteDialog(false);

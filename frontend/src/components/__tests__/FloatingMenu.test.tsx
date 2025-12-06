@@ -426,13 +426,13 @@ describe('FloatingMenu Component', () => {
         const textPostBtn = screen.queryByTitle('Create Text Post');
         if (textPostBtn) {
           fireEvent.click(textPostBtn);
-          
-          // Menu should close - check that bubble buttons are no longer visible
-          setTimeout(() => {
-            const updatedTextPostBtn = screen.queryByTitle('Create Text Post');
-            expect(updatedTextPostBtn).not.toBeInTheDocument();
-          }, 500);
         }
+      });
+      
+      // Menu should close - check that bubble buttons are no longer visible
+      await waitFor(() => {
+        const updatedTextPostBtn = screen.queryByTitle('Create Text Post');
+        expect(updatedTextPostBtn).not.toBeInTheDocument();
       });
     }
   });
@@ -467,7 +467,6 @@ describe('FloatingMenu Component', () => {
     render(<FloatingMenu currentSpaceId="test-space" currentUserId="test-user" />);
     
     const buttons = screen.getAllByRole('button');
-    const deleteBtn = buttons.find(btn => btn.textContent === '🗑️');
     
     // Delete button might still be present but functionality won't work
     // This is acceptable as the component is flexible
