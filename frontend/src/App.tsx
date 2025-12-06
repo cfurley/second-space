@@ -42,17 +42,42 @@ export default function App() {
   const [editingItem, setEditingItem] = useState<any>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   
-  // Load content from localStorage on mount
+  // Load content from localStorage and backend on mount
   useEffect(() => {
-    const loadContent = () => {
+    const loadContent = async () => {
       try {
-        // Load all content types from localStorage
+        // Load localStorage content (posts and bookmarks - not on backend yet)
         const posts = JSON.parse(localStorage.getItem('ss_posts') || '[]');
-        const media = JSON.parse(localStorage.getItem('ss_media') || '[]');
         const bookmarks = JSON.parse(localStorage.getItem('ss_bookmarks') || '[]');
         
+        // Fetch media from backend for each space
+        let backendMedia: any[] = [];
+        try {
+          // Fetch media for each space (space IDs 1, 2, 3)
+          const spaceIds = [1, 2, 3];
+          const mediaPromises = spaceIds.map(async (spaceId) => {
+            try {
+              const result = await api.getMediaBySpace(spaceId.toString());
+              if (result.success && Array.isArray(result.data)) {
+                return result.data.map((m: any) => ({
+                  ...m,
+                  spaceId: spaceId === 1 ? 'space-my-ideas' : spaceId === 2 ? 'space-work' : 'space-personal'
+                }));
+              }
+              return [];
+            } catch (err) {
+              console.error(`Failed to load media for space ${spaceId}:`, err);
+              return [];
+            }
+          });
+          const mediaArrays = await Promise.all(mediaPromises);
+          backendMedia = mediaArrays.flat();
+        } catch (err) {
+          console.error('Failed to load media from backend:', err);
+        }
+        
         // Combine all content
-        const allContent = [...posts, ...media, ...bookmarks];
+        const allContent = [...posts, ...backendMedia, ...bookmarks];
         
         // Group content by space
         const contentBySpace: {[key: string]: any[]} = {
@@ -78,15 +103,17 @@ export default function App() {
                 isBookmarked: item.isBookmarked || false
               }
             });
-          } else if (item.type === 'image' || item.fileData) {
+          } else if (item.type === 'image' || item.fileData || item.filename) {
+            // Handle both localStorage media (fileData) and backend media (filename/filepath)
+            const imageUrl = item.fileData || (item.filepath ? `http://localhost:8080${item.filepath}` : '');
             contentBySpace[spaceName].push({
               type: 'image',
               content: {
                 id: item.id,
-                title: item.title,
-                description: item.description,
-                image: item.fileData,
-                timestamp: new Date(item.createdAt).toLocaleString(),
+                title: item.title || item.filename,
+                description: item.description || '',
+                image: imageUrl,
+                timestamp: item.create_date_utc ? new Date(item.create_date_utc).toLocaleString() : new Date(item.createdAt).toLocaleString(),
                 isBookmarked: item.isBookmarked || false
               }
             });

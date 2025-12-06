@@ -13,6 +13,8 @@ services:
       - DB_USER=myuser
       - DB_PASSWORD=mypassword
       - DB_NAME=mydatabase
+    volumes:
+      - backend_uploads:/app/uploads
     networks:
       - app-network
 
@@ -45,6 +47,7 @@ services:
       
 volumes:
   second_space_data:
+  backend_uploads:
 
 networks:
   app-network:

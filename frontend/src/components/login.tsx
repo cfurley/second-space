@@ -765,7 +765,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
               <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
                 <button
                   type="button"
-                  onClick={() => setVerified(true)}
+                  onClick={() => setMode("verify")}
                   style={{
                     flex: 1,
                     height: 48,

@@ -32,7 +32,7 @@ export function MediaUploadDialog({
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
 
   // CWE-434: Security - Whitelist of allowed file types (matches backend)
-  const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'txt', 'json'];
+  const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'txt', 'json', 'mp4', 'webm', 'mov', 'avi'];
   const ALLOWED_MIME_TYPES = [
     'image/png',
     'image/jpeg', 
@@ -41,9 +41,13 @@ export function MediaUploadDialog({
     'image/bmp',
     'image/svg+xml',
     'text/plain',
-    'application/json'
+    'application/json',
+    'video/mp4',
+    'video/webm',
+    'video/quicktime',
+    'video/x-msvideo'
   ];
-  const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+  const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
   const validateFile = (file: File): { valid: boolean; errors: string[] } => {
     const errors: string[] = [];
@@ -74,7 +78,11 @@ export function MediaUploadDialog({
       'image/bmp': ['bmp'],
       'image/svg+xml': ['svg'],
       'text/plain': ['txt'],
-      'application/json': ['json']
+      'application/json': ['json'],
+      'video/mp4': ['mp4'],
+      'video/webm': ['webm'],
+      'video/quicktime': ['mov'],
+      'video/x-msvideo': ['avi']
     };
     
     const validExtensions = mimeToExt[file.type];
@@ -143,15 +151,27 @@ export function MediaUploadDialog({
         reader.readAsDataURL(mediaFile);
       });
       
+      // Map space names/IDs to numeric IDs (temporary solution until proper space management is implemented)
+      const spaceIdMap: Record<string, number> = {
+        'space-my-ideas': 1,
+        'space-work': 2,
+        'space-personal': 3,
+        'My Ideas': 1,
+        'Work': 2,
+        'Personal': 3
+      };
+      
+      const numericSpaceId = spaceIdMap[currentSpaceId] || parseInt(currentSpaceId) || 1;
+      
       console.log("Uploading media:", {
         filename: mediaFile.name,
         file_size: mediaFile.size,
-        container_id: currentSpaceId
+        container_id: numericSpaceId
       });
       
       // Create media using backend API
       const result = await api.createMedia({
-        container_id: parseInt(currentSpaceId), // Assuming container_id is the space ID
+        container_id: numericSpaceId,
         filename: mediaFile.name,
         file_size: mediaFile.size,
         base64: base64,
@@ -257,7 +277,7 @@ export function MediaUploadDialog({
                   </p>
                 </div>
                 <p className="text-xs text-gray-400 mt-2">
-                  Allowed: PNG, JPG, JPEG, GIF, WebP, BMP, SVG, TXT, JSON (Max 20MB)
+                  Allowed: Images (PNG, JPG, GIF, WebP, BMP, SVG), Videos (MP4, WebM, MOV, AVI), Text (TXT, JSON) - Max 50MB
                 </p>
               </div>
               <Input
@@ -265,7 +285,7 @@ export function MediaUploadDialog({
                 type="file"
                 onChange={handleFileChange}
                 className="hidden"
-                accept=".png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.txt,.json"
+                accept=".png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.txt,.json,.mp4,.webm,.mov,.avi"
               />
             </div>
           </div>
