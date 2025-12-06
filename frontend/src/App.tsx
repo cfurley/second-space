@@ -51,7 +51,6 @@ export default function App() {
           height: '100vh'
         }}
       >
-        <AnimatedBackground />
         
         {/* Landing page content with circular gradient blur exclusion zone */}
         <div className="relative z-10 flex flex-col items-center pointer-events-auto">
