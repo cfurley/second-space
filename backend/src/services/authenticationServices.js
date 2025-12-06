@@ -95,11 +95,16 @@ function resetAttempts(identifier) {
   STORAGE.set(identifier, getDefault());
 }
 
+function clearAllAttempts() {
+  STORAGE.clear();
+}
+
 // Expose for tests and admin
 export default {
   checkLockout,
   recordFailedAttempt,
   resetAttempts,
+  clearAllAttempts,
   // internals for troubleshooting
   _STORAGE: STORAGE,
 };

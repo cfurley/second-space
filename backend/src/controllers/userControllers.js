@@ -7,6 +7,12 @@ import userModel from "../models/userModel.js";
  */
 const authenticate = async (req, res) => {
   const { username, password } = req.body;
+
+  // Validate input first - no point in recording attempts for null username
+  if (!username || !password) {
+    return res.status(400).json({ error: "Missing username or password." });
+  }
+
   // identifier used to track attempts: prefer username, fallback to IP
   const identifier = username || req.ip || req.socket?.remoteAddress || "unknown";
 
@@ -18,12 +24,8 @@ const authenticate = async (req, res) => {
       return res.status(429).json({ error: `Too many login attempts. Try again in ${minutes} minute(s).` });
     }
   } catch (e) {
-    // If the lockout check fails for any reason, continue to authentication to avoid blocking valid logins
-    console.error("Lockout check failed", e);
-  }
-
-  if (!username || !password) {
-    return res.status(400).json({ error: "Missing username or password." });
+    // Lockout system failure - fail securely by blocking authentication
+    return res.status(500).json({ error: "Authentication system error. Please try again later." });
   }
 
   const result = await userService.authenticateLogin(username, password);
@@ -37,7 +39,8 @@ const authenticate = async (req, res) => {
       }
       // If warning, still return same Invalid Login error to avoid revealing info
     } catch (e) {
-      console.error("Failed to record failed attempt", e);
+      // Failed to record attempt - log internally only
+      return res.status(500).json({ error: "Authentication system error." });
     }
     return res.status(result.status).json({ error: result.error });
   } else {
@@ -45,7 +48,7 @@ const authenticate = async (req, res) => {
     try {
       authenticationService.resetAttempts(identifier);
     } catch (e) {
-      console.error("Failed to reset authentication attempts", e);
+      // Failed to reset - log internally only, but allow successful login to proceed
     }
 
     const user = result.data;

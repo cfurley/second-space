@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 import { fileTypeFromBuffer } from "file-type";
+import { sanitizeFilename } from "../utils/pathSecurity.js";
 
 // maximum file size allowed (bytes). 20 MB default.
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
@@ -192,6 +193,9 @@ const insertMediaToDatabase = async (media) => {
   // Generate server-side filepath; do NOT use user-provided filepath
   try {
     const filepath = await generateFilepath(media);
+    
+    // Sanitize filename before storing in database
+    const sanitizedFilename = sanitizeFilename(media.filename);
 
     // Remember whether generateFilepath wrote a file to disk (it writes only when base64 provided)
     const wroteFile = !!(media.base64 && typeof media.base64 === "string");
@@ -206,7 +210,7 @@ const insertMediaToDatabase = async (media) => {
 
     const values = [
       media.container_id,
-      media.filename,
+      sanitizedFilename,
       filepath,
       media.file_size,
       media.video_length ?? null,
@@ -222,17 +226,20 @@ const insertMediaToDatabase = async (media) => {
         // Cleanup any written file to avoid orphaning
         if (wroteFile && filepath) {
           try {
-            let relPath = filepath.startsWith("/") ? filepath.slice(1) : filepath;
-            // normalize both forward and back slashes and remove leading 'uploads' segment
-            relPath = relPath.replace(/^uploads[\\/]/, "");
+            let relPath = filepath.startsWith("/")
+              ? filepath.slice(1)
+              : filepath;
+            if (relPath.startsWith("uploads/"))
+              relPath = relPath.slice("uploads/".length);
             const cwdBase = path.basename(process.cwd());
             const uploadsRoot =
               cwdBase === "backend"
                 ? path.join(process.cwd(), "uploads")
                 : path.join(process.cwd(), "backend", "uploads");
-            // split path into parts so path.join uses correct platform separators
-            const relParts = relPath.split(/[/\\\\]+/).filter(Boolean);
-            const absolutePath = path.join(uploadsRoot, ...relParts);
+            const absolutePath = path.join(
+              uploadsRoot,
+              relPath.replace(/\\/g, "/")
+            );
             await fs.promises.unlink(absolutePath);
           } catch (err) {
             if (err.code !== "ENOENT") {
@@ -259,16 +266,19 @@ const insertMediaToDatabase = async (media) => {
     } catch (dbError) {
       // Attempt to cleanup written file on DB error
       if (wroteFile && filepath) {
-          try {
+        try {
           let relPath = filepath.startsWith("/") ? filepath.slice(1) : filepath;
-          relPath = relPath.replace(/^uploads[\\/]/, "");
+          if (relPath.startsWith("uploads/"))
+            relPath = relPath.slice("uploads/".length);
           const cwdBase = path.basename(process.cwd());
           const uploadsRoot =
             cwdBase === "backend"
               ? path.join(process.cwd(), "uploads")
               : path.join(process.cwd(), "backend", "uploads");
-          const relParts = relPath.split(/[/\\\\]+/).filter(Boolean);
-          const absolutePath = path.join(uploadsRoot, ...relParts);
+          const absolutePath = path.join(
+            uploadsRoot,
+            relPath.replace(/\\/g, "/")
+          );
           await fs.promises.unlink(absolutePath);
         } catch (err) {
           if (err.code !== "ENOENT") {
@@ -286,7 +296,7 @@ const insertMediaToDatabase = async (media) => {
     }
   } catch (error) {
     console.log(error);
-    return { success: false, status: 500, error: "Server Error" };
+    return { success: false, status: 400, error: error.message };
   }
 };
 
@@ -303,7 +313,17 @@ const insertMediaToDatabase = async (media) => {
 async function generateFilepath(media) {
   if (!media || !media.filename) throw new Error("Missing filename");
 
-  const ext = path.extname(media.filename).toLowerCase();
+  // Validate filename against path traversal attacks
+  let sanitizedFilename;
+  try {
+    sanitizedFilename = sanitizeFilename(media.filename);
+  } catch (error) {
+    throw new Error(
+      `Invalid filename: ${error.message}`
+    );
+  }
+
+  const ext = path.extname(sanitizedFilename).toLowerCase();
 
   // Validate extension against whitelist
   if (!ALLOWED_EXTENSIONS[ext]) {
@@ -424,7 +444,17 @@ const updateMediaInDatabase = async (id, media) => {
     }
 
     // Determine new extension and folder
-    const newExt = path.extname(media.filename).toLowerCase();
+    let sanitizedFilename;
+    try {
+      sanitizedFilename = sanitizeFilename(media.filename);
+    } catch (error) {
+      return {
+        success: false,
+        status: 400,
+        error: `Invalid filename: ${error.message}`,
+      };
+    }
+    const newExt = path.extname(sanitizedFilename).toLowerCase();
     const imageExts = [
       ".png",
       ".jpg",
