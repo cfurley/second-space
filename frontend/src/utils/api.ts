@@ -246,6 +246,120 @@ export const api = {
       method: "DELETE",
     });
   },
+  
+  // ==================== CONTENT ENDPOINTS ====================
+  // For text posts and bookmarks (stored locally until backend endpoints exist)
+  
+  /**
+   * Create a text post
+   */
+  async createPost(postData: {
+    title: string;
+    content: string;
+    spaceId: string;
+    userId?: string;
+  }) {
+    try {
+      const post = {
+        id: `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        ...postData,
+        type: 'text',
+        createdAt: new Date().toISOString(),
+        isBookmarked: false
+      };
+      
+      const existingPosts = JSON.parse(localStorage.getItem('ss_posts') || '[]');
+      existingPosts.push(post);
+      localStorage.setItem('ss_posts', JSON.stringify(existingPosts));
+      
+      return { success: true, message: 'Post created successfully', data: post };
+    } catch (error) {
+      console.error('Error creating post:', error);
+      throw new Error('Failed to create post');
+    }
+  },
+  
+  /**
+   * Create a bookmark
+   */
+  async createBookmark(bookmarkData: {
+    title: string;
+    url: string;
+    notes?: string;
+    spaceId: string;
+    userId?: string;
+  }) {
+    try {
+      const bookmark = {
+        id: `bookmark_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        ...bookmarkData,
+        type: 'bookmark',
+        createdAt: new Date().toISOString(),
+        isBookmarked: false
+      };
+      
+      const existingBookmarks = JSON.parse(localStorage.getItem('ss_bookmarks') || '[]');
+      existingBookmarks.push(bookmark);
+      localStorage.setItem('ss_bookmarks', JSON.stringify(existingBookmarks));
+      
+      return { success: true, message: 'Bookmark saved successfully', data: bookmark };
+    } catch (error) {
+      console.error('Error creating bookmark:', error);
+      throw new Error('Failed to save bookmark');
+    }
+  },
+  
+  /**
+   * Get all content for a space (posts, media, bookmarks)
+   */
+  async getSpaceContent(spaceId: string) {
+    try {
+      const posts = JSON.parse(localStorage.getItem('ss_posts') || '[]')
+        .filter((item: any) => item.spaceId === spaceId);
+      const media = JSON.parse(localStorage.getItem('ss_media') || '[]')
+        .filter((item: any) => item.spaceId === spaceId);
+      const bookmarks = JSON.parse(localStorage.getItem('ss_bookmarks') || '[]')
+        .filter((item: any) => item.spaceId === spaceId);
+      
+      return { 
+        success: true, 
+        data: {
+          posts,
+          media,
+          bookmarks,
+          all: [...posts, ...media, ...bookmarks].sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
+        }
+      };
+    } catch (error) {
+      console.error('Error getting space content:', error);
+      throw new Error('Failed to get space content');
+    }
+  },
+  
+  /**
+   * Toggle bookmark status of any content item
+   */
+  async toggleBookmark(itemId: string, itemType: 'post' | 'media' | 'bookmark') {
+    try {
+      const storageKey = itemType === 'post' ? 'ss_posts' : 
+                        itemType === 'media' ? 'ss_media' : 'ss_bookmarks';
+      
+      const items = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      const updated = items.map((item: any) => 
+        item.id === itemId ? { ...item, isBookmarked: !item.isBookmarked } : item
+      );
+      
+      localStorage.setItem(storageKey, JSON.stringify(updated));
+      
+      return { success: true, message: 'Bookmark toggled successfully' };
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      throw new Error('Failed to toggle bookmark');
+    }
+  },
+
 
   // ==================== HEALTH CHECK ====================
 

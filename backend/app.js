@@ -12,7 +12,8 @@ const HOST = "0.0.0.0";
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
   : [
-      "http://localhost:5173", // Vite dev server
+      "http://localhost:5173", // Vite dev server (default)
+      "http://localhost:3001", // Vite dev server (alternate port)
       "http://localhost:80", // Docker frontend with port
       "http://localhost", // Docker frontend without port
       "https://cfurley.github.io", // GitHub Pages
@@ -40,14 +41,19 @@ app.use(
 // Explicitly handle preflight for all routes (some proxies/CDNs require this)
 app.options('*', cors());
 
-// Middleware for JSON support
-app.use(express.json());
+// Middleware for JSON support with increased size limit for base64 media uploads
+// 50MB limit to accommodate base64-encoded files (base64 increases size by ~33%)
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Request logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
+
+// Serve uploaded files statically
+app.use('/uploads', express.static('uploads'));
 
 /****** SETUP ROUTERS HERE ******/
 app.use("/spaces", spaceRouter);
