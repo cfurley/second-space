@@ -30,6 +30,9 @@ describe('Login Component - Authentication Tests', () => {
     // Clear all mocks before each test
     vi.clearAllMocks();
     
+    // Clear localStorage to reset login timeout state
+    localStorage.clear();
+    
     // Mock window.alert
     window.alert = mockAlert;
     
