@@ -132,7 +132,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
         <>
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[100] animate-in fade-in duration-300"
+            className="fixed inset-0 bg-popover z-[100] animate-in fade-in duration-300"
             onClick={(e) => {
               e.stopPropagation();
               handleOpenChange(false);
@@ -149,7 +149,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div 
-              className="bg-[#0a0a0a] border border-white/20 rounded-3xl"
+              className="bg-popover border border-border rounded-3xl"
               style={{
                 boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
               }}
@@ -173,7 +173,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
                       setTitle(e.target.value);
                       if (touched) validateForm();
                     }}
-                    className={`bg-white/5 border-white/10 text-white placeholder:text-white/30 h-9 text-sm ${
+                    className={`bg-card border-border text-white placeholder:text-white/30 h-9 text-sm ${
                       touched && errors.name ? 'border-red-500' : ''
                     }`}
                     required
@@ -194,7 +194,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
                     placeholder="🏃"
                     value={icon}
                     onChange={(e) => setIcon(e.target.value)}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
+                    className="bg-card border-border text-white placeholder:text-white/30 h-9 text-sm"
                     maxLength={2}
                   />
                   <p className="text-xs text-white/40">Optional - defaults to 📁</p>
@@ -212,7 +212,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
                       setDescription(e.target.value);
                       if (touched) validateForm();
                     }}
-                    className={`bg-white/5 border-white/10 text-white placeholder:text-white/30 min-h-16 text-sm resize-none ${
+                    className={`bg-card border-border text-white placeholder:text-white/30 min-h-16 text-sm resize-none ${
                       touched && errors.description ? 'border-red-500' : ''
                     }`}
                     maxLength={200}
@@ -229,7 +229,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
                   type="button"
                   variant="outline"
                   onClick={() => setOpen(false)}
-                  className="flex-1 bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white h-9 text-sm"
+                  className="flex-1 bg-card border-border text-white/70 hover:bg-card hover:text-white h-9 text-sm"
                 >
                   Cancel
                 </Button>

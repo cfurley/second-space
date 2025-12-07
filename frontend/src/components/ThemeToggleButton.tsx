@@ -41,22 +41,21 @@ export function ThemeToggleButton({ embedded = false }: { embedded?: boolean }) 
           onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
           aria-label="Toggle theme"
           aria-expanded={themeDropdownOpen}
-          className={`w-14 h-14 flex items-center justify-center rounded-full text-black dark:text-white cursor-pointer hover:scale-110 transition-all duration-300 border shadow-lg ${embedded ? 'bg-transparent border-transparent' : 'bg-black/10 dark:bg-white/10 border-black/30 dark:border-white/30'}`}
-          style={embedded ? {} : { backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
+          className={`w-14 h-14 flex items-center justify-center rounded-full text-black dark:text-white cursor-pointer hover:scale-110 transition-all duration-300 border shadow-lg ${embedded ? 'bg-transparent border-transparent' : 'bg-popover border border-border'}`}
         >
           <span className="text-2xl" aria-hidden="true">{currentTheme === 'dark' ? '🌙' : '☀️'}</span>
         </button>
 
         {/* Dropdown Menu */}
         {themeDropdownOpen && (
-          <div className="absolute bottom-full mb-4 left-0 bg-white/95 dark:bg-black/95 backdrop-blur-xl rounded-lg border border-black/30 dark:border-white/30 overflow-hidden shadow-lg min-w-[140px]" role="menu">
+          <div className="absolute bottom-full mb-4 left-0 bg-popover rounded-lg border border-border overflow-hidden shadow-lg min-w-[140px]" role="menu">
             <button
               onClick={() => handleThemeChange('dark')}
               role="menuitem"
               aria-label="Switch to dark theme"
-              className={`w-full flex items-center gap-3 px-4 py-3 text-black dark:text-white hover:bg-black/10 dark:hover:bg-white/10 transition-all ${
-                currentTheme === 'dark' ? 'bg-black/10 dark:bg-white/10' : ''
-              }`}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-black dark:text-white hover:bg-card transition-all ${
+                  currentTheme === 'dark' ? 'bg-card' : ''
+                }`}
             >
               <span className="text-lg" aria-hidden="true">🌙</span>
               <span className="text-sm">Dark</span>
@@ -70,9 +69,9 @@ export function ThemeToggleButton({ embedded = false }: { embedded?: boolean }) 
               onClick={() => handleThemeChange('light')}
               role="menuitem"
               aria-label="Switch to light theme"
-              className={`w-full flex items-center gap-3 px-4 py-3 text-black dark:text-white hover:bg-black/10 dark:hover:bg-white/10 transition-all ${
-                currentTheme === 'light' ? 'bg-black/10 dark:bg-white/10' : ''
-              }`}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-black dark:text-white hover:bg-card transition-all ${
+                  currentTheme === 'light' ? 'bg-card' : ''
+                }`}
             >
               <span className="text-lg" aria-hidden="true">☀️</span>
               <span className="text-sm">Light</span>

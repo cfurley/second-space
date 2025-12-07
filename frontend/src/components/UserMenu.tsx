@@ -94,11 +94,11 @@ export function UserMenu({
             boxShadow: '0 0 60px rgba(0, 0, 0, 0.5), 0 20px 50px rgba(0, 0, 0, 0.8)',
           }}
         >
-          <div 
-            className="bg-[#0a0a0a] border border-white/20 rounded-3xl"
-            style={{
-              boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
-            }}
+             <div 
+               className="bg-popover border border-border rounded-3xl"
+               style={{
+                 boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
+               }}
           >
           {isLoggedIn ? (
             /* Logged In Menu */

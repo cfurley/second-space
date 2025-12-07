@@ -4,7 +4,6 @@ export function GlassCard({ children }: { children: React.ReactNode }) {
         <div className="*
           bg-card
           border border-border
-          backdrop-blur-lg
           rounded-x1
           shadow-lg
           p-4
