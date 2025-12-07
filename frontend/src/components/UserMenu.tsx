@@ -113,14 +113,14 @@ export function UserMenu({
                   console.log('Settings clicked');
                   alert('Settings page (not implemented)');
                 }}
-                className="w-full text-left px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all text-sm"
+                className="w-full text-left px-4 py-2.5 text-white/70 hover:text-white hover:bg-[#1a1a1a] rounded-lg transition-all text-sm"
               >
                 ⚙️ Settings
               </button>
               
               <button
                 onClick={handleLogout}
-                className="w-full text-left px-4 py-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all text-sm mt-1"
+                className="w-full text-left px-4 py-2.5 text-red-400 hover:text-red-300 hover:bg-red-700 rounded-lg transition-all text-sm mt-1"
               >
                 🚪 Logout
               </button>
