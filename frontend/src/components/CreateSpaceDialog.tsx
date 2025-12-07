@@ -11,9 +11,10 @@ interface CreateSpaceDialogProps {
     description: string;
   }) => void | Promise<void>;
   onOpenChange?: (open: boolean) => void;
+  buttonClassName?: string;
 }
 
-export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDialogProps) {
+export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName }: CreateSpaceDialogProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [icon, setIcon] = useState('');
@@ -111,7 +112,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDi
       {!open ? (
         <button 
           onClick={() => handleOpenChange(true)}
-          className="flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-white/20 text-white/70 hover:text-white hover:bg-white/5 transition-all"
+          className={`${buttonClassName || 'flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-white/20 text-white/70 hover:text-white hover:bg-white/5 transition-all'}`}
           aria-label="Create new space"
         >
           <span className="text-xl">➕</span>
@@ -119,7 +120,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDi
       ) : (
         <button
           onClick={() => handleOpenChange(false)}
-          className="flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-white/20 text-white/70 hover:text-white hover:bg-white/5 transition-all"
+          className={`${buttonClassName || 'flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-white/20 text-white/70 hover:text-white hover:bg-white/5 transition-all'}`}
           aria-label="Close dialog"
         >
           <span className="text-xl">✕</span>
