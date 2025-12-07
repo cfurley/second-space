@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ContentCard } from './ContentCard';
+import { CardEditModal } from './CardEditModal';
 import { FilterBar } from './FilterBar';
 
 interface ContentAreaProps {
@@ -12,6 +13,12 @@ interface ContentAreaProps {
 
 export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceContent, searchQuery = '' }: ContentAreaProps) {
   const [localContent, setLocalContent] = useState<any[]>([]);
+  const [addedContent, setAddedContent] = useState<any[]>([]);
+
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editorIndex, setEditorIndex] = useState<number | null>(null);
+  const [editorType, setEditorType] = useState<'image' | 'text' | 'link' | 'ad'>('text');
+  const [editorInitial, setEditorInitial] = useState<Record<string, any>>({});
 
   // Use only actual space content (no default/sample cards)
   const allContent = spaceContent.map((item, index) => {
@@ -21,9 +28,12 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
     return { ...item, content: { ...item.content, ...edited, isBookmarked: localItem.isBookmarked } };
   });
 
+  // Append any locally added cards (not yet persisted)
+  const composedContent = [...allContent, ...addedContent];
+
   // Apply search filter if query exists - preserve original index
   const filteredContent = searchQuery 
-    ? allContent
+    ? composedContent
         .map((item, index) => ({ item, index }))
         .filter(({ item }) => {
           const title = item.content?.title?.toLowerCase() || '';
@@ -31,12 +41,12 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
           const query = searchQuery.toLowerCase();
           return title.includes(query) || text.includes(query);
         })
-    : allContent.map((item, index) => ({ item, index }));
+    : composedContent.map((item, index) => ({ item, index }));
 
   // (Pinned/unpinned handling not needed here)
 
   const handleToggleBookmark = (index: number) => {
-    const item = allContent[index];
+    const item = composedContent[index];
     const currentBookmarkState = item.content?.isBookmarked || false;
     
     setLocalContent(prev => {
@@ -61,6 +71,25 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
       }
       return [...prev, { index, editedFields: { ...fields } }];
     });
+  };
+
+  const openEditor = (index: number | null, type: 'image'|'text'|'link'|'ad', initial: Record<string, any> = {}) => {
+    setEditorIndex(index);
+    setEditorType(type);
+    setEditorInitial(initial || {});
+    setEditorOpen(true);
+  };
+
+  const handleSaveFromModal = (fields: Record<string, any>) => {
+    if (editorIndex === null) {
+      // create a new local card
+      const now = new Date().toLocaleString();
+      const newItem = { type: editorType, content: { ...fields, timestamp: now } };
+      setAddedContent(prev => [...prev, newItem]);
+    } else {
+      // edit existing composed item
+      handleEdit(editorIndex, fields);
+    }
   };
 
   return (
@@ -91,6 +120,7 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
               content={item.content}
               onToggleBookmark={() => handleToggleBookmark(index)}
               onEdit={(fields: Record<string, any>) => handleEdit(index, fields)}
+              onRequestEdit={() => openEditor(index, item.type, item.content)}
             />
           </div>
         ))}
@@ -102,10 +132,28 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
           const remainder = count % columns;
           const placeholders = remainder === 0 ? 0 : columns - remainder;
           return Array.from({ length: placeholders }).map((_, i) => (
-            <div key={`placeholder-${i}`} className="col-span-1" aria-hidden="true" />
+            <div key={`placeholder-${i}`} className="col-span-1">
+              <div
+                className="h-56 flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300 dark:border-white/10 text-gray-400 cursor-pointer"
+                onClick={() => openEditor(null, 'text', {})}
+              >
+                <div className="text-center">
+                  <div className="text-2xl">+</div>
+                  <div className="text-xs mt-1">Add card</div>
+                </div>
+              </div>
+            </div>
           ));
         })()}
       </div>
+      
+      <CardEditModal
+        open={editorOpen}
+        onOpenChange={setEditorOpen}
+        type={editorType}
+        initial={editorInitial}
+        onSave={handleSaveFromModal}
+      />
       
       {/* Floating Action Buttons */}
       <div className="fixed bottom-8 right-8 flex items-center gap-3">

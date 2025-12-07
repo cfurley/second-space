@@ -84,14 +84,14 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
           <div className="relative">
             <button
               onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-              className="min-w-[64px] h-10 px-3 rounded-full bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/15 flex items-center justify-center text-gray-700 dark:text-white font-semibold transition-all border border-gray-300 dark:border-white/20"
+              className="min-w-[80px] h-10 px-4 rounded-full bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/15 flex items-center justify-center text-gray-700 dark:text-white font-semibold transition-all border border-gray-300 dark:border-white/20"
             >
               {userInitials}
             </button>
             
             {/* Dropdown Menu */}
             {profileMenuOpen && (
-              <div className="absolute right-0 mt-4 w-56 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-white/10 overflow-hidden z-50 transform translate-y-1">
+              <div className="absolute right-0 mt-4 w-72 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-white/10 overflow-hidden z-50 transform translate-y-1">
                 <div className="py-1">
                   <div className="px-4 py-2 text-sm text-gray-700 dark:text-white font-medium border-b border-gray-200 dark:border-white/10">
                     {user?.username || 'Username'}

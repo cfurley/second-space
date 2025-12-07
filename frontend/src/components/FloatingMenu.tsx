@@ -393,7 +393,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
 
       {/* Create Text Post Dialog */}
       <Dialog open={showTextPostDialog} onOpenChange={setShowTextPostDialog}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">Create Text Post</DialogTitle>
           </DialogHeader>
@@ -436,7 +436,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
 
       {/* Upload Media Dialog */}
       <Dialog open={showMediaDialog} onOpenChange={setShowMediaDialog}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">Upload Media</DialogTitle>
           </DialogHeader>

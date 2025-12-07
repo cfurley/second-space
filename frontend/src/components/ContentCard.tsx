@@ -15,9 +15,10 @@ interface ContentCardProps {
   };
   onToggleBookmark?: () => void;
   onEdit?: (fields: Record<string, any>) => void;
+  onRequestEdit?: () => void;
 }
 
-export function ContentCard({ type, content, onToggleBookmark, onEdit }: ContentCardProps) {
+export function ContentCard({ type, content, onToggleBookmark, onEdit, onRequestEdit }: ContentCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   
   const getCardContent = () => {
@@ -55,9 +56,9 @@ export function ContentCard({ type, content, onToggleBookmark, onEdit }: Content
                         )}
                         <p className="text-white/60 text-xs">{content.timestamp}</p>
                       </div>
-                      {onEdit && (
+                      {onRequestEdit && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); onEdit({}); /* trigger edit prompt in parent via onEdit handler */ }}
+                          onClick={(e) => { e.stopPropagation(); onRequestEdit(); }}
                           className="text-white/80 underline text-xs"
                         >
                           Edit
@@ -200,8 +201,8 @@ export function ContentCard({ type, content, onToggleBookmark, onEdit }: Content
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-white/10 text-xs text-gray-500 dark:text-white/50">
           <div className="flex items-center gap-3">
             <span>{getTypeLabel()}</span>
-            {onEdit && (
-              <button onClick={(e) => { e.stopPropagation(); onEdit({}); }} className="underline text-xs text-gray-600 dark:text-white/60">Edit</button>
+            {onRequestEdit && (
+              <button onClick={(e) => { e.stopPropagation(); onRequestEdit(); }} className="underline text-xs text-gray-600 dark:text-white/60">Edit</button>
             )}
           </div>
           <div className="flex items-center gap-3">
