@@ -80,7 +80,7 @@ export function UserMenu({
       {isLoggedIn ? (
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-9 h-9 rounded-full bg-white/8 border border-white/30 flex items-center justify-center text-white text-xs hover:bg-white/15 transition-all"
+            className="w-9 h-9 rounded-full bg-[#1f1f1f] border border-white/30 flex items-center justify-center text-white text-xs hover:bg-[#2a2a2a] transition-all"
         >
           {userInitials}
         </button>
@@ -140,8 +140,8 @@ export function UserMenu({
                   
                   <button
                     onClick={() => setShowSignupForm(true)}
-                    className="w-full px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all text-sm mt-2"
-                  >
+                    className="w-full px-4 py-2.5 text-white/70 hover:text-white hover:bg-[#1a1a1a] rounded-lg transition-all text-sm mt-2"
+                    >
                     Sign Up
                   </button>
                 </>
@@ -163,7 +163,7 @@ export function UserMenu({
                       placeholder="Enter username"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
+                        className="bg-[#111111] border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
                       required
                     />
                   </div>
@@ -178,7 +178,7 @@ export function UserMenu({
                       placeholder="Enter password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
+                        className="bg-[#111111] border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
                       required
                     />
                   </div>
@@ -188,7 +188,7 @@ export function UserMenu({
                       type="button"
                       variant="outline"
                       onClick={() => setShowLoginForm(false)}
-                      className="flex-1 bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white h-9 text-sm"
+                        className="flex-1 bg-[#111111] border-white/10 text-white/70 hover:bg-[#1a1a1a] hover:text-white h-9 text-sm"
                     >
                       Back
                     </Button>
@@ -229,7 +229,7 @@ export function UserMenu({
                       placeholder="Choose username"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
+                      className="bg-[#111111] border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
                       required
                     />
                   </div>
@@ -244,7 +244,7 @@ export function UserMenu({
                       placeholder="Enter email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
+                      className="bg-[#111111] border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
                       required
                     />
                   </div>
@@ -259,7 +259,7 @@ export function UserMenu({
                       placeholder="Choose password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
+                      className="bg-[#111111] border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
                       required
                     />
                   </div>
@@ -269,7 +269,7 @@ export function UserMenu({
                       type="button"
                       variant="outline"
                       onClick={() => setShowSignupForm(false)}
-                      className="flex-1 bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white h-9 text-sm"
+                        className="flex-1 bg-[#111111] border-white/10 text-white/70 hover:bg-[#1a1a1a] hover:text-white h-9 text-sm"
                     >
                       Back
                     </Button>
