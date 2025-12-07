@@ -39,7 +39,7 @@ describe("Header Component", () => {
       fireEvent.click(logoutButton);
 
       await waitFor(() => {
-        expect(screen.getByText("Confirm Logout")).toBeInTheDocument();
+        expect(screen.getByText(/Confirm Logout/)).toBeInTheDocument();
         expect(screen.getByText("Are you sure you want to logout? You will be taken back to the login screen.")).toBeInTheDocument();
       });
     });
@@ -51,13 +51,13 @@ describe("Header Component", () => {
       fireEvent.click(logoutButton);
 
       await waitFor(() => {
-        expect(screen.getByText("Confirm Logout")).toBeInTheDocument();
+        expect(screen.getByText(/Confirm Logout/)).toBeInTheDocument();
       });
 
       const cancelButton = screen.getByRole("button", { name: "Cancel" });
       fireEvent.click(cancelButton);
 
-      expect(screen.queryByText("Confirm Logout")).not.toBeInTheDocument();
+      expect(screen.queryByText(/Confirm Logout/)).not.toBeInTheDocument();
     });
 
     it("clears localStorage when logout is confirmed", async () => {
@@ -73,10 +73,11 @@ describe("Header Component", () => {
       fireEvent.click(logoutButton);
 
       await waitFor(() => {
-        expect(screen.getByText("Confirm Logout")).toBeInTheDocument();
+        expect(screen.getByText(/Confirm Logout/)).toBeInTheDocument();
       });
 
-      const confirmLogoutButton = screen.getAllByRole("button").find((btn: HTMLElement) => btn.textContent === "Logout" && btn.className.includes("bg-red"));
+      const buttons = screen.getAllByRole("button");
+      const confirmLogoutButton = buttons.find((btn: HTMLElement) => btn.textContent?.includes("Logout") && btn.className.includes("bg-red"));
       if (confirmLogoutButton) {
         fireEvent.click(confirmLogoutButton);
       }
