@@ -558,7 +558,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
 
       {/* Save Bookmark Dialog */}
       <Dialog open={showBookmarkDialog} onOpenChange={setShowBookmarkDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">Save Bookmark</DialogTitle>
           </DialogHeader>
