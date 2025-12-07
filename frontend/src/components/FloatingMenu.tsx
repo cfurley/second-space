@@ -235,8 +235,8 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
       {open && (
         <div style={{
           position: 'absolute',
-          bottom: '60px',
-          right: '60px',
+          bottom: '72px',
+          right: '0px',
           display: 'flex',
           flexDirection: 'column',
           gap: '8px',

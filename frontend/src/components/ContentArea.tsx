@@ -155,34 +155,7 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
         onSave={handleSaveFromModal}
       />
       
-      {/* Floating Action Buttons */}
-      <div className="fixed bottom-8 right-8 flex items-center gap-3">
-        <button 
-          className="w-14 h-14 rounded-full bg-white dark:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/15 backdrop-blur-md border border-gray-200 dark:border-white/20 flex items-center justify-center transition-all group shadow-md"
-          aria-label="Edit"
-        >
-          <svg className="w-5 h-5 text-gray-700 dark:text-white/80 group-hover:text-gray-900 dark:group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-        </button>
-        <button 
-          className="w-14 h-14 rounded-full bg-white dark:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/15 backdrop-blur-md border border-gray-200 dark:border-white/20 flex items-center justify-center transition-all group shadow-md"
-          aria-label="Add"
-        >
-          <svg className="w-6 h-6 text-gray-700 dark:text-white/80 group-hover:text-gray-900 dark:group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-        </button>
-        <button 
-          className="w-14 h-14 rounded-full bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-white/90 flex items-center justify-center transition-all shadow-lg"
-          aria-label="Search"
-        >
-          <svg className="w-5 h-5 text-white dark:text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-4.35-4.35"></path>
-          </svg>
-        </button>
-      </div>
+      {/* Floating Action Buttons removed per request */}
     </div>
   );
 }
