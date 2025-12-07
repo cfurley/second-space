@@ -102,8 +102,8 @@ export function ContentCard({ type, content, onToggleBookmark, onEdit, onRequest
       
       case 'text':
         return (
-          <div className="p-3 h-56 overflow-y-auto text-gray-700 dark:text-white/80 text-xs leading-relaxed bg-white dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/8 hover:border-gray-300 dark:hover:border-white/20 hover:scale-[1.02] transition-all duration-300 shadow-md hover:shadow-lg">
-            <div className="h-full">{content.text}</div>
+          <div className="p-3 overflow-y-auto text-gray-700 dark:text-white/80 text-sm leading-relaxed bg-white dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/8 hover:border-gray-300 dark:hover:border-white/20 hover:scale-[1.02] transition-all duration-300 shadow-md hover:shadow-lg" style={{ minHeight: '320px' }}>
+            <div className="h-full whitespace-pre-wrap">{content.text}</div>
           </div>
         );
       
@@ -202,7 +202,13 @@ export function ContentCard({ type, content, onToggleBookmark, onEdit, onRequest
           <div className="flex items-center gap-3">
             <span>{getTypeLabel()}</span>
             {onRequestEdit && (
-              <button onClick={(e) => { e.stopPropagation(); onRequestEdit(); }} className="underline text-xs text-gray-600 dark:text-white/60">Edit</button>
+              <button
+                onClick={(e) => { e.stopPropagation(); onRequestEdit(); }}
+                aria-label="Edit space"
+                className="underline text-sm text-gray-600 dark:text-white/60 hover:scale-110 transition-transform duration-200 cursor-pointer"
+              >
+                edit space
+              </button>
             )}
           </div>
           <div className="flex items-center gap-3">
