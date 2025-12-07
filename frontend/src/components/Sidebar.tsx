@@ -45,34 +45,7 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
     }
   };
 
-  const [deletingSpace, setDeletingSpace] = useState<string | null>(null);
-
-  // Close delete popout when clicking outside
-  React.useEffect(() => {
-    const onDocClick = (e: MouseEvent) => {
-      if (!deletingSpace) return;
-      const target = e.target as HTMLElement | null;
-      if (!target) return;
-      // If click inside the popout or on a delete button, do nothing
-      if (target.closest('.space-delete-popout')) return;
-      if (target.closest('[data-delete-button]')) return;
-      setDeletingSpace(null);
-    };
-
-    document.addEventListener('click', onDocClick);
-    return () => document.removeEventListener('click', onDocClick);
-  }, [deletingSpace]);
-
-  const confirmDelete = (spaceName: string) => {
-    // Remove from both lists if present
-    setPinnedSpaces(prev => prev.filter(s => s.name !== spaceName));
-    setAllSpaces(prev => prev.filter(s => s.name !== spaceName));
-    // If the deleted space was active, clear selection
-    if (activeSpace === spaceName) {
-      onSpaceChange('');
-    }
-    setDeletingSpace(null);
-  };
+  
 
   return (
     <div className="relative w-[280px] bg-gray-200 dark:bg-[#1a1a1a] border-r border-gray-300 dark:border-white/10 py-8">
@@ -101,42 +74,7 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
               >
                 ⭐
               </button>
-              <button
-                data-delete-button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDeletingSpace(space.name);
-                  // ensure the clicked button receives focus to avoid focus/interaction glitches
-                  const bt = e.currentTarget as HTMLElement;
-                  // defer focus slightly to allow state update/render
-                  setTimeout(() => bt.focus(), 0);
-                }}
-                className="ml-1 text-sm px-2 py-1 rounded hover:bg-red-600/10 text-red-400"
-                aria-label={`Delete ${space.name}`}
-                title="Delete"
-              >
-                🗑️
-              </button>
-
-              {deletingSpace === space.name && (
-                <div className="space-delete-popout absolute right-0 top-full mt-2 w-48 bg-popover border border-border rounded-lg p-3 z-30 shadow-lg">
-                  <p className="text-sm text-white mb-2">Are you sure you want to delete "{space.name}"?</p>
-                  <div className="flex gap-2 justify-end">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setDeletingSpace(null); }}
-                      className="px-2 py-1 text-sm rounded bg-card hover:bg-card"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); confirmDelete(space.name); }}
-                      className="px-2 py-1 text-sm rounded bg-red-600 text-white hover:bg-red-700"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              )}
+              {/* delete button removed */}
             </div>
           </div>
         ))}
@@ -167,40 +105,7 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
               >
                 ☆
               </button>
-              <button
-                data-delete-button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDeletingSpace(space.name);
-                  const bt = e.currentTarget as HTMLElement;
-                  setTimeout(() => bt.focus(), 0);
-                }}
-                className="ml-1 text-sm px-2 py-1 rounded hover:bg-red-600/10 text-red-400"
-                aria-label={`Delete ${space.name}`}
-                title="Delete"
-              >
-                🗑️
-              </button>
-
-              {deletingSpace === space.name && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-popover border border-border rounded-lg p-3 z-30 shadow-lg">
-                  <p className="text-sm text-white mb-2">Are you sure you want to delete "{space.name}"?</p>
-                  <div className="flex gap-2 justify-end">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setDeletingSpace(null); }}
-                      className="px-2 py-1 text-sm rounded bg-card hover:bg-card"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); confirmDelete(space.name); }}
-                      className="px-2 py-1 text-sm rounded bg-red-600 text-white hover:bg-red-700"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              )}
+              {/* delete button removed */}
             </div>
           </div>
         ))}
