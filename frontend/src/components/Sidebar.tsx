@@ -45,6 +45,19 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
     }
   };
 
+  const [deletingSpace, setDeletingSpace] = useState<string | null>(null);
+
+  const confirmDelete = (spaceName: string) => {
+    // Remove from both lists if present
+    setPinnedSpaces(prev => prev.filter(s => s.name !== spaceName));
+    setAllSpaces(prev => prev.filter(s => s.name !== spaceName));
+    // If the deleted space was active, clear selection
+    if (activeSpace === spaceName) {
+      onSpaceChange('');
+    }
+    setDeletingSpace(null);
+  };
+
   return (
     <div className="relative w-[280px] bg-gray-200 dark:bg-[#1a1a1a] border-r border-gray-300 dark:border-white/10 py-8">
       <div className="mb-12 px-8">
@@ -54,7 +67,7 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
         {pinnedSpaces.map((space) => (
           <div
             key={space.name}
-            className={`flex items-center justify-between gap-3 px-4 py-2.5 mb-4 rounded-lg cursor-pointer transition-all duration-300 ${
+            className={`relative flex items-center justify-between gap-3 px-4 py-2.5 mb-4 rounded-lg cursor-pointer transition-all duration-300 ${
               activeSpace === space.name
                 ? 'bg-black/10 dark:bg-white/10 text-black dark:text-white border border-black/30 dark:border-white/30 scale-105'
                 : 'text-black/50 dark:text-white/50 hover:bg-black/5 dark:hover:bg-white/5 hover:scale-105 border border-transparent'
@@ -64,13 +77,43 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
               <span className="text-lg">{space.icon}</span>
               <span className="text-sm">{space.name}</span>
             </div>
-            <button
-              onClick={(e) => { e.stopPropagation(); toggleStart(space.name); }}
-              className="ml-1 text-sm px-2 py-1 rounded hover:bg-white/5 dark:hover:bg-white/5"
-              aria-label={`Unstart ${space.name}`}
-            >
-              ⭐
-            </button>
+            <div className="flex items-center">
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleStart(space.name); }}
+                className="ml-1 text-sm px-2 py-1 rounded hover:bg-white/5 dark:hover:bg-white/5"
+                aria-label={`Unstart ${space.name}`}
+              >
+                ⭐
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setDeletingSpace(space.name); }}
+                className="ml-1 text-sm px-2 py-1 rounded hover:bg-red-600/10 text-red-400"
+                aria-label={`Delete ${space.name}`}
+                title="Delete"
+              >
+                🗑️
+              </button>
+
+              {deletingSpace === space.name && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-[#0a0a0a] border border-white/20 rounded-lg p-3 z-30 shadow-lg">
+                  <p className="text-sm text-white mb-2">Are you sure you want to delete "{space.name}"?</p>
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setDeletingSpace(null); }}
+                      className="px-2 py-1 text-sm rounded bg-white/5 hover:bg-white/10"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); confirmDelete(space.name); }}
+                      className="px-2 py-1 text-sm rounded bg-red-600 text-white hover:bg-red-700"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         ))}
       </div>
@@ -82,7 +125,7 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
         {allSpaces.map((space) => (
           <div
             key={space.name}
-            className={`flex items-center justify-between gap-3 px-4 py-2.5 mb-4 rounded-lg cursor-pointer transition-all duration-300 ${
+            className={`relative flex items-center justify-between gap-3 px-4 py-2.5 mb-4 rounded-lg cursor-pointer transition-all duration-300 ${
               activeSpace === space.name
                 ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm border border-gray-200 dark:border-white/30'
                 : 'text-gray-600 dark:text-white/50 hover:bg-white/50 dark:hover:bg-white/5 hover:scale-105 border border-transparent'
@@ -92,13 +135,43 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
               <span className="text-lg">{space.icon}</span>
               <span className="text-sm">{space.name}</span>
             </div>
-            <button
-              onClick={(e) => { e.stopPropagation(); toggleStart(space.name); }}
-              className="ml-1 text-sm px-2 py-1 rounded hover:bg-white/5 dark:hover:bg-white/5"
-              aria-label={`Start ${space.name}`}
-            >
-              ☆
-            </button>
+            <div className="flex items-center">
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleStart(space.name); }}
+                className="ml-1 text-sm px-2 py-1 rounded hover:bg-white/5 dark:hover:bg-white/5"
+                aria-label={`Start ${space.name}`}
+              >
+                ☆
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setDeletingSpace(space.name); }}
+                className="ml-1 text-sm px-2 py-1 rounded hover:bg-red-600/10 text-red-400"
+                aria-label={`Delete ${space.name}`}
+                title="Delete"
+              >
+                🗑️
+              </button>
+
+              {deletingSpace === space.name && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-[#0a0a0a] border border-white/20 rounded-lg p-3 z-30 shadow-lg">
+                  <p className="text-sm text-white mb-2">Are you sure you want to delete "{space.name}"?</p>
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setDeletingSpace(null); }}
+                      className="px-2 py-1 text-sm rounded bg-white/5 hover:bg-white/10"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); confirmDelete(space.name); }}
+                      className="px-2 py-1 text-sm rounded bg-red-600 text-white hover:bg-red-700"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         ))}
       </div>
