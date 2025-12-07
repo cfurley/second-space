@@ -31,7 +31,7 @@ export function ThemeToggleButton() {
   };
 
   return (
-    <div className="fixed left-1/2 transform -translate-x-1/2 bottom-6 z-50">
+    <div style={{ position: 'fixed', left: '24px', bottom: '24px', zIndex: 99999 }}>
       <div className="relative">
         <button
           onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
@@ -45,7 +45,7 @@ export function ThemeToggleButton() {
 
         {/* Dropdown Menu */}
         {themeDropdownOpen && (
-          <div className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 bg-white/95 dark:bg-black/95 backdrop-blur-xl rounded-lg border border-black/30 dark:border-white/30 overflow-hidden shadow-lg min-w-[140px]" role="menu">
+          <div className="absolute bottom-full mb-4 left-0 bg-white/95 dark:bg-black/95 backdrop-blur-xl rounded-lg border border-black/30 dark:border-white/30 overflow-hidden shadow-lg min-w-[140px]" role="menu">
             <button
               onClick={() => handleThemeChange('dark')}
               role="menuitem"
