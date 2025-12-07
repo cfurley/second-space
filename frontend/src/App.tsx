@@ -163,8 +163,7 @@ export default function App() {
 
   return (
     <div className="h-screen w-screen bg-gray-100 dark:bg-black overflow-hidden relative">
-      {/* Theme Selector Button - Fixed on far left */}
-      <ThemeToggleButton />
+      {/* Theme Selector Button is now embedded in the Sidebar */}
       
       <FloatingMenu 
         currentSpaceId={currentSpaceId} 
