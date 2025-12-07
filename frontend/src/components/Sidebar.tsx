@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CreateSpaceDialog } from './CreateSpaceDialog';
+import { ThemeToggleButton } from './ThemeToggleButton';
 
 interface SidebarItem {
   icon: string;
@@ -13,24 +14,31 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
-  const pinnedSpaces: SidebarItem[] = [
+  const [pinnedSpaces, setPinnedSpaces] = useState<SidebarItem[]>([
     { icon: '💡', name: 'My Ideas', isActive: true },
     { icon: '🏃', name: 'Fitness Plans' },
     { icon: '🛍️', name: 'Shopping' },
     { icon: '📅', name: 'Events' },
-  ];
+  ]);
 
-  const allSpaces: SidebarItem[] = [
+  const [allSpaces, setAllSpaces] = useState<SidebarItem[]>([
     { icon: '🍽️', name: 'Recipes' },
     { icon: '✅', name: 'Tasks' },
     { icon: '🎵', name: 'Music' },
     { icon: '📚', name: 'Learning' },
-  ];
+  ]);
 
   return (
     <div className="w-[280px] bg-gray-200 dark:bg-[#1a1a1a] border-r border-gray-300 dark:border-white/10 py-8">
       <div className="mb-12 px-8">
-        <div className="text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider mb-6">Pinned Spaces</div>
+        <div className="flex items-center justify-between mb-6">
+          <div className="text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Pinned Spaces</div>
+          <div className="flex items-center gap-2">
+            <CreateSpaceDialog onCreateSpace={(spaceData) => {
+              setPinnedSpaces(prev => [{ icon: spaceData.icon, name: spaceData.title }, ...prev]);
+            }} />
+          </div>
+        </div>
         {pinnedSpaces.map((space) => (
           <div
             key={space.name}
@@ -48,7 +56,14 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
       </div>
 
       <div className="mb-12 px-8">
-        <div className="text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider mb-6">All Spaces</div>
+        <div className="flex items-center justify-between mb-6">
+          <div className="text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">All Spaces</div>
+          <div className="flex items-center gap-2">
+            <CreateSpaceDialog onCreateSpace={(spaceData) => {
+              setAllSpaces(prev => [{ icon: spaceData.icon, name: spaceData.title }, ...prev]);
+            }} />
+          </div>
+        </div>
         {allSpaces.map((space) => (
           <div
             key={space.name}
@@ -63,6 +78,12 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
             <span className="text-sm">{space.name}</span>
           </div>
         ))}
+      </div>
+
+      <div className="px-8 mt-auto">
+        <div className="flex items-center justify-start gap-3">
+          <ThemeToggleButton embedded />
+        </div>
       </div>
     </div>
   );
