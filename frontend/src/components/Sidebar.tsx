@@ -31,13 +31,8 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
   return (
     <div className="w-[280px] bg-gray-200 dark:bg-[#1a1a1a] border-r border-gray-300 dark:border-white/10 py-8">
       <div className="mb-12 px-8">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6">
           <div className="text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Pinned Spaces</div>
-          <div className="flex items-center gap-2">
-            <CreateSpaceDialog onCreateSpace={(spaceData) => {
-              setPinnedSpaces(prev => [{ icon: spaceData.icon, name: spaceData.title }, ...prev]);
-            }} />
-          </div>
         </div>
         {pinnedSpaces.map((space) => (
           <div
@@ -56,13 +51,8 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
       </div>
 
       <div className="mb-12 px-8">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6">
           <div className="text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">All Spaces</div>
-          <div className="flex items-center gap-2">
-            <CreateSpaceDialog onCreateSpace={(spaceData) => {
-              setAllSpaces(prev => [{ icon: spaceData.icon, name: spaceData.title }, ...prev]);
-            }} />
-          </div>
         </div>
         {allSpaces.map((space) => (
           <div
@@ -81,8 +71,16 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
       </div>
 
       <div className="px-8 mt-auto">
-        <div className="flex items-center justify-start gap-3">
-          <ThemeToggleButton embedded />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <ThemeToggleButton embedded />
+          </div>
+          <div className="flex items-center">
+            <CreateSpaceDialog onCreateSpace={(spaceData) => {
+              // add new spaces to All Spaces by default
+              setAllSpaces(prev => [{ icon: spaceData.icon, name: spaceData.title }, ...prev]);
+            }} />
+          </div>
         </div>
       </div>
     </div>
