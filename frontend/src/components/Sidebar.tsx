@@ -66,7 +66,7 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
             </div>
             <button
               onClick={(e) => { e.stopPropagation(); toggleStart(space.name); }}
-              className="ml-2 text-sm px-2 py-1 rounded hover:bg-white/5 dark:hover:bg-white/5"
+              className="ml-1 text-sm px-2 py-1 rounded hover:bg-white/5 dark:hover:bg-white/5"
               aria-label={`Unstart ${space.name}`}
             >
               ⭐
@@ -94,7 +94,7 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
             </div>
             <button
               onClick={(e) => { e.stopPropagation(); toggleStart(space.name); }}
-              className="ml-2 text-sm px-2 py-1 rounded hover:bg-white/5 dark:hover:bg-white/5"
+              className="ml-1 text-sm px-2 py-1 rounded hover:bg-white/5 dark:hover:bg-white/5"
               aria-label={`Start ${space.name}`}
             >
               ☆
