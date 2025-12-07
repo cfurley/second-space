@@ -94,12 +94,11 @@ git push origin feature/your-feature-name
 ### Current Features
 
 - 🔐 User authentication (signup/login)
-
-### Coming Soon
-
 - 📦 **Space creation and management** - Create and manage user spaces
 - 🎨 **Theme customization** - Choose from various themes
 - 📱 **Media organization** - Import and organize media such as PNG, MP4, GIFs
+
+### Coming Soon
 - 🤖 **AI Integration** - Help scrape and organize media automatically
 - 👥 **Collaboration** - Share and work on spaces with others in real-time
 - ⏰ **Time Capsule** - See what you did a year ago
