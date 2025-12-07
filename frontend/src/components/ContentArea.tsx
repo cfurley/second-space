@@ -133,15 +133,7 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
           const placeholders = remainder === 0 ? 0 : columns - remainder;
           return Array.from({ length: placeholders }).map((_, i) => (
             <div key={`placeholder-${i}`} className="col-span-1">
-              <div
-                className="h-56 flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300 dark:border-white/10 text-gray-400 cursor-pointer"
-                onClick={() => openEditor(null, 'text', {})}
-              >
-                <div className="text-center">
-                  <div className="text-2xl">+</div>
-                  <div className="text-xs mt-1">Add card</div>
-                </div>
-              </div>
+              <div className="h-56" />
             </div>
           ));
         })()}
