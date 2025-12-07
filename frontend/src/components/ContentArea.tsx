@@ -13,76 +13,12 @@ interface ContentAreaProps {
 export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceContent, searchQuery = '' }: ContentAreaProps) {
   const [localContent, setLocalContent] = useState<any[]>([]);
 
-  const sampleContent = [
-    {
-      type: 'image' as const,
-      content: {
-        title: 'Design Inspiration',
-        image: 'https://images.unsplash.com/photo-1718220216044-006f43e3a9b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBvZmZpY2UlMjB3b3Jrc3BhY2V8ZW58MXx8fHwxNzU2MzE3NTE3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        timestamp: '2 hours ago',
-      },
-    },
-    {
-      type: 'text' as const,
-      content: {
-        text: 'App idea: A mood board platform that doesn\'t require social features and focuses on personal organization. Users can drag and drop content from anywhere on the web into organized spaces.',
-        timestamp: '1 day ago',
-      },
-    },
-    {
-      type: 'link' as const,
-      content: {
-        title: 'Dribbble Design',
-        text: 'Beautiful UI design inspiration for dark themed applications with glassmorphism effects',
-        domain: 'dribbble.com',
-        timestamp: '3 days ago',
-      },
-    },
-    {
-      type: 'image' as const,
-      content: {
-        title: 'UI Screenshot',
-        image: 'https://images.unsplash.com/photo-1734009617600-ff7b688d4a72?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwZGVzaWduJTIwaW5zcGlyYXRpb258ZW58MXx8fHwxNzU2Mzk5NzE5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        timestamp: '5 days ago',
-      },
-    },
-    {
-      type: 'text' as const,
-      content: {
-        text: 'Color palette ideas: Dark backgrounds with high contrast white text and subtle glass effects for depth. Consider using rgba values for transparency.',
-        timestamp: '1 week ago',
-      },
-    },
-    {
-      type: 'link' as const,
-      content: {
-        title: 'GitHub Repository',
-        text: 'SwiftUI design system with golden ratio spacing and modern component library',
-        domain: 'github.com',
-        timestamp: '1 week ago',
-      },
-    },
-    {
-      type: 'image' as const,
-      content: {
-        title: 'Creative Workspace',
-        image: 'https://images.unsplash.com/photo-1559028012-481c04fa702d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkYXJrJTIwdWklMjBkZXNpZ258ZW58MXx8fHwxNzU2Mzk5NzE5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        timestamp: '2 weeks ago',
-      },
-    },
-    {
-      type: 'text' as const,
-      content: {
-        text: 'Browser extension concept: Allow users to drag any content from web pages directly into their organized spaces. Should work with images, text, links, and even entire page sections.',
-        timestamp: '2 weeks ago',
-      },
-    },
-  ];
-
-  // Combine user-created content with sample content and local modifications
-  const allContent = [...spaceContent, ...sampleContent].map((item, index) => {
+  // Use only actual space content (no default/sample cards)
+  const allContent = spaceContent.map((item, index) => {
     const localItem = localContent.find(l => l.index === index);
-    return localItem ? { ...item, content: { ...item.content, isBookmarked: localItem.isBookmarked } } : item;
+    if (!localItem) return item;
+    const edited = localItem.editedFields || {};
+    return { ...item, content: { ...item.content, ...edited, isBookmarked: localItem.isBookmarked } };
   });
 
   // Apply search filter if query exists - preserve original index
@@ -97,9 +33,7 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
         })
     : allContent.map((item, index) => ({ item, index }));
 
-  // Separate pinned and unpinned content
-  const pinnedContent = filteredContent.filter(({ item }) => item.content?.isBookmarked);
-  const unpinnedContent = filteredContent.filter(({ item }) => !item.content?.isBookmarked);
+  // (Pinned/unpinned handling not needed here)
 
   const handleToggleBookmark = (index: number) => {
     const item = allContent[index];
@@ -109,10 +43,23 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
       const existing = prev.findIndex(l => l.index === index);
       if (existing >= 0) {
         const updated = [...prev];
-        updated[existing] = { index, isBookmarked: !currentBookmarkState };
+        updated[existing] = { ...updated[existing], index, isBookmarked: !currentBookmarkState };
         return updated;
       }
       return [...prev, { index, isBookmarked: !currentBookmarkState }];
+    });
+  };
+
+  const handleEdit = (index: number, fields: Record<string, any>) => {
+    setLocalContent(prev => {
+      const existing = prev.findIndex(l => l.index === index);
+      if (existing >= 0) {
+        const updated = [...prev];
+        const prevEntry = updated[existing];
+        updated[existing] = { ...prevEntry, index, editedFields: { ...(prevEntry.editedFields || {}), ...fields } };
+        return updated;
+      }
+      return [...prev, { index, editedFields: { ...fields } }];
     });
   };
 
@@ -124,7 +71,7 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
         </h1>
       </div>
 
-      <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4 mt-8">
+      <div className="grid grid-cols-4 gap-4 mt-8">
         {/* No results message */}
         {searchQuery && filteredContent.length === 0 && (
           <div className="col-span-full flex flex-col items-center justify-center py-20">
@@ -136,16 +83,28 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
           </div>
         )}
         
-        {/* Content Cards in Masonry Layout */}
+        {/* Content Cards in Grid Layout (4 per row on md+). Render placeholders to fill the last row so cards don't stretch. */}
         {filteredContent.map(({ item, index }) => (
-          <div key={`content-${index}`} className="break-inside-avoid mb-4">
+          <div key={`content-${index}`} className="col-span-1 w-full">
             <ContentCard
               type={item.type}
               content={item.content}
               onToggleBookmark={() => handleToggleBookmark(index)}
+              onEdit={(fields: Record<string, any>) => handleEdit(index, fields)}
             />
           </div>
         ))}
+
+        {/* Add empty placeholders to ensure exactly 4 columns appear on larger viewports */}
+        {(() => {
+          const columns = 4; // desired columns on md+
+          const count = filteredContent.length;
+          const remainder = count % columns;
+          const placeholders = remainder === 0 ? 0 : columns - remainder;
+          return Array.from({ length: placeholders }).map((_, i) => (
+            <div key={`placeholder-${i}`} className="col-span-1" aria-hidden="true" />
+          ));
+        })()}
       </div>
       
       {/* Floating Action Buttons */}

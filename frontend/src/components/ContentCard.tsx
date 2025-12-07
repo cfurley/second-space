@@ -14,9 +14,10 @@ interface ContentCardProps {
     isBookmarked?: boolean;
   };
   onToggleBookmark?: () => void;
+  onEdit?: (fields: Record<string, any>) => void;
 }
 
-export function ContentCard({ type, content, onToggleBookmark }: ContentCardProps) {
+export function ContentCard({ type, content, onToggleBookmark, onEdit }: ContentCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   
   const getCardContent = () => {
@@ -24,7 +25,7 @@ export function ContentCard({ type, content, onToggleBookmark }: ContentCardProp
       case 'image':
         return (
           <div 
-            className="rounded-xl overflow-hidden relative cursor-pointer bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 hover:scale-[1.02] transition-all duration-300 shadow-md hover:shadow-lg"
+            className="rounded-xl overflow-hidden relative cursor-pointer bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 hover:scale-[1.02] transition-all duration-300 shadow-md hover:shadow-lg h-56"
             onClick={() => content.description && setIsFlipped(!isFlipped)}
             style={{ perspective: '1000px' }}
           >
@@ -44,7 +45,7 @@ export function ContentCard({ type, content, onToggleBookmark }: ContentCardProp
                     <ImageWithFallback
                       src={content.image}
                       alt={content.title || 'Content image'}
-                      className="w-full h-auto rounded-2xl object-cover max-h-[250px]"
+                      className="w-full h-40 rounded-2xl object-cover"
                     />
                     {/* Title and timestamp overlay on front */}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4">
@@ -90,19 +91,21 @@ export function ContentCard({ type, content, onToggleBookmark }: ContentCardProp
       
       case 'text':
         return (
-          <div className="p-3 min-h-[80px] text-gray-700 dark:text-white/80 text-xs leading-relaxed bg-white dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/8 hover:border-gray-300 dark:hover:border-white/20 hover:scale-[1.02] transition-all duration-300 shadow-md hover:shadow-lg">
-            {content.text}
+          <div className="p-3 h-56 overflow-y-auto text-gray-700 dark:text-white/80 text-xs leading-relaxed bg-white dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/8 hover:border-gray-300 dark:hover:border-white/20 hover:scale-[1.02] transition-all duration-300 shadow-md hover:shadow-lg">
+            <div className="h-full">{content.text}</div>
           </div>
         );
       
       case 'link':
         return (
-          <div className="p-3 bg-white dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/8 hover:border-gray-300 dark:hover:border-white/20 hover:scale-[1.02] transition-all duration-300 shadow-md hover:shadow-lg">
-            <h4 className="text-gray-900 dark:text-white font-semibold text-sm mb-1.5">{content.title}</h4>
-            <p className="text-gray-600 dark:text-white/60 text-xs leading-relaxed mb-2">{content.text}</p>
-            {content.domain && (
-              <p className="text-gray-400 dark:text-white/40 text-xs">{content.domain}</p>
-            )}
+          <div className="p-3 h-56 overflow-y-auto bg-white dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/8 hover:border-gray-300 dark:hover:border-white/20 hover:scale-[1.02] transition-all duration-300 shadow-md hover:shadow-lg">
+            <div className="h-full">
+              <h4 className="text-gray-900 dark:text-white font-semibold text-sm mb-1.5">{content.title}</h4>
+              <p className="text-gray-600 dark:text-white/60 text-xs leading-relaxed mb-2">{content.text}</p>
+              {content.domain && (
+                <p className="text-gray-400 dark:text-white/40 text-xs">{content.domain}</p>
+              )}
+            </div>
           </div>
         );
       
@@ -124,8 +127,35 @@ export function ContentCard({ type, content, onToggleBookmark }: ContentCardProp
     }
   };
 
+  const doEdit = () => {
+    if (!onEdit) return;
+    if (type === 'text') {
+      const newText = prompt('Edit text', content.text || '')
+      if (newText !== null) onEdit({ text: newText });
+      return;
+    }
+    if (type === 'image') {
+      const newTitle = prompt('Edit image title', content.title || '')
+      const newUrl = prompt('Edit image URL', content.image || '')
+      const fields: Record<string, any> = {}
+      if (newTitle !== null) fields.title = newTitle;
+      if (newUrl !== null) fields.image = newUrl;
+      if (Object.keys(fields).length) onEdit(fields);
+      return;
+    }
+    if (type === 'link') {
+      const newTitle = prompt('Edit link title', content.title || '')
+      const newText = prompt('Edit link text', content.text || '')
+      const fields: Record<string, any> = {}
+      if (newTitle !== null) fields.title = newTitle;
+      if (newText !== null) fields.text = newText;
+      if (Object.keys(fields).length) onEdit(fields);
+      return;
+    }
+  }
+
   return (
-    <div className="relative group">
+    <div className="relative group w-full" onDoubleClick={() => doEdit()}>
       {/* Bookmark toggle button - appears on hover */}
       <button
         onClick={(e) => {
@@ -149,6 +179,20 @@ export function ContentCard({ type, content, onToggleBookmark }: ContentCardProp
           </div>
         )}
       </button>
+      {/* Edit button - appears next to bookmark */}
+      {onEdit && (
+        <button
+          onClick={(e) => { e.stopPropagation(); doEdit(); }}
+          className="absolute top-3 right-10 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          title="Edit"
+        >
+          <div className="bg-white/10 backdrop-blur-sm rounded-full p-1.5 shadow-lg hover:bg-white/15 transition-colors">
+            <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          </div>
+        </button>
+      )}
       
       <div>
         {getCardContent()}
