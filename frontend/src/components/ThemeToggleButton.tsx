@@ -31,7 +31,7 @@ export function ThemeToggleButton() {
   };
 
   return (
-    <div className="fixed left-6 top-1/2 -translate-y-1/2 z-50">
+    <div className="fixed left-6 bottom-6 z-50">
       <div className="relative">
         <button
           onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
