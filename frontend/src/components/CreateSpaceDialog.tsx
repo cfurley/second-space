@@ -114,7 +114,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDi
           className="flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-white/20 text-white/70 hover:text-white hover:bg-white/5 transition-all"
           aria-label="Create new space"
         >
-          <span className="text-xl font-light">+</span>
+          <span className="text-xl">➕</span>
         </button>
       ) : (
         <button
@@ -122,7 +122,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDi
           className="flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-white/20 text-white/70 hover:text-white hover:bg-white/5 transition-all"
           aria-label="Close dialog"
         >
-          <span className="text-xl font-light">✕</span>
+          <span className="text-xl">✕</span>
         </button>
       )}
 
