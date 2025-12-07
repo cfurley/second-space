@@ -248,8 +248,8 @@ describe("mediaServices.generateFilepath and insertMediaToDatabase", () => {
   // });
 
   test("insertMediaToDatabase rejects too-large base64", async () => {
-    // create a buffer larger than MAX_FILE_SIZE used in service (20MB)
-    const size = 21 * 1024 * 1024; // 21 MB
+    // create a buffer larger than MAX_FILE_SIZE used in service (50MB)
+    const size = 51 * 1024 * 1024; // 51 MB
     const buffer = Buffer.alloc(size, "a");
     const base64 = buffer.toString("base64");
     const media = {

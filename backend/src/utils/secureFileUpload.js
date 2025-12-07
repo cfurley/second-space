@@ -254,13 +254,14 @@ function initializeUploadDirectory() {
   Require all denied
 </FilesMatch>
 
-# Deny access to all files by default
-Order Deny,Allow
-Deny from all
+# Deny access to all files by default (Apache 2.4+ syntax)
+<RequireAll>
+  Require all denied
+</RequireAll>
 
 # Allow only specific safe file types
 <FilesMatch "\\.(?i:png|jpg|jpeg|gif|webp|pdf|txt|md)$">
-  Allow from all
+  Require all granted
 </FilesMatch>
   `.trim();
 

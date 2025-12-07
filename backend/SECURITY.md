@@ -86,7 +86,7 @@ function validateFileSize(size)
 
 **Upload Directory Structure:**
 ```
-/var/app/uploads/          (Outside web root - NOT accessible via web)
+/uploads/                   (Relative to project root - backend/uploads or /app/uploads in Docker)
 ├── .htaccess              (Apache protection rules)
 └── {timestamp}_{random}_{sanitized_filename}
 ```
@@ -94,8 +94,10 @@ function validateFileSize(size)
 **Security Measures:**
 
 1. **Storage Outside Web Root**
-   - Files stored in `/var/app/uploads/` (or configured `UPLOAD_ROOT`)
-   - NOT accessible via direct HTTP requests
+   - Files stored in `uploads/` directory (relative to project root)
+   - In Docker: `/app/uploads/` mounted to persistent volume
+   - NOT accessible via direct HTTP requests to upload directory
+   - Served via Express static middleware with controlled access
    - Prevents direct script execution
 
 2. **Filename Sanitization**

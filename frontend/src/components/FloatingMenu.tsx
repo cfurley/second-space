@@ -186,8 +186,10 @@ export function FloatingMenu({
       setShowDeleteDialog(false);
       setSelectedItems([]);
       
-      // Reload the page to reflect changes
-      window.location.reload();
+      // Notify parent to refresh UI after deletion
+      if (onDeleteSelected) {
+        onDeleteSelected();
+      }
     } catch (error) {
       console.error('Error deleting:', error);
       alert('Failed to delete. Please try again.');
@@ -202,14 +204,13 @@ export function FloatingMenu({
       const allPosts = JSON.parse(localStorage.getItem('ss_posts') || '[]');
       const allMedia = JSON.parse(localStorage.getItem('ss_media') || '[]');
       const allBookmarks = JSON.parse(localStorage.getItem('ss_bookmarks') || '[]');
-      
       // Filter by current space and combine
       const items = [
         ...allPosts.filter((item: any) => item.spaceId === currentSpaceId).map((item: any) => ({
           ...item,
           itemType: 'post',
           displayTitle: item.title || 'Text Post',
-          displayDescription: item.content?.substring(0, 50) + '...' || ''
+          displayDescription: item.content?.length > 50 ? item.content.substring(0, 50) + '...' : item.content || ''
         })),
         ...allMedia.filter((item: any) => item.spaceId === currentSpaceId).map((item: any) => ({
           ...item,

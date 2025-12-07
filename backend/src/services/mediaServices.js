@@ -348,12 +348,12 @@ async function generateFilepath(media) {
 
   // Determine uploads root:
   // - If process.cwd() ends with 'backend', use process.cwd()/uploads
-  // - Otherwise use <repo-root>/backend/uploads
+  // - Otherwise use process.cwd()/uploads (Docker uses /app as working directory)
   const cwdBase = path.basename(process.cwd());
   const uploadsRoot =
     cwdBase === "backend"
       ? path.join(process.cwd(), "uploads")
-      : path.join(process.cwd(), "backend", "uploads");
+      : path.join(process.cwd(), "uploads");
   const destDir = path.join(uploadsRoot, folder);
   // ensure directory exists
   await fs.promises.mkdir(destDir, { recursive: true });

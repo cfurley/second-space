@@ -111,16 +111,34 @@ export function ContentCard({
         );
       
       case 'link':
+        // Validate URL to prevent XSS attacks
+        const isValidUrl = (url: string) => {
+          try {
+            const urlObj = new URL(url);
+            return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+          } catch {
+            return false;
+          }
+        };
+        
+        const safeUrl = content.url && isValidUrl(content.url) ? content.url : '#';
+        
         return (
           <div className="border-l-3 border-white/50 pl-4">
             <h4 className="text-white font-medium mb-2">{content.title}</h4>
             {content.url && (
               <a 
-                href={content.url} 
+                href={safeUrl} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:text-blue-300 text-sm underline block mb-2"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (safeUrl === '#') {
+                    e.preventDefault();
+                    alert('Invalid URL');
+                  }
+                }}
               >
                 {content.url}
               </a>
