@@ -347,94 +347,35 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
       )}
       <div style={{ display: 'flex', flexDirection: 'row', gap: '12px' }}>
         <button
-        onClick={() => setShowEditDialog(true)}
-        style={{
-          width: '48px',
-          height: '48px',
-          backgroundColor: '#2C2C2C',
-          color: 'white',
-          borderRadius: '50%',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '20px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-          transition: 'transform 0.2s, box-shadow 0.2s'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.1)';
-          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
-        }}
-        title="Edit Content"
-      >
-        ✏️
-      </button>
-
-      <button
-        onClick={() => setOpen(prev => !prev)}
-        style={{
-          width: '48px',
-          height: '48px',
-          backgroundColor: '#2C2C2C',
-          color: 'white',
-          borderRadius: '50%',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '24px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-          transition: 'transform 0.3s, box-shadow 0.2s',
-          transform: open ? 'rotate(45deg)' : 'rotate(0deg)'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = open ? 'rotate(45deg) scale(1.1)' : 'scale(1.1)';
-          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = open ? 'rotate(45deg)' : 'rotate(0deg)';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
-        }}
-      >
-        +
-      </button>
-
-      <button
-        onClick={() => setShowSearchDialog(true)}
-        style={{
-          width: '48px',
-          height: '48px',
-          backgroundColor: '#2C2C2C',
-          color: 'white',
-          borderRadius: '50%',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '20px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-          transition: 'transform 0.2s, box-shadow 0.2s'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.1)';
-          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
-        }}
-      >
-        🔍
-      </button>
-    </div>
+          onClick={() => setOpen(prev => !prev)}
+          style={{
+            width: '48px',
+            height: '48px',
+            backgroundColor: '#2C2C2C',
+            color: 'white',
+            borderRadius: '50%',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '24px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            transition: 'transform 0.3s, box-shadow 0.2s',
+            transform: open ? 'rotate(45deg)' : 'rotate(0deg)'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = open ? 'rotate(45deg) scale(1.1)' : 'scale(1.1)';
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = open ? 'rotate(45deg)' : 'rotate(0deg)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+          }}
+        >
+          +
+        </button>
+      </div>
 
       {/* Add CSS animation keyframes */}
       <style>{`
@@ -452,36 +393,44 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
 
       {/* Create Text Post Dialog */}
       <Dialog open={showTextPostDialog} onOpenChange={setShowTextPostDialog}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">Create Text Post</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="postTitle" className="text-right">Title</Label>
-              <Input
-                id="postTitle"
-                value={postTitle}
-                onChange={(e) => setPostTitle(e.target.value)}
-                className="col-span-3"
-                placeholder="Enter post title"
-              />
+          <form onSubmit={(e) => { e.preventDefault(); handleTextPostSubmit(); }}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="postTitle" className="text-right">Title</Label>
+                <Input
+                  id="postTitle"
+                  value={postTitle}
+                  onChange={(e) => setPostTitle(e.target.value)}
+                  className="col-span-3"
+                  placeholder="Enter post title"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label htmlFor="postContent" className="text-right mt-2">Content</Label>
+                <Textarea
+                  id="postContent"
+                  value={postContent}
+                  onChange={(e) => setPostContent(e.target.value)}
+                  className="col-span-3"
+                  placeholder="Write your post content..."
+                  rows={6}
+                  onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleTextPostSubmit();
+                    }
+                  }}
+                />
+              </div>
             </div>
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="postContent" className="text-right mt-2">Content</Label>
-              <Textarea
-                id="postContent"
-                value={postContent}
-                onChange={(e) => setPostContent(e.target.value)}
-                className="col-span-3"
-                placeholder="Write your post content..."
-                rows={6}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button onClick={handleTextPostSubmit}>Create Post</Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button type="submit">Create Post</Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

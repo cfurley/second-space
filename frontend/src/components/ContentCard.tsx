@@ -47,12 +47,22 @@ export function ContentCard({ type, content, onToggleBookmark, onEdit }: Content
                       alt={content.title || 'Content image'}
                       className="w-full h-40 rounded-2xl object-cover"
                     />
-                    {/* Title and timestamp overlay on front */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4">
-                      {content.title && (
-                        <h3 className="text-white font-medium text-sm mb-1">{content.title}</h3>
+                    {/* Title and timestamp overlay on front. Add an Edit link for images. */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 flex items-center justify-between">
+                      <div>
+                        {content.title && (
+                          <h3 className="text-white font-medium text-sm mb-1">{content.title}</h3>
+                        )}
+                        <p className="text-white/60 text-xs">{content.timestamp}</p>
+                      </div>
+                      {onEdit && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onEdit({}); /* trigger edit prompt in parent via onEdit handler */ }}
+                          className="text-white/80 underline text-xs"
+                        >
+                          Edit
+                        </button>
                       )}
-                      <p className="text-white/60 text-xs">{content.timestamp}</p>
                     </div>
                   </div>
                 ) : (
@@ -155,7 +165,7 @@ export function ContentCard({ type, content, onToggleBookmark, onEdit }: Content
   }
 
   return (
-    <div className="relative group w-full" onDoubleClick={() => doEdit()}>
+    <div className="relative group w-full">
       {/* Bookmark toggle button - appears on hover */}
       <button
         onClick={(e) => {
@@ -179,20 +189,7 @@ export function ContentCard({ type, content, onToggleBookmark, onEdit }: Content
           </div>
         )}
       </button>
-      {/* Edit button - appears next to bookmark */}
-      {onEdit && (
-        <button
-          onClick={(e) => { e.stopPropagation(); doEdit(); }}
-          className="absolute top-3 right-10 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          title="Edit"
-        >
-          <div className="bg-white/10 backdrop-blur-sm rounded-full p-1.5 shadow-lg hover:bg-white/15 transition-colors">
-            <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
-          </div>
-        </button>
-      )}
+      {/* Small Edit link will be rendered in card content (overlay or bottom bar) */}
       
       <div>
         {getCardContent()}
@@ -201,8 +198,15 @@ export function ContentCard({ type, content, onToggleBookmark, onEdit }: Content
       {/* Only show bottom bar for non-image types, since images have title/timestamp in overlay */}
       {type !== 'image' && (
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-white/10 text-xs text-gray-500 dark:text-white/50">
-          <span>{getTypeLabel()}</span>
-          <span>{content.timestamp}</span>
+          <div className="flex items-center gap-3">
+            <span>{getTypeLabel()}</span>
+            {onEdit && (
+              <button onClick={(e) => { e.stopPropagation(); onEdit({}); }} className="underline text-xs text-gray-600 dark:text-white/60">Edit</button>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <span>{content.timestamp}</span>
+          </div>
         </div>
       )}
     </div>
