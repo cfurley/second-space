@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export function ThemeToggleButton() {
+export function ThemeToggleButton({ embedded = false }: { embedded?: boolean }) {
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<'dark' | 'light'>('dark');
 
@@ -30,15 +30,19 @@ export function ThemeToggleButton() {
     }
   };
 
+  const containerStyle: React.CSSProperties = embedded
+    ? { position: 'relative', zIndex: 10 }
+    : { position: 'fixed', left: '24px', bottom: '24px', zIndex: 99999 };
+
   return (
-    <div style={{ position: 'fixed', left: '24px', bottom: '24px', zIndex: 99999 }}>
+    <div style={containerStyle}>
       <div className="relative">
         <button
           onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
           aria-label="Toggle theme"
           aria-expanded={themeDropdownOpen}
-          className="w-14 h-14 flex items-center justify-center rounded-full bg-black/10 dark:bg-white/10 backdrop-blur-xl text-black dark:text-white cursor-pointer hover:bg-black/15 dark:hover:bg-white/15 hover:scale-110 transition-all duration-300 border border-black/30 dark:border-white/30 shadow-lg"
-          style={{ backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
+          className={`w-14 h-14 flex items-center justify-center rounded-full text-black dark:text-white cursor-pointer hover:scale-110 transition-all duration-300 border shadow-lg ${embedded ? 'bg-transparent border-transparent' : 'bg-black/10 dark:bg-white/10 border-black/30 dark:border-white/30'}`}
+          style={embedded ? {} : { backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
         >
           <span className="text-2xl" aria-hidden="true">{currentTheme === 'dark' ? '🌙' : '☀️'}</span>
         </button>
