@@ -13,9 +13,10 @@ This document outlines the security measures implemented to protect against **CW
 - API Layer: `frontend/src/utils/api.ts`
 
 **Allowed File Types:**
-- **Images:** PNG, JPG, JPEG, GIF, WebP
-- **Documents:** PDF, TXT, MD
-- **Maximum File Size:** 10MB
+- **Images:** PNG, JPG, JPEG, GIF, WebP, BMP, SVG
+- **Videos:** MP4, WebM, MOV, AVI
+- **Documents:** PDF, TXT, MD, JSON
+- **Maximum File Size:** 50MB
 
 **Allowed MIME Types:**
 ```javascript
@@ -55,7 +56,7 @@ This document outlines the security measures implemented to protect against **CW
    - Example: `image/jpeg` must have `.jpg` or `.jpeg` extension
 
 4. **File Size Validation**
-   - Maximum 10MB per file
+   - Maximum 50MB per file
    - Prevents DoS attacks via large files
 
 **Code Location:**
@@ -208,7 +209,7 @@ if (!resolvedPath.startsWith(resolvedRoot)) {
 - [x] MIME type validation on server-side (simulated in localStorage)
 - [x] Extension validation on server-side
 - [x] MIME-Extension matching validation
-- [x] File size validation (10MB limit)
+- [x] File size validation (50MB limit)
 - [x] Filename sanitization
 - [x] Unique filename generation
 - [x] Path traversal prevention
@@ -258,7 +259,7 @@ if (!resolvedPath.startsWith(resolvedRoot)) {
    import multer from 'multer';
    const upload = multer({ 
      storage: multer.memoryStorage(),
-     limits: { fileSize: 10 * 1024 * 1024 }
+     limits: { fileSize: 50 * 1024 * 1024 }
    });
    
    router.post('/upload', upload.single('file'), uploadMedia);
@@ -298,7 +299,7 @@ curl -F "file=@../../etc/passwd" http://localhost:8080/api/media/upload
 
 ### Test Case 5: Oversized File
 ```bash
-# Try to upload file > 10MB
+# Try to upload file > 50MB
 curl -F "file=@large_video.mp4" http://localhost:8080/api/media/upload
 # Expected: "File size exceeds maximum"
 ```

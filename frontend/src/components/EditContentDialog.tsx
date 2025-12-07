@@ -40,18 +40,25 @@ export function EditContentDialog({
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [attachmentPreview, setAttachmentPreview] = useState<string>("");
 
-  // CWE-434: Security - File upload validation
-  const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'pdf', 'txt', 'md'];
+  // CWE-434: Security - File upload validation (synchronized with backend limits)
+  const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'mp4', 'webm', 'mov', 'avi', 'pdf', 'txt', 'md', 'json'];
   const ALLOWED_MIME_TYPES = [
     'image/png',
     'image/jpeg',
     'image/gif',
     'image/webp',
+    'image/bmp',
+    'image/svg+xml',
+    'video/mp4',
+    'video/webm',
+    'video/quicktime',
+    'video/x-msvideo',
     'application/pdf',
     'text/plain',
-    'text/markdown'
+    'text/markdown',
+    'application/json'
   ];
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
   const validateFile = (file: File): { valid: boolean; errors: string[] } => {
     const errors: string[] = [];
@@ -76,9 +83,16 @@ export function EditContentDialog({
       'image/jpeg': ['jpg', 'jpeg'],
       'image/gif': ['gif'],
       'image/webp': ['webp'],
+      'image/bmp': ['bmp'],
+      'image/svg+xml': ['svg'],
+      'video/mp4': ['mp4'],
+      'video/webm': ['webm'],
+      'video/quicktime': ['mov'],
+      'video/x-msvideo': ['avi'],
       'application/pdf': ['pdf'],
       'text/plain': ['txt'],
-      'text/markdown': ['md']
+      'text/markdown': ['md'],
+      'application/json': ['json']
     };
     
     const validExtensions = mimeToExt[file.type];

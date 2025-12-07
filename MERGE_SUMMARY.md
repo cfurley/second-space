@@ -14,7 +14,7 @@ Successfully merged `origin/main` into `Y-Nguyen-floating-menu-update` branch. T
 ### 1. Backend Media Integration
 
 **MediaUploadDialog.tsx:**
-- Updated file size limit: `10MB → 20MB`
+- Updated file size limit: `10MB → 50MB`
 - Updated allowed extensions:
   - Added: `.bmp`, `.svg`, `.json`
   - Removed: `.pdf`, `.md`
@@ -80,7 +80,7 @@ Successfully merged `origin/main` into `Y-Nguyen-floating-menu-update` branch. T
 - File validation:
   - Extension whitelist: `.png, .jpg, .jpeg, .gif, .webp, .bmp, .svg, .txt, .json`
   - MIME type validation via magic bytes (file-type library)
-  - Size limit: 20MB (20 * 1024 * 1024)
+  - Size limit: 50MB (50 * 1024 * 1024)
   - Path traversal prevention via sanitization
 - File storage:
   - Organized by type: `backend/uploads/images/`, `text/`, `json/`, `others/`
@@ -133,7 +133,7 @@ From main branch (Jackie's backend work):
 
 1. **Test Media Upload Flow:**
    - Verify base64 conversion works correctly
-   - Test file size validation (20MB limit)
+   - Test file size validation (50MB limit)
    - Test file type validation (new extensions)
    - Test backend storage and retrieval
 
@@ -154,7 +154,7 @@ From main branch (Jackie's backend work):
 - **Frontend:** Fully integrated with backend media API
 - **Media Storage:** Backend expects base64-encoded files in POST requests
 - **File Types:** Frontend and backend now aligned on allowed types
-- **Size Limits:** Frontend and backend both enforce 20MB limit
+- **Size Limits:** Frontend and backend both enforce 50MB limit
 - **Posts/Bookmarks:** Still using localStorage (backend endpoints not yet implemented)
 
 ## Commit History
@@ -162,7 +162,7 @@ From main branch (Jackie's backend work):
 ```
 128e38b Merge origin/main into Y-Nguyen-floating-menu-update
 ├── Integrated backend media API routes
-├── Updated file size limit to 20MB
+├── Updated file size limit to 50MB
 ├── Updated allowed file types
 ├── Replaced localStorage with backend API calls
 └── Resolved 6 merge conflicts
