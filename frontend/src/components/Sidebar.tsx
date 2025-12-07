@@ -49,7 +49,7 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
     <div className="relative w-[280px] bg-gray-200 dark:bg-[#1a1a1a] border-r border-gray-300 dark:border-white/10 py-8">
       <div className="mb-12 px-8">
         <div className="mb-6">
-          <div className="text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Started Spaces</div>
+          <div className="text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Starred Spaces</div>
         </div>
         {pinnedSpaces.map((space) => (
           <div
