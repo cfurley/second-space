@@ -26,10 +26,21 @@ const authenticate = async (req, res) => {
     const lock = authenticationService.checkLockout(identifier);
     if (lock.locked) {
       const minutes = Math.ceil(lock.remainingMs / 60000) || 1;
+      logger.warn(`Login attempt blocked due to lockout`, {
+        identifier: identifier,
+        remainingMinutes: minutes,
+        ip: req.ip,
+        timestamp: new Date().toISOString(),
+      });
       return res.status(429).json({ error: `Too many login attempts. Try again in ${minutes} minute(s).` });
     }
   } catch (e) {
     // Lockout system failure - fail securely by blocking authentication
+    logger.error(`Lockout system check failed`, {
+      identifier: identifier,
+      error: e.message,
+      ip: req.ip,
+    });
     return res.status(500).json({ error: "Authentication system error. Please try again later." });
   }
 
@@ -40,11 +51,30 @@ const authenticate = async (req, res) => {
     try {
       const record = authenticationService.recordFailedAttempt(identifier);
       if (record.shouldLock) {
+        logger.warn(`Login lockout enforced after multiple failed attempts`, {
+          identifier: identifier,
+          attemptCount: record.attemptCount,
+          timeoutMinutes: record.timeoutMinutes,
+          ip: req.ip,
+          timestamp: new Date().toISOString(),
+        });
         return res.status(429).json({ error: `Too many login attempts. Try again in ${record.timeoutMinutes} minute(s).` });
       }
+      // Log failed attempt (warning to track potential attacks)
+      logger.warn(`Failed login attempt recorded`, {
+        identifier: identifier,
+        attemptCount: record.attemptCount || 1,
+        ip: req.ip,
+        timestamp: new Date().toISOString(),
+      });
       // If warning, still return same Invalid Login error to avoid revealing info
     } catch (e) {
       // Failed to record attempt - log internally only
+      logger.error(`Failed to record login attempt`, {
+        identifier: identifier,
+        error: e.message,
+        ip: req.ip,
+      });
       return res.status(500).json({ error: "Authentication system error." });
     }
     return res.status(result.status).json({ error: result.error });
@@ -52,8 +82,17 @@ const authenticate = async (req, res) => {
     // Successful login: reset any counters for this identifier
     try {
       authenticationService.resetAttempts(identifier);
+      logger.info(`Login attempt counters reset after successful authentication`, {
+        identifier: identifier,
+        ip: req.ip,
+      });
     } catch (e) {
       // Failed to reset - log internally only, but allow successful login to proceed
+      logger.error(`Failed to reset login attempt counters`, {
+        identifier: identifier,
+        error: e.message,
+        ip: req.ip,
+      });
     }
 
     const user = result.data;
