@@ -92,15 +92,13 @@ export function UserMenu({
 
   return (
     <div className="relative" ref={menuRef}>
-      {/* User Avatar / Login Button */}
-      {(isLoggedIn || cachedUser) ? (
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-            className="w-9 h-9 rounded-full bg-[#1f1f1f] border border-white/30 flex items-center justify-center text-white text-xs hover:bg-[#2a2a2a] transition-all"
-        >
-          {cachedUser ? getUserInitials() : userInitials}
-        </button>
-      ) : null}
+      {/* User Avatar / Login Button - Always visible */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-9 h-9 rounded-full bg-[#1f1f1f] border border-white/30 flex items-center justify-center text-white text-xs hover:bg-[#2a2a2a] transition-all"
+      >
+        {cachedUser ? getUserInitials() : userInitials}
+      </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
