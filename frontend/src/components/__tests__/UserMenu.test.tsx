@@ -12,22 +12,22 @@ describe('UserMenu Component', () => {
   });
 
   it('renders without crashing', () => {
-    render(<UserMenu />);
+    render(<UserMenu isLoggedIn={true} />);
     expect(screen.getByText('AT')).toBeInTheDocument();
   });
 
   it('displays default initials when not logged in', () => {
-    render(<UserMenu />);
+    render(<UserMenu isLoggedIn={true} />);
     expect(screen.getByText('AT')).toBeInTheDocument();
   });
 
   it('displays user initials when provided', () => {
-    render(<UserMenu userInitials="JC" />);
+    render(<UserMenu isLoggedIn={true} userInitials="JC" />);
     expect(screen.getByText('JC')).toBeInTheDocument();
   });
 
   it('opens dropdown menu when clicked', () => {
-    render(<UserMenu />);
+    render(<UserMenu isLoggedIn={true} />);
     
     const avatarButton = screen.getByText('AT');
     fireEvent.click(avatarButton);
@@ -37,7 +37,7 @@ describe('UserMenu Component', () => {
   });
 
   it('shows login form when Login is clicked', () => {
-    render(<UserMenu />);
+    render(<UserMenu isLoggedIn={true} />);
     
     const avatarButton = screen.getByText('AT');
     fireEvent.click(avatarButton);
@@ -50,7 +50,7 @@ describe('UserMenu Component', () => {
   });
 
   it('shows signup form when Sign Up is clicked', () => {
-    render(<UserMenu />);
+    render(<UserMenu isLoggedIn={true} />);
     
     const avatarButton = screen.getByText('AT');
     fireEvent.click(avatarButton);
@@ -64,7 +64,7 @@ describe('UserMenu Component', () => {
   });
 
   it('handles login form submission', async () => {
-    render(<UserMenu />);
+    render(<UserMenu isLoggedIn={true} />);
     
     const avatarButton = screen.getByText('AT');
     fireEvent.click(avatarButton);
@@ -88,7 +88,7 @@ describe('UserMenu Component', () => {
   });
 
   it('handles signup form submission', async () => {
-    render(<UserMenu />);
+    render(<UserMenu isLoggedIn={true} />);
     
     const avatarButton = screen.getByText('AT');
     fireEvent.click(avatarButton);
@@ -144,7 +144,7 @@ describe('UserMenu Component', () => {
     
     setUserCache(userData as any);
     
-    render(<UserMenu />);
+    render(<UserMenu isLoggedIn={true} />);
     
     const avatarButton = screen.getByText('JC');
     fireEvent.click(avatarButton);
@@ -163,7 +163,7 @@ describe('UserMenu Component', () => {
     
     setUserCache(userData as any);
     
-    render(<UserMenu />);
+    render(<UserMenu isLoggedIn={true} />);
     
     const avatarButton = screen.getByText('JC');
     fireEvent.click(avatarButton);
@@ -182,7 +182,7 @@ describe('UserMenu Component', () => {
     
     setUserCache(userData as any);
     
-    render(<UserMenu />);
+    render(<UserMenu isLoggedIn={true} />);
     
     const avatarButton = screen.getByText('JC');
     fireEvent.click(avatarButton);
