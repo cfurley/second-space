@@ -69,7 +69,7 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
             <div className="flex items-center">
               <button
                 onClick={(e) => { e.stopPropagation(); toggleStart(space.name); }}
-                className="-mr-1 text-sm px-2 py-1 rounded hover:bg-white/5 dark:hover:bg-white/5"
+                className="-mr-3 text-sm px-2 py-1 rounded hover:bg-white/5 dark:hover:bg-white/5"
                 aria-label={`Unstart ${space.name}`}
               >
                 ⭐
@@ -100,7 +100,7 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
             <div className="flex items-center">
               <button
                 onClick={(e) => { e.stopPropagation(); toggleStart(space.name); }}
-                className="-mr-1 text-sm px-2 py-1 rounded hover:bg-white/5 dark:hover:bg-white/5"
+                className="-mr-3 text-sm px-2 py-1 rounded hover:bg-white/5 dark:hover:bg-white/5"
                 aria-label={`Start ${space.name}`}
               >
                 ☆
