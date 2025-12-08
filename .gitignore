@@ -47,3 +47,4 @@ coverage/
 # Generated reports
 COMMIT_STATS.md
 commit-stats.json
+test-report.md
