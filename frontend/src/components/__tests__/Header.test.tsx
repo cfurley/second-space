@@ -103,7 +103,7 @@ describe("Header Component", () => {
       const dialog = screen.getByText(/Confirm Logout/).closest('div');
       if (dialog) {
         const { getByRole } = within(dialog as HTMLElement);
-        const confirmLogoutButton = getByRole('button', { name: 'Logout' });
+        const confirmLogoutButton = getByRole('button', { name: /logout/i });
         fireEvent.click(confirmLogoutButton);
       }
 

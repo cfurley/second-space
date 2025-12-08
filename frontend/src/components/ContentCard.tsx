@@ -187,6 +187,7 @@ export function ContentCard({ type, content, onToggleBookmark, onEdit, onRequest
         }}
         className="absolute top-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
         title={content.isBookmarked ? "Unpin from top" : "Pin to top"}
+        aria-label={content.isBookmarked ? "Unbookmark" : "Bookmark"}
       >
         {content.isBookmarked ? (
           <div className="bg-yellow-400 rounded-full p-1.5 shadow-lg">

@@ -187,7 +187,7 @@ describe('UserMenu Component', () => {
     const avatarButton = screen.getByText('JC');
     fireEvent.click(avatarButton);
     
-    const logoutButton = screen.getByText('Logout');
+    const logoutButton = screen.getByText(/logout/i);
     fireEvent.click(logoutButton);
     
     // Should return to default state
