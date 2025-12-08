@@ -116,7 +116,7 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
         <ThemeToggleButton embedded />
       </div>
       <div className="absolute right-4 bottom-6">
-        <CreateSpaceDialog buttonClassName="flex items-center justify-center w-10 h-10 rounded-full bg-gray-300 dark:bg-purple-600 text-gray-800 dark:text-white text-xl shadow-lg hover:scale-110 transition-all border-none" onCreateSpace={(spaceData) => {
+        <CreateSpaceDialog buttonClassName="w-12 h-12 aspect-square bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-2xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300" onCreateSpace={(spaceData) => {
           // add new spaces to All Spaces by default
           setAllSpaces(prev => [{ icon: spaceData.icon, name: spaceData.title }, ...prev]);
         }} />
