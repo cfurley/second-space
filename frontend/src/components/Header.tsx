@@ -1,70 +1,86 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserMenu } from './UserMenu';
 import { getUserCache, getUserInitials, clearUserCache } from '../utils/userCache';
+// Inline accessible dialog used when the separate AlertDialog component
+// is not present in this branch. Keeps tests simple and avoids import errors.
 
 interface HeaderProps {
   activeNav: string;
   onNavChange: (nav: string) => void;
 }
 
+interface User { id: string; username: string; first_name?: string; last_name?: string }
+
+function generateInitials(firstName?: string, lastName?: string): string {
+  const first = firstName?.[0]?.toUpperCase() || '';
+  const last = lastName?.[0]?.toUpperCase() || '';
+  return (first + last).slice(0, 2) || 'US';
+}
+
 export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: HeaderProps & { searchQuery?: string; onSearchChange?: (query: string) => void }) {
   const navItems = ['Spaces', 'Recent', 'Shared'];
-  const [profileMenuOpen, setProfileMenuOpen] = React.useState(false);
-  const [username, setUsername] = React.useState<string>('Username');
-  const [userInitials, setUserInitials] = React.useState<string>('US');
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [username, setUsername] = useState<string>('Username');
+  const [userInitials, setUserInitials] = useState<string>('US');
+  const [user, setUser] = useState<User | null>(null);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   // Fetch user data from cache on component mount
-  React.useEffect(() => {
-    const user = getUserCache();
-    if (user) {
-      setUsername(user.username);
-      setUserInitials(getUserInitials());
+  useEffect(() => {
+    const cached = getUserCache();
+    if (cached) {
+      setUser(cached);
+      setUsername(cached.username || 'Username');
+      // Prefer the utility for initials if available, fallback to generated initials
+      try {
+        const initials = getUserInitials();
+        setUserInitials(initials || generateInitials(cached.first_name, cached.last_name));
+      } catch (e) {
+        setUserInitials(generateInitials(cached.first_name, cached.last_name));
+      }
     }
   }, []);
 
-  const handleLogout = () => {
-    // Clear user data from cache
-    clearUserCache();
-    // Clear legacy localStorage key if it exists
+  const handleLogoutClick = () => {
+    // Open confirmation dialog instead of logging out immediately
+    setShowLogoutDialog(true);
+  };
+
+  const handleConfirmLogout = () => {
+    // Clear user data from cache and legacy localStorage
+    try { clearUserCache(); } catch (e) { /* ignore */ }
     localStorage.removeItem('user');
-    // Reset user state
+    // Reset local state
+    setUser(null);
     setUsername('Username');
     setUserInitials('US');
-    // Close menu
     setProfileMenuOpen(false);
-    // Navigate to home
+    setShowLogoutDialog(false);
+    // Navigate to home/login
     window.location.href = '/';
   };
 
+  const handleCancelLogout = () => {
+    setShowLogoutDialog(false);
+  };
+
   return (
-    <header className="bg-white dark:bg-[#0a0a0a] border-b border-gray-200 dark:border-white/10 px-8 py-3">
-      <div className="flex items-center justify-between">
-        {/* Left: Second Space branding */}
-        <div className="flex items-center">
-          <h1 className="text-gray-900 dark:text-white font-semibold" style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)' }}>Second Space</h1>
-        </div>
-        
-        {/* Right: Search bar with AI button */}
-        <div className="flex items-center gap-3">
-          <div className="relative">
+    <>
+      <header className="bg-white dark:bg-[#0a0a0a] border-b border-gray-200 dark:border-white/10 px-8 py-3">
+        <div className="flex items-center justify-between">
+          {/* Left: Second Space branding */}
+          <div className="flex items-center">
+            <h1 className="text-gray-900 dark:text-white font-semibold" style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)' }}>Second Space</h1>
+          </div>
+          {/* Center: Search input */}
+          <div className="flex-1 px-6">
             <input
-              type="text"
               placeholder="Search spaces..."
               value={searchQuery || ''}
-              onChange={(e) => onSearchChange?.(e.target.value)}
-              className="w-[280px] bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full px-4 py-1.5 pr-10 text-gray-900 dark:text-white text-sm placeholder:text-gray-400 dark:placeholder:text-white/40 focus:outline-none focus:border-gray-300 dark:focus:border-white/20 transition-all"
+              onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+              className="w-full max-w-lg px-3 py-2 rounded-md border border-gray-300 dark:border-white/10 bg-white dark:bg-[#0a0a0a] text-sm"
             />
-            <svg 
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-black/40 dark:text-white/40"
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.35-4.35" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
-            </svg>
           </div>
-          
           {/* Profile Menu */}
           <div className="relative">
             <button
@@ -81,7 +97,7 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
                   <div className="px-4 py-2 text-sm text-gray-700 dark:text-white font-medium border-b border-gray-200 dark:border-white/10">
                     {username}
                   </div>
-                  <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                  <button onClick={handleLogoutClick} className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
                     Logout
                   </button>
                 </div>
@@ -89,7 +105,35 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
             )}
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Logout Confirmation Dialog (inline fallback) */}
+      {showLogoutDialog && (
+        <div role="dialog" aria-modal="true" className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-slate-900 border-2 border-red-600 dark:border-red-500 shadow-2xl rounded-lg p-8 max-w-sm w-full">
+            <h2 className="text-2xl font-bold text-red-600 dark:text-red-400">⚠️ Confirm Logout</h2>
+            <p className="text-gray-800 dark:text-gray-300 mt-4 text-base font-medium leading-relaxed">
+              Are you sure you want to logout? You will be taken back to the login screen.
+            </p>
+
+            <div className="flex flex-col gap-3 mt-6">
+              <button
+                onClick={handleConfirmLogout}
+                className="w-3/4 mx-auto bg-amber-500 hover:bg-amber-600 dark:bg-amber-400 dark:hover:bg-amber-500 text-black px-4 py-2 rounded-md font-semibold text-base border border-amber-600 dark:border-amber-300 shadow-md"
+              >
+                Logout
+              </button>
+
+              <button
+                onClick={handleCancelLogout}
+                className="w-3/4 mx-auto bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-md font-medium border border-gray-400 dark:border-gray-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

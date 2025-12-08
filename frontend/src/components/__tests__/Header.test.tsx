@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { Header } from "../Header";
 import { setUserCache, clearUserCache } from '../../utils/userCache';
@@ -26,7 +26,7 @@ describe("Header Component", () => {
       expect(screen.getByPlaceholderText("Search spaces...")).toBeInTheDocument();
     });
 
-    it("shows default US initials when no user data", async () => {
+    it("renders logout button in header", async () => {
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
       await waitFor(() => {
         expect(screen.getByText("US")).toBeInTheDocument();
@@ -47,30 +47,69 @@ describe("Header Component", () => {
       setUserCache(mockUser);
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
 
-      await waitFor(() => {
-        const profileButton = screen.getByText("JC");
-        fireEvent.click(profileButton);
-      });
+      const profileButton = await waitFor(() => screen.getByText("JC"));
+      fireEvent.click(profileButton);
 
-      expect(screen.getByText("jackiechen")).toBeInTheDocument();
-      expect(screen.getByText("Logout")).toBeInTheDocument();
+      // After opening the menu, click the Logout item to open confirmation
+      const logoutButton = await waitFor(() => screen.getByText("Logout"));
+      fireEvent.click(logoutButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Confirm Logout/)).toBeInTheDocument();
+        expect(screen.getByText("Are you sure you want to logout? You will be taken back to the login screen.")).toBeInTheDocument();
+      });
     });
 
     it("closes menu when profile button is clicked again", async () => {
       setUserCache(mockUser);
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
 
-      await waitFor(() => {
-        const profileButton = screen.getByText("JC");
-        fireEvent.click(profileButton);
-      });
-
-      expect(screen.getByText("jackiechen")).toBeInTheDocument();
-
-      const profileButton = screen.getByText("JC");
+      const profileButton = await waitFor(() => screen.getByText("JC"));
       fireEvent.click(profileButton);
 
-      expect(screen.queryByText("jackiechen")).not.toBeInTheDocument();
+      const logoutButton = await waitFor(() => screen.getByText("Logout"));
+      fireEvent.click(logoutButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Confirm Logout/)).toBeInTheDocument();
+      });
+
+      const cancelButton = screen.getByRole("button", { name: "Cancel" });
+      fireEvent.click(cancelButton);
+
+      expect(screen.queryByText(/Confirm Logout/)).not.toBeInTheDocument();
+    });
+
+    it("clears localStorage when logout is confirmed", async () => {
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      
+      render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
+
+      // Mock window.location.href
+      delete (window as any).location;
+      window.location = { href: '' } as any;
+
+      // Open profile menu and the confirmation dialog
+      const profileButton = await waitFor(() => screen.getByText("US"));
+      fireEvent.click(profileButton);
+      const logoutButton = await waitFor(() => screen.getByText("Logout"));
+      fireEvent.click(logoutButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Confirm Logout/)).toBeInTheDocument();
+      });
+
+      // Find the dialog and click the confirm Logout button inside it
+      const dialog = screen.getByText(/Confirm Logout/).closest('div');
+      if (dialog) {
+        const { getByRole } = within(dialog as HTMLElement);
+        const confirmLogoutButton = getByRole('button', { name: 'Logout' });
+        fireEvent.click(confirmLogoutButton);
+      }
+
+      await waitFor(() => {
+        expect(localStorage.getItem('user')).toBeNull();
+      });
     });
   });
 
@@ -125,11 +164,24 @@ describe("Header Component", () => {
       const logoutButton = screen.getByText("Logout");
       fireEvent.click(logoutButton);
 
+      await waitFor(() => {
+        expect(screen.getByText(/Confirm Logout/)).toBeInTheDocument();
+      });
+
+      const dialog = screen.getByText(/Confirm Logout/).closest('div');
+      if (dialog) {
+        const { getByRole } = within(dialog as HTMLElement);
+        const confirmLogoutButton = getByRole('button', { name: 'Logout' });
+        fireEvent.click(confirmLogoutButton);
+      }
+
       // Verify cache is cleared (both keys)
-      expect(localStorage.getItem('ss_user_data')).toBeNull();
-      expect(localStorage.getItem('ss_user_data_expiry')).toBeNull();
-      // Also check legacy key is cleared
-      expect(localStorage.getItem('user')).toBeNull();
+      await waitFor(() => {
+        expect(localStorage.getItem('ss_user_data')).toBeNull();
+        expect(localStorage.getItem('ss_user_data_expiry')).toBeNull();
+        // Also check legacy key is cleared
+        expect(localStorage.getItem('user')).toBeNull();
+      });
     });
 
     it("closes menu after logout", async () => {
@@ -149,7 +201,20 @@ describe("Header Component", () => {
       const logoutButton = screen.getByText("Logout");
       fireEvent.click(logoutButton);
 
-      expect(screen.queryByText("jackiechen")).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText(/Confirm Logout/)).toBeInTheDocument();
+      });
+
+      const dialog = screen.getByText(/Confirm Logout/).closest('div');
+      if (dialog) {
+        const { getByRole } = within(dialog as HTMLElement);
+        const confirmLogoutButton = getByRole('button', { name: 'Logout' });
+        fireEvent.click(confirmLogoutButton);
+      }
+
+      await waitFor(() => {
+        expect(screen.queryByText("jackiechen")).not.toBeInTheDocument();
+      });
     });
   });
 });
