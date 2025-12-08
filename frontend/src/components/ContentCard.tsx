@@ -138,6 +138,9 @@ export function ContentCard({
         return (
           <div className="border-l-3 border-white/50 pl-4">
             <h4 className="text-white font-medium mb-2">{content.title}</h4>
+            {content.domain && (
+              <p className="text-gray-400 dark:text-white/50 text-xs mb-2">{content.domain}</p>
+            )}
             {content.url && (
               <a 
                 href={safeUrl} 
