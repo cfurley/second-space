@@ -288,7 +288,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
       <div style={{ display: 'flex', flexDirection: 'row', gap: '12px' }}>
         <button
           onClick={() => setOpen(prev => !prev)}
-          className={`w-12 h-12 bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-2xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300 ${open ? 'rotate-45' : 'rotate-0'}`}
+          className={`w-16 h-12 bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-2xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300 ${open ? 'rotate-45' : 'rotate-0'}`}
         >
           +
         </button>

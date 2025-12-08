@@ -115,7 +115,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
           className={`${buttonClassName || 'flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-black/20 dark:border-white/20 text-black/70 dark:text-white/70 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all'}`}
           aria-label="Create new space"
         >
-          <span className="text-xl">➕</span>
+          <span className="text-xl">+</span>
         </button>
       ) : (
         <button
@@ -150,9 +150,6 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
           >
             <div 
               className="bg-white dark:bg-[#0a0a0a] border border-black/10 dark:border-white/20 rounded-3xl"
-              style={{
-                boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
-              }}
             >
             <form onSubmit={handleSubmit} className="p-6">
               <div className="mb-6">
