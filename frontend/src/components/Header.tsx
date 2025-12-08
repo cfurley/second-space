@@ -69,13 +69,13 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
   return (
     <>
       <header className="bg-white dark:bg-[#0a0a0a] border-b border-gray-200 dark:border-white/10 px-8 py-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4 max-w-6xl w-full mx-auto">
           {/* Left: Second Space branding */}
           <div className="flex items-center">
             <h1 className="text-gray-900 dark:text-white font-semibold" style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)' }}>Second Space</h1>
           </div>
           {/* Center: Search input */}
-          <div className="flex-1 px-6 flex justify-center">
+          <div className="flex-1 px-6 flex justify-center max-w-2xl">
             <input
               placeholder="Search spaces..."
               value={searchQuery || ''}
