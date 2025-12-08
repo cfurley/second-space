@@ -18,6 +18,7 @@ import {
   resetAttempts,
   formatTimeRemaining,
   getTimeoutMinutes,
+  getNextTimeoutMinutes,
 } from "../utils/loginTimeout";
 
 interface LoginProps {
@@ -204,7 +205,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
       } else if (attemptResult.shouldShowWarning) {
         // Show warning on 4th attempt
         setShowWarning(true);
-        const nextTimeoutMinutes = getTimeoutMinutes();
+        const nextTimeoutMinutes = getNextTimeoutMinutes();
         const minuteText = nextTimeoutMinutes === 1 ? '1 minute' : `${nextTimeoutMinutes} minutes`;
         alert(`Warning: This is your ${attemptResult.attemptCount}th failed attempt. After ${attemptResult.remainingAttempts} more failed attempt(s), you will be locked out for ${minuteText}.`);
       } else {

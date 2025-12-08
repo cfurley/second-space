@@ -257,6 +257,12 @@ export function getTimeoutMinutes(): number {
   return Math.max(1, data.lockoutCount);
 }
 
+export function getNextTimeoutMinutes(): number {
+  const data = getAttemptData();
+  // Next lockout will be lockoutCount + 1
+  return Math.max(1, data.lockoutCount + 1);
+}
+
 export function formatTimeRemaining(seconds: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
