@@ -12,9 +12,10 @@ interface CreateSpaceDialogProps {
   }) => void | Promise<void>;
   onOpenChange?: (open: boolean) => void;
   buttonClassName?: string;
+  buttonStyle?: React.CSSProperties;
 }
 
-export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName }: CreateSpaceDialogProps) {
+export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName, buttonStyle }: CreateSpaceDialogProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [icon, setIcon] = useState('');
@@ -107,7 +108,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
   };
 
   return (
-    <div className="relative">
+    <div className="relative" style={buttonStyle}>
       {/* Button that toggles between + and Close */}
       {!open ? (
         <button 
