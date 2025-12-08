@@ -33,7 +33,7 @@ describe('CreateSpaceDialog Component', () => {
     fireEvent.click(button);
     
     await waitFor(() => {
-      expect(screen.getByText(/create/i)).toBeInTheDocument();
+      expect(screen.getByText('New Space')).toBeInTheDocument();
     });
   });
 
