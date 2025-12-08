@@ -41,6 +41,17 @@
   --ss-text-muted: #9ca3af;
   --ss-success: #22c55e;
   --ss-error: #ef4444;
+
+  /* Landing hero (light) */
+  --landing-spot-strong: rgba(255, 255, 255, 0.9);
+  --landing-spot-mid: rgba(255, 255, 255, 0.4);
+  --landing-spot-soft: rgba(0, 0, 0, 0.08);
+  --landing-text: #0a0a0a;
+  --landing-text-glow: rgba(0, 0, 0, 0.15);
+  --landing-button-bg: rgba(0, 0, 0, 0.08);
+  --landing-button-border: rgba(0, 0, 0, 0.14);
+  --landing-button-hover: rgba(0, 0, 0, 0.12);
+  --landing-button-text: #0a0a0a;
 }
 
 .dark {
@@ -88,6 +99,17 @@
   --ss-text-secondary: rgba(255, 255, 255, 0.65);
   --ss-success: #22c55e;
   --ss-error: #ef4444;
+
+  /* Landing hero (dark) */
+  --landing-spot-strong: rgba(10, 10, 10, 1);
+  --landing-spot-mid: rgba(10, 10, 10, 0.85);
+  --landing-spot-soft: rgba(10, 10, 10, 0.4);
+  --landing-text: rgba(255, 255, 255, 0.95);
+  --landing-text-glow: rgba(255, 255, 255, 0.3);
+  --landing-button-bg: rgba(255, 255, 255, 0.1);
+  --landing-button-border: rgba(255, 255, 255, 0.2);
+  --landing-button-hover: rgba(255, 255, 255, 0.2);
+  --landing-button-text: rgba(255, 255, 255, 0.95);
 }
 
 @theme inline {
