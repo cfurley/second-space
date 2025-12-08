@@ -44,11 +44,11 @@
 }
 
 .dark {
-  --background: #0f172a;
+  --background: #1a1a1a;
   --foreground: oklch(0.985 0 0);
-  --card: #0b1220;
+  --card: #1a1a1a;
   --card-foreground: oklch(0.985 0 0);
-  --popover: #0b1220;
+  --popover: #1a1a1a;
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.985 0 0);
   --primary-foreground: oklch(0.205 0 0);
