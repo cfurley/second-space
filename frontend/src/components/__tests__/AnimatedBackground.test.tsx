@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import AnimatedBackground from '../frontend/src/components/AnimatedBackground';
+import AnimatedBackground from '../AnimatedBackground';
 
 describe('AnimatedBackground Component', () => {
   it('renders without crashing', () => {

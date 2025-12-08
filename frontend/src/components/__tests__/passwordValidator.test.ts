@@ -3,7 +3,7 @@ import {
   validatePasswordLength,
   validatePasswordCharacters,
   validatePasswordStrength,
-} from '../passwordValidator';
+} from '../../utils/passwordValidator';
 
 describe('Password Validator', () => {
   describe('validatePasswordLength', () => {

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import CaptchaType67 from '../frontend/src/components/CaptchaType67';
+import CaptchaType67 from '../CaptchaType67';
 
 // Mock ReactDOM.createPortal to render in place (if any portal usage happens upstream)
 vi.mock('react-dom', async () => {

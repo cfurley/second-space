@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { Sidebar } from '../frontend/src/components/Sidebar';
+import { Sidebar } from '../Sidebar';
 
 describe('Sidebar Component', () => {
   const mockOnSpaceChange = vi.fn();

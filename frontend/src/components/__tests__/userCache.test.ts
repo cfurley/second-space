@@ -9,7 +9,7 @@ import {
   getUserDisplayName,
   getUserInitials,
   type UserData,
-} from '../userCache';
+} from '../../utils/userCache';
 
 // Mock localStorage
 const localStorageMock = (() => {

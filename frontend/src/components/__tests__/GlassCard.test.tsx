@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { GlassCard } from '../frontend/src/components/GlassCard';
+import { GlassCard } from '../GlassCard';
 
 describe('GlassCard Component', () => {
   it('renders without crashing', () => {

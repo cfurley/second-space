@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { BottomMenuBar } from '../frontend/src/components/BottomMenuBar';
+import { BottomMenuBar } from '../BottomMenuBar';
 
 describe('BottomMenuBar Component', () => {
   it('renders without crashing', () => {

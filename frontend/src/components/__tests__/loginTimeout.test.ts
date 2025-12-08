@@ -8,7 +8,7 @@ import {
   getLockoutCount,
   getTimeoutMinutes,
   STORAGE_KEY,
-} from '../loginTimeout';
+} from '../../utils/loginTimeout';
 
 // Mock localStorage if not available
 const localStorageMock = (() => {

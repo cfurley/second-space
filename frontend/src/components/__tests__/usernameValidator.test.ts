@@ -3,7 +3,7 @@ import {
   validateUsernameLength,
   validateUsernameCharacters,
   validateUsernameDoesNotContainProfanity,
-} from '../frontend/src/utils/usernameValidator';
+} from '../../utils/usernameValidator';
 
 describe('Username Validator', () => {
   describe('validateUsernameLength', () => {

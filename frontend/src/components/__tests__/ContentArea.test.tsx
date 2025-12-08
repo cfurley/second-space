@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { ContentArea } from '../frontend/src/components/ContentArea';
+import { ContentArea } from '../ContentArea';
 
 describe('ContentArea Component', () => {
   const mockOnFilterChange = vi.fn();
