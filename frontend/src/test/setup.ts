@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterEach } from 'vitest';
+import { afterEach, vi } from 'vitest';
 
 // Cleanup after each test
 afterEach(() => {
@@ -8,8 +8,8 @@ afterEach(() => {
 });
 
 // Mock IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
+globalThis.IntersectionObserver = class IntersectionObserver {
+constructor() {}
   disconnect() {}
   observe() {}
   takeRecords() {
@@ -40,7 +40,7 @@ Object.defineProperty(window, 'scrollTo', {
 });
 
 // Mock ResizeObserver
-global.ResizeObserver = class ResizeObserver {
+globalThis.ResizeObserver = class ResizeObserver {
   constructor() {}
   disconnect() {}
   observe() {}
