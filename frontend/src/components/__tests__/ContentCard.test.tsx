@@ -51,13 +51,13 @@ describe('ContentCard Component', () => {
             text: 'Content',
             timestamp: '2024-01-01'
           }}
-          onRequestEdit={mockOnRequestEdit}
+          onEdit={mockOnEdit}
         />
       );
       
       const editButton = screen.getByText('Edit');
       fireEvent.click(editButton);
-      expect(mockOnRequestEdit).toHaveBeenCalled();
+      expect(mockOnEdit).toHaveBeenCalled();
     });
   });
 
