@@ -140,9 +140,9 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
             }}
           />
           
-          {/* Dialog Content - Positioned in the sidebar area */}
+          {/* Dialog Content - Positioned near the create space button at bottom */}
           <div 
-            className="fixed top-[140px] left-[32px] z-[150] w-[320px] rounded-3xl shadow-2xl animate-in slide-in-from-left fade-in duration-300 overflow-hidden"
+            className="fixed bottom-[80px] left-[180px] z-[150] w-[320px] rounded-3xl shadow-2xl animate-in slide-in-from-bottom fade-in duration-300 overflow-hidden"
             style={{
               boxShadow: '0 0 60px rgba(0, 0, 0, 0.5), 0 20px 50px rgba(0, 0, 0, 0.8)',
             }}
