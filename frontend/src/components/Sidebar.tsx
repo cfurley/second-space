@@ -16,11 +16,17 @@ interface SidebarProps {
 export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
   const [pinnedSpaces, setPinnedSpaces] = useState<SidebarItem[]>([
     { icon: '💡', name: 'My Ideas', isActive: true },
-    { icon: '💼', name: 'Work' },
-    { icon: '🏠', name: 'Personal' },
+    { icon: '🏃', name: 'Fitness Plans' },
+    { icon: '🛍️', name: 'Shopping' },
+    { icon: '🎉', name: 'Events' },
   ]);
 
-  const [allSpaces, setAllSpaces] = useState<SidebarItem[]>([]);
+  const [allSpaces, setAllSpaces] = useState<SidebarItem[]>([
+    { icon: '🍳', name: 'Recipes' },
+    { icon: '✅', name: 'Tasks' },
+    { icon: '🎵', name: 'Music' },
+    { icon: '📚', name: 'Learning' },
+  ]);
 
   const toggleStart = (spaceName: string) => {
     // If in pinned (started), move to allSpaces
