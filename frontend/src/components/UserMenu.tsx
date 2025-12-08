@@ -111,9 +111,11 @@ export function UserMenu({
           }}
         >
              <div 
-               className="border border-border rounded-3xl"
+               className="border border-white/20 rounded-3xl"
                style={{
                  backgroundColor: '#1a1a1a',
+                 opacity: 1,
+                 backdropFilter: 'none',
                  boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
                }}
           >
