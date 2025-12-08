@@ -252,6 +252,7 @@ export function ContentCard({
           }}
           className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           title={content.isBookmarked ? "Unpin from top" : "Pin to top"}
+          aria-label={content.isBookmarked ? "Remove bookmark" : "Add bookmark"}
         >
           {content.isBookmarked ? (
             <div className="bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-500 rounded-full p-2 shadow-[0_0_20px_rgba(250,204,21,0.6)]">
