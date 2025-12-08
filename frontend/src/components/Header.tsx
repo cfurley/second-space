@@ -75,12 +75,12 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
             <h1 className="text-gray-900 dark:text-white font-semibold" style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)' }}>Second Space</h1>
           </div>
           {/* Center: Search input */}
-          <div className="flex-1 px-6">
+          <div className="flex-1 px-6 flex justify-center">
             <input
               placeholder="Search spaces..."
               value={searchQuery || ''}
               onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
-              className="w-full max-w-lg px-3 py-2 rounded-md border border-gray-300 dark:border-white/10 bg-white dark:bg-[#0a0a0a] text-sm"
+              className="w-full max-w-xl md:max-w-lg px-3 py-2 rounded-md border border-gray-300 dark:border-white/10 bg-white dark:bg-[#0a0a0a] text-sm"
             />
           </div>
           {/* Profile Menu */}
