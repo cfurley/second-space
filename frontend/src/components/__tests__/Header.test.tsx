@@ -77,12 +77,14 @@ describe("Header Component", () => {
       });
 
       const buttons = screen.getAllByRole("button");
-      const confirmLogoutButton = buttons.find((btn: HTMLElement) => btn.textContent?.includes("Logout") && btn.className.includes("bg-red"));
+      const confirmLogoutButton = buttons.find((btn: HTMLElement) => btn.textContent?.includes("Logout") && btn.className.includes("!bg-amber"));
       if (confirmLogoutButton) {
         fireEvent.click(confirmLogoutButton);
       }
 
-      expect(localStorage.getItem('user')).toBeNull();
+      await waitFor(() => {
+        expect(localStorage.getItem('user')).toBeNull();
+      });
     });
   });
 
