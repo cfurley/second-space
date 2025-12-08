@@ -43,3 +43,7 @@ backend/logs/*
 # Test coverage
 coverage/
 .nyc_output/
+
+# Generated reports
+COMMIT_STATS.md
+commit-stats.json

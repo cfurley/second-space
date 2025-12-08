@@ -204,6 +204,25 @@ docker-compose logs database | grep "ready to accept connections"
 
 ---
 
+## 📊 Commit Statistics
+
+Generate comprehensive commit statistics for the repository:
+
+```bash
+# View report in console
+node generate-commit-stats.js
+
+# Generate markdown report file
+node generate-commit-stats.js --output=COMMIT_STATS.md
+
+# Generate JSON report file
+node generate-commit-stats.js --json --output=commit-stats.json
+```
+
+See [COMMIT_STATS_README.md](./COMMIT_STATS_README.md) for detailed documentation.
+
+---
+
 <hr>
 
 <small>
