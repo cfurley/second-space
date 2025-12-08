@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { CardEditModal } from '../CardEditModal';
 
@@ -123,6 +124,8 @@ describe('CardEditModal Component', () => {
   });
 
   it('calls onSave with form data when Save is clicked', async () => {
+    const user = userEvent.setup();
+    
     render(
       <CardEditModal 
         open={true} 
@@ -135,11 +138,13 @@ describe('CardEditModal Component', () => {
     const titleInput = screen.getByLabelText('Title');
     const textInput = screen.getByLabelText('Text');
     
-    fireEvent.change(titleInput, { target: { value: 'New Title' } });
-    fireEvent.change(textInput, { target: { value: 'New Text' } });
+    await user.clear(titleInput);
+    await user.type(titleInput, 'New Title');
+    await user.clear(textInput);
+    await user.type(textInput, 'New Text');
     
     const saveButton = screen.getByText('Save');
-    fireEvent.click(saveButton);
+    await user.click(saveButton);
 
     await waitFor(() => {
       expect(mockOnSave).toHaveBeenCalledWith({
