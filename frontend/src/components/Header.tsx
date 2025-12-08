@@ -9,6 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from './ui/alert-dialog';
+import { getUserCache, getUserInitials, clearUserCache } from '../utils/userCache';
 
 interface HeaderProps {
   activeNav: string;
@@ -35,10 +36,9 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
 
   // Fetch user data from cache on component mount
   React.useEffect(() => {
-    const user = getUserCache();
-    if (user) {
-      setUsername(user.username);
-      setUserInitials(getUserInitials());
+    const cachedUser = getUserCache();
+    if (cachedUser) {
+      setUser(cachedUser);
     }
   }, []);
 
@@ -49,8 +49,8 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
   };
 
   const handleConfirmLogout = () => {
-    // Clear user data from localStorage
-    localStorage.removeItem('user');
+    // Clear user data from cache
+    clearUserCache();
     // Reset user state
     setUser(null);
     // Close dialog
