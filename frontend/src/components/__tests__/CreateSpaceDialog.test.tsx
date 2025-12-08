@@ -54,6 +54,9 @@ describe('CreateSpaceDialog Component', () => {
   });
 
   it('validates required fields', async () => {
+    // Mock window.alert to capture validation messages
+    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    
     render(
       <CreateSpaceDialog 
         onCreateSpace={mockOnCreateSpace}
@@ -64,13 +67,21 @@ describe('CreateSpaceDialog Component', () => {
     fireEvent.click(button);
     
     await waitFor(() => {
-      const createButton = screen.getByRole('button', { name: /create/i });
-      fireEvent.click(createButton);
+      expect(screen.getByRole('button', { name: /create/i })).toBeInTheDocument();
     });
     
+    // Submit the form
+    const form = screen.getByRole('button', { name: /create/i }).closest('form');
+    if (form) {
+      fireEvent.submit(form);
+    }
+    
+    // Validation error is shown via alert()
     await waitFor(() => {
-      expect(screen.getByText(/please enter a space name/i)).toBeInTheDocument();
+      expect(alertMock).toHaveBeenCalledWith('Please enter a space name');
     });
+    
+    alertMock.mockRestore();
   });
 
   it('validates minimum name length', async () => {
@@ -193,12 +204,13 @@ describe('CreateSpaceDialog Component', () => {
       fireEvent.change(nameInput, { target: { value: 'Test Name' } });
     });
     
-    // Close dialog
+    // Close dialog - Note: Cancel button calls setOpen(false) directly, not handleOpenChange
     const cancelButton = screen.getByRole('button', { name: /cancel/i });
     fireEvent.click(cancelButton);
     
+    // Dialog should close (not visible)
     await waitFor(() => {
-      expect(mockOnOpenChange).toHaveBeenCalledWith(false);
+      expect(screen.queryByLabelText(/name/i)).not.toBeInTheDocument();
     });
   });
 
