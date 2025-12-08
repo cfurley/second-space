@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import logger from "./src/utils/logger.js";
 import spaceRouter from "./src/routes/spacesRoutes.js";
 import mediaRouter from "./src/routes/mediaRoutes.js";
 import userRouter from "./src/routes/userRoutes.js";
@@ -28,7 +29,7 @@ app.use(
       if (allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
-        console.warn(`CORS blocked request from origin: ${origin}`);
+        logger.warn(`CORS blocked request from origin: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
@@ -48,7 +49,13 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Request logging middleware
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  const timestamp = new Date().toISOString();
+  logger.info(`Incoming request`, {
+    method: req.method,
+    path: req.path,
+    ip: req.ip,
+    userAgent: req.get("user-agent"),
+  });
   next();
 });
 
@@ -77,12 +84,22 @@ app.get("/", (req, res) => {
 
 // 404 handler
 app.use((req, res) => {
+  logger.warn(`Route not found`, {
+    method: req.method,
+    path: req.path,
+  });
   res.status(404).json({ message: "Route not found" });
 });
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error("Error:", err);
+  logger.error(`Request error`, {
+    method: req.method,
+    path: req.path,
+    status: err.status || 500,
+    message: err.message,
+    stack: err.stack,
+  });
   res.status(err.status || 500).json({
     message: err.message || "Internal server error",
     ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
@@ -91,7 +108,7 @@ app.use((err, req, res, next) => {
 
 // Start the server and listen for connections
 app.listen(PORT, HOST, () => {
-  console.log(`🚀 Server is running on http://${HOST}:${PORT}`);
-  console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
-  console.log(`🌐 CORS enabled for: ${allowedOrigins.join(", ")}`);
+  logger.info(`🚀 Server is running on http://${HOST}:${PORT}`);
+  logger.info(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
+  logger.info(`🌐 CORS enabled for: ${allowedOrigins.join(", ")}`);
 });

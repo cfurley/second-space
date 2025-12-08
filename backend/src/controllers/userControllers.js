@@ -1,6 +1,7 @@
 import userService from "../services/userServices.js";
 import authenticationService from "../services/authenticationServices.js";
 import userModel from "../models/userModel.js";
+import logger from "../utils/logger.js";
 
 /**
  * Authenticate a user login
@@ -25,6 +26,11 @@ const authenticate = async (req, res) => {
     }
   } catch (e) {
     // Lockout system failure - fail securely by blocking authentication
+    logger.error(`Lockout system check failed`, {
+      identifier: identifier,
+      error: e.message,
+      ip: req.ip,
+    });
     return res.status(500).json({ error: "Authentication system error. Please try again later." });
   }
 
@@ -40,6 +46,11 @@ const authenticate = async (req, res) => {
       // If warning, still return same Invalid Login error to avoid revealing info
     } catch (e) {
       // Failed to record attempt - log internally only
+      logger.error(`Failed to record login attempt`, {
+        identifier: identifier,
+        error: e.message,
+        ip: req.ip,
+      });
       return res.status(500).json({ error: "Authentication system error." });
     }
     return res.status(result.status).json({ error: result.error });
@@ -49,6 +60,11 @@ const authenticate = async (req, res) => {
       authenticationService.resetAttempts(identifier);
     } catch (e) {
       // Failed to reset - log internally only, but allow successful login to proceed
+      logger.error(`Failed to reset login attempt counters`, {
+        identifier: identifier,
+        error: e.message,
+        ip: req.ip,
+      });
     }
 
     const user = result.data;

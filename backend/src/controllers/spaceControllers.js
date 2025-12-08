@@ -1,5 +1,6 @@
 import spaceService from "../services/spaceServices.js";
 import spaceModel from "../models/spaceModel.js";
+import logger from "../utils/logger.js";
 
 const getAllSpaces = async (req, res) => {
   let userId;
@@ -44,16 +45,22 @@ const createSpace = async (req, res) => {
   try {
     const space = spaceModel.fromJson(req.body); // TODO: this is only local, fix
   } catch (error) {
-    res.status(400).json({ error: "Invalid parameters given." });
+    return res.status(400).json({ error: "Invalid parameters given." });
   }
+
   try {
     // i cant make it acknowledge it's a space in the service
     // this is def not good practice
     await spaceService.insertSpaceToDatabase(req.body);
   } catch (error) {
+    logger.error(`Space creation failed`, {
+      spaceName: req.body.name,
+      error: error.message,
+      stack: error.stack,
+      ip: req.ip,
+    });
     return res.status(500).json({
       error: "Database Error.",
-      details: error.message,
     });
   }
   return res.status(200).json({ message: "Space created succesfully" });
