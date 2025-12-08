@@ -12,7 +12,7 @@ interface ChatBotProps {
 
 // Use same API base selection as api.ts to avoid localhost calls in production
 const CHAT_API_BASE = (import.meta as any).env.PROD
-  ? (import.meta as any).env.VITE_API_URL || (import.meta as any).env.VITE_API_BASE_URL
+  ? (import.meta as any).env.VITE_API_URL || (import.meta as any).env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '')
   : (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 export const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
@@ -62,12 +62,13 @@ export const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+
+      // Surface backend/ai-server errors to the UI instead of a generic message
+      if (!response.ok || data.error) {
+        throw new Error(data.message || data.error || `HTTP ${response.status}`);
       }
 
-      const data = await response.json();
-      
       const assistantMessage: Message = {
         role: 'assistant',
         content: data.message?.content || 'Sorry, I couldn\'t generate a response.'
@@ -76,7 +77,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (err) {
       console.error('Chat error:', err);
-      setError('Failed to get response. Please try again.');
+      setError(err instanceof Error ? err.message : 'Failed to get response. Please try again.');
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: 'Sorry, I encountered an error. Please try again.'
