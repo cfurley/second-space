@@ -9,6 +9,12 @@ import logger from "../utils/logger.js";
  * @param {string} password
  */
 const authenticateLogin = async (username, password) => {
+   if (username == null || username == undefined) {
+    return { success: false, status: 500, error: "Username is null." };
+  }
+  if (password == null || password == undefined) {
+    return { success: false, status: 500, error: "Password is null." };
+  }
 
   // Step 1: Fetch user by username only (not password)
   const selectQuery = `
@@ -100,6 +106,12 @@ const authenticateLogin = async (username, password) => {
  * @param {string} password
  */
 const updatePassword = async (userId, password) => {
+    if (userId == null || userId == undefined) {
+    return { success: false, status: 500, error: "No user id provided" };
+  }
+  if (password == null || password == undefined) {
+    return { success: false, status: 500, error: "No password provided" };
+  }
 
   // Hash the password before storing
   let hashedPassword;
