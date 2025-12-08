@@ -1,0 +1,32 @@
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Local env / IDE
+.env
+.env.local
+.vscode
+.idea
+
+# Git / misc
+.git
+.gitignore
+
+# Build outputs / caches
+dist
+build
+.cache
+.vite
+.DS_Store
+*.log
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Large assets
+*.mp4
+*.mov
+*.zip

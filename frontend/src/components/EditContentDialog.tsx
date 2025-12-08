@@ -265,7 +265,7 @@ export function EditContentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
             Edit {contentType === 'text' ? 'Post' : contentType === 'image' ? 'Media' : 'Bookmark'}
@@ -453,10 +453,10 @@ export function EditContentDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="px-6 py-2 border-2 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950">
             Cancel
           </Button>
-          <Button onClick={handleSave}>
+          <Button onClick={handleSave} className="px-6 py-2">
             Save Changes
           </Button>
         </DialogFooter>

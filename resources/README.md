@@ -1,1 +1,0 @@
-This is where we can store resources such as <b>images</b> or <b>icons</b>.

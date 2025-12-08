@@ -11,9 +11,11 @@ interface CreateSpaceDialogProps {
     description: string;
   }) => void | Promise<void>;
   onOpenChange?: (open: boolean) => void;
+  buttonClassName?: string;
+  buttonStyle?: React.CSSProperties;
 }
 
-export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDialogProps) {
+export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName, buttonStyle }: CreateSpaceDialogProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [icon, setIcon] = useState('');
@@ -106,23 +108,23 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDi
   };
 
   return (
-    <div className="relative">
+    <div className="relative" style={buttonStyle}>
       {/* Button that toggles between + and Close */}
       {!open ? (
         <button 
           onClick={() => handleOpenChange(true)}
-          className="flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-white/20 text-white/70 hover:text-white hover:bg-white/5 transition-all"
+          className={`${buttonClassName || 'flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-black/20 dark:border-white/20 text-black/70 dark:text-white/70 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all'}`}
           aria-label="Create new space"
         >
-          <span className="text-xl font-light">+</span>
+          <span className="text-xl">+</span>
         </button>
       ) : (
         <button
           onClick={() => handleOpenChange(false)}
-          className="flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-white/20 text-white/70 hover:text-white hover:bg-white/5 transition-all"
+          className={`${buttonClassName || 'flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-black/20 dark:border-white/20 text-black/70 dark:text-white/70 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all'}`}
           aria-label="Close dialog"
         >
-          <span className="text-xl font-light">✕</span>
+          <span className="text-xl">✕</span>
         </button>
       )}
 
@@ -138,9 +140,9 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDi
             }}
           />
           
-          {/* Dialog Content - Positioned in the sidebar area */}
+          {/* Dialog Content - Positioned near the create space button at bottom */}
           <div 
-            className="fixed top-[140px] left-[32px] z-[150] w-[320px] rounded-3xl shadow-2xl animate-in slide-in-from-left fade-in duration-300 overflow-hidden"
+            className="fixed bottom-[80px] left-[180px] z-[150] w-[320px] rounded-3xl shadow-2xl animate-in slide-in-from-bottom fade-in duration-300 overflow-hidden"
             style={{
               boxShadow: '0 0 60px rgba(0, 0, 0, 0.5), 0 20px 50px rgba(0, 0, 0, 0.8)',
             }}
@@ -148,20 +150,21 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDi
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div 
-              className="bg-[#0a0a0a] border border-white/20 rounded-3xl"
+              className="bg-white dark:bg-[#0a0a0a] border border-black/10 dark:border-white/20 rounded-3xl"
               style={{
-                boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
+                backgroundColor: 'var(--background, white)',
+                opacity: 1
               }}
             >
             <form onSubmit={handleSubmit} className="p-6">
               <div className="mb-6">
-                <h2 className="text-lg font-semibold text-white mb-1">New Space</h2>
-                <p className="text-xs text-white/50">Create a space to organize your content</p>
+                <h2 className="text-lg font-semibold text-foreground dark:text-white mb-1">New Space</h2>
+                <p className="text-xs text-muted-foreground dark:text-white/50">Create a space to organize your content</p>
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="space-name" className="text-white/90 text-xs">
+                  <Label htmlFor="space-name" className="text-foreground dark:text-white/90 text-xs">
                     Name <span className="text-red-400">*</span>
                   </Label>
                   <Input
@@ -172,7 +175,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDi
                       setTitle(e.target.value);
                       if (touched) validateForm();
                     }}
-                    className={`bg-white/5 border-white/10 text-white placeholder:text-white/30 h-9 text-sm ${
+                    className={`bg-gray-100 dark:bg-white/5 border-gray-300 dark:border-white/10 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-white/30 h-9 text-sm ${
                       touched && errors.name ? 'border-red-500' : ''
                     }`}
                     required
@@ -185,7 +188,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDi
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="space-icon" className="text-white/90 text-xs">
+                  <Label htmlFor="space-icon" className="text-foreground dark:text-white/90 text-xs">
                     Icon
                   </Label>
                   <Input
@@ -193,14 +196,14 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDi
                     placeholder="🏃"
                     value={icon}
                     onChange={(e) => setIcon(e.target.value)}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
+                    className="bg-gray-100 dark:bg-white/5 border-gray-300 dark:border-white/10 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-white/30 h-9 text-sm"
                     maxLength={2}
                   />
-                  <p className="text-xs text-white/40">Optional - defaults to 📁</p>
+                  <p className="text-xs text-muted-foreground dark:text-white/40">Optional - defaults to 📁</p>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="space-description" className="text-white/90 text-xs">
+                  <Label htmlFor="space-description" className="text-foreground dark:text-white/90 text-xs">
                     Description
                   </Label>
                   <Textarea
@@ -211,7 +214,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDi
                       setDescription(e.target.value);
                       if (touched) validateForm();
                     }}
-                    className={`bg-white/5 border-white/10 text-white placeholder:text-white/30 min-h-16 text-sm resize-none ${
+                    className={`bg-gray-100 dark:bg-white/5 border-gray-300 dark:border-white/10 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-white/30 min-h-16 text-sm resize-none ${
                       touched && errors.description ? 'border-red-500' : ''
                     }`}
                     maxLength={200}
@@ -219,7 +222,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDi
                   {touched && errors.description && (
                     <p className="text-xs text-red-400">{errors.description}</p>
                   )}
-                  <p className="text-xs text-white/40">{description.length}/200 characters</p>
+                  <p className="text-xs text-muted-foreground dark:text-white/40">{description.length}/200 characters</p>
                 </div>
               </div>
 
@@ -228,7 +231,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange }: CreateSpaceDi
                   type="button"
                   variant="outline"
                   onClick={() => setOpen(false)}
-                  className="flex-1 bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white h-9 text-sm"
+                  className="flex-1 bg-red-50 dark:bg-red-950 border-2 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900 h-10 text-sm font-medium"
                 >
                   Cancel
                 </Button>

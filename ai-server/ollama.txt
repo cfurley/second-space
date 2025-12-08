@@ -1,0 +1,1 @@
+Can implement this service using ollama docker setup.

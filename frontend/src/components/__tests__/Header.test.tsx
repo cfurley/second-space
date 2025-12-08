@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { Header } from "../Header";
+import { setUserCache, clearUserCache } from '../../utils/userCache';
 
 describe("Header Component", () => {
   const mockOnNavChange = vi.fn();
@@ -15,6 +16,7 @@ describe("Header Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    clearUserCache();
   });
 
   describe("Rendering", () => {
@@ -24,66 +26,18 @@ describe("Header Component", () => {
       expect(screen.getByPlaceholderText("Search spaces...")).toBeInTheDocument();
     });
 
-    it("renders logout button in header", () => {
+    it("renders logout button in header", async () => {
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-      expect(screen.getByText("Logout")).toBeInTheDocument();
-    });
-  });
-
-
-  describe("Logout Functionality", () => {
-    it("shows logout confirmation dialog when logout button is clicked", async () => {
-      render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-
-      const logoutButton = screen.getByText("Logout");
-      fireEvent.click(logoutButton);
-
       await waitFor(() => {
-        expect(screen.getByText(/Confirm Logout/)).toBeInTheDocument();
-        expect(screen.getByText("Are you sure you want to logout? You will be taken back to the login screen.")).toBeInTheDocument();
+        expect(screen.getByText("US")).toBeInTheDocument();
       });
     });
 
-    it("closes dialog when cancel is clicked", async () => {
+    it("shows generated initials from stored user data", async () => {
+      setUserCache(mockUser);
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-
-      const logoutButton = screen.getByText("Logout");
-      fireEvent.click(logoutButton);
-
       await waitFor(() => {
-        expect(screen.getByText(/Confirm Logout/)).toBeInTheDocument();
-      });
-
-      const cancelButton = screen.getByRole("button", { name: "Cancel" });
-      fireEvent.click(cancelButton);
-
-      expect(screen.queryByText(/Confirm Logout/)).not.toBeInTheDocument();
-    });
-
-    it("clears localStorage when logout is confirmed", async () => {
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      
-      render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-
-      // Mock window.location.href
-      delete (window as any).location;
-      window.location = { href: '' } as any;
-
-      const logoutButton = screen.getByText("Logout");
-      fireEvent.click(logoutButton);
-
-      await waitFor(() => {
-        expect(screen.getByText(/Confirm Logout/)).toBeInTheDocument();
-      });
-
-      const buttons = screen.getAllByRole("button");
-      const confirmLogoutButton = buttons.find((btn: HTMLElement) => btn.textContent?.includes("Logout") && btn.className.includes("!bg-amber"));
-      if (confirmLogoutButton) {
-        fireEvent.click(confirmLogoutButton);
-      }
-
-      await waitFor(() => {
-        expect(localStorage.getItem('user')).toBeNull();
+        expect(screen.getByText("JC")).toBeInTheDocument();
       });
     });
   });

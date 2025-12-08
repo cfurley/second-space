@@ -1,28 +1,19 @@
-import React, { useState } from 'react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from './ui/alert-dialog';
+import React, { useState, useEffect } from 'react';
+import { UserMenu } from './UserMenu';
+import { getUserCache, getUserInitials, clearUserCache } from '../utils/userCache';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
+import { Button } from './ui/button';
+// Inline accessible dialog used when the separate AlertDialog component
+// is not present in this branch. Keeps tests simple and avoids import errors.
 
 interface HeaderProps {
   activeNav: string;
   onNavChange: (nav: string) => void;
 }
 
-interface User {  id: string;
-  username: string;
-  first_name: string;
-  last_name: string;
-}
+interface User { id: string; username: string; first_name?: string; last_name?: string }
 
-// Helper function to generate initials from first and last name
-function generateInitials(firstName: string, lastName: string): string {
+function generateInitials(firstName?: string, lastName?: string): string {
   const first = firstName?.[0]?.toUpperCase() || '';
   const last = lastName?.[0]?.toUpperCase() || '';
   return (first + last).slice(0, 2) || 'US';
@@ -30,146 +21,113 @@ function generateInitials(firstName: string, lastName: string): string {
 
 export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: HeaderProps & { searchQuery?: string; onSearchChange?: (query: string) => void }) {
   const navItems = ['Spaces', 'Recent', 'Shared'];
-  const [user, setUser] = React.useState<User | null>(null);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [username, setUsername] = useState<string>('Username');
+  const [userInitials, setUserInitials] = useState<string>('US');
+  const [user, setUser] = useState<User | null>(null);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
-  // Fetch user data from localStorage on component mount
-  React.useEffect(() => {
-    try {
-      const userDataStr = localStorage.getItem('user');
-      if (userDataStr) {
-        const userData = JSON.parse(userDataStr);
-        setUser(userData);
+  // Fetch user data from cache on component mount
+  useEffect(() => {
+    const cached = getUserCache();
+    if (cached) {
+      setUser(cached);
+      setUsername(cached.username || 'Username');
+      // Prefer the utility for initials if available, fallback to generated initials
+      try {
+        const initials = getUserInitials();
+        setUserInitials(initials || generateInitials(cached.first_name, cached.last_name));
+      } catch (e) {
+        setUserInitials(generateInitials(cached.first_name, cached.last_name));
       }
-    } catch (error) {
-      console.error('Error loading user data from localStorage:', error);
     }
   }, []);
 
-  const userInitials = user ? generateInitials(user.first_name, user.last_name) : 'US';
-
   const handleLogoutClick = () => {
+    // Open confirmation dialog instead of logging out immediately
     setShowLogoutDialog(true);
   };
 
   const handleConfirmLogout = () => {
-    // Clear user data from localStorage
+    // Clear user data from cache and legacy localStorage
+    try { clearUserCache(); } catch (e) { /* ignore */ }
     localStorage.removeItem('user');
-    // Reset user state
+    // Reset local state
     setUser(null);
-    // Close dialog
+    setUsername('Username');
+    setUserInitials('US');
+    setProfileMenuOpen(false);
     setShowLogoutDialog(false);
-    // Refresh page to go back to login screen
+    // Navigate to home/login
     window.location.href = '/';
+  };
+
+  const handleCancelLogout = () => {
+    setShowLogoutDialog(false);
   };
 
   return (
     <>
       <header className="bg-white dark:bg-[#0a0a0a] border-b border-gray-200 dark:border-white/10 px-8 py-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4 max-w-6xl w-full mx-auto">
           {/* Left: Second Space branding */}
           <div className="flex items-center">
             <h1 className="text-gray-900 dark:text-white font-semibold" style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)' }}>Second Space</h1>
           </div>
-          
-          {/* Right: Search bar with AI button */}
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search spaces..."
-                value={searchQuery || ''}
-                onChange={(e) => onSearchChange?.(e.target.value)}
-                className="w-[220px] bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full px-4 py-1.5 pr-10 text-gray-900 dark:text-white text-sm placeholder:text-gray-400 dark:placeholder:text-white/40 focus:outline-none focus:border-gray-300 dark:focus:border-white/20 transition-all"
-              />
-              <svg 
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-black/40 dark:text-white/40"
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
-              </svg>
-            </div>
+          {/* Center: Search input */}
+          <div className="flex-1 flex justify-center">
+            <input
+              placeholder="Search spaces..."
+              value={searchQuery || ''}
+              onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+              className="w-full max-w-xs px-3 py-2 rounded-md border border-gray-300 dark:border-white/10 bg-white dark:bg-[#0a0a0a] text-sm"
+            />
+          </div>
+          {/* Profile Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+              className="min-w-[80px] h-10 px-4 rounded-full bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/15 flex items-center justify-center text-gray-700 dark:text-white font-semibold transition-all border border-gray-300 dark:border-white/20"
+            >
+              {userInitials}
+            </button>
             
-            {/* Logout replaces profile avatar */}
-            <div className="relative">
-              <button
-                onClick={handleLogoutClick}
-                className="px-4 py-2 bg-red-600 dark:bg-red-700 hover:bg-red-700 dark:hover:bg-red-600 text-white rounded-lg font-medium text-sm transition-colors border border-red-700 dark:border-red-600"
-                title="Logout"
-              >
-                Logout
-              </button>
-            </div>
+            {/* Dropdown Menu */}
+            {profileMenuOpen && (
+              <div className="absolute right-0 mt-4 w-72 rounded-lg shadow-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-[#1a1a1a] overflow-hidden z-50 transform translate-y-1">
+                <div className="py-1">
+                  <div className="px-4 py-2 text-sm text-gray-700 dark:text-white font-medium border-b border-gray-200 dark:border-white/10">
+                    {username}
+                  </div>
+                  <button onClick={handleLogoutClick} className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
-     {/* Logout Confirmation Dialog */}
-      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-        <AlertDialogContent
-          className="
-            max-w-sm w-full 
-            !bg-white !dark:bg-slate-900 
-            !bg-opacity-100 
-            !backdrop-blur-none 
-            border-2 border-red-600 dark:border-red-500 
-            shadow-2xl rounded-lg p-8 pb-10
-          "
-        >
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl font-bold text-red-600 dark:text-red-400">
-              ⚠️ Confirm Logout
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-800 dark:text-gray-300 mt-4 text-base font-medium leading-relaxed">
+      {/* Logout Confirmation Dialog (inline fallback) */}
+      <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-red-600 dark:text-red-400 flex items-center gap-2">⚠️ Confirm Logout</DialogTitle>
+            <DialogDescription className="text-base text-gray-800 dark:text-gray-200">
               Are you sure you want to logout? You will be taken back to the login screen.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-
-          <AlertDialogFooter className="flex flex-col gap-3 mt-6">
-
-            {/* Highlighted Amber Action Button */}
-            <AlertDialogAction
-              onClick={handleConfirmLogout}
-              className="
-                w-3/4 mx-auto
-                !bg-amber-500 !hover:bg-amber-600
-                dark:!bg-amber-400 dark:!hover:bg-amber-500
-                !text-black
-                px-4 py-2
-                rounded-md
-                font-semibold text-base
-                !border !border-amber-600 dark:!border-amber-300
-                shadow-md
-                transition
-                data-[state=open]:!bg-amber-500
-              "
-            >
-              Logout
-            </AlertDialogAction>
-
-            {/* Cancel Button  */}
-            <AlertDialogCancel
-              className="
-                w-3/4 mx-auto
-                bg-gray-200 dark:bg-gray-700
-                text-gray-900 dark:text-gray-100
-                hover:bg-gray-300 dark:hover:bg-gray-600
-                px-4 py-2
-                rounded-md
-                font-medium
-                border border-gray-400 dark:border-gray-600
-                transition
-                mb-2
-              "
-            >
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:flex-row sm:justify-end gap-3">
+            <Button variant="outline" onClick={handleCancelLogout} className="w-full sm:w-auto px-6 py-2 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800">
               Cancel
-            </AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmLogout} className="w-full sm:w-auto px-6 py-2 bg-red-600 hover:bg-red-700">
+              Logout
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

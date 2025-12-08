@@ -1,15 +1,19 @@
 FROM node:22 AS build
 WORKDIR /app
-COPY ./package.json ./
-COPY . ./
 
-RUN npm cache clean --force
-RUN rm -rf node_modules package-lock.json
-RUN npm install
+# Copy package metadata first to leverage Docker layer caching
+COPY package.json package-lock.json* ./
+
+# Install dependencies. Use npm ci when a lockfile is present for reproducible installs.
+RUN npm ci --prefer-offline --no-audit --progress=false || npm install --prefer-offline --no-audit --progress=false
+
+# Copy the rest of the source (excluded files come from .dockerignore)
+COPY . .
 
 # Set API URL for Docker Compose local development
 ENV VITE_API_URL=http://localhost:8080
 
+# Build the production assets
 RUN npm run build
 
 FROM nginx

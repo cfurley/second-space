@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { setUserCache, getUserCache, clearUserCache, getUserDisplayName, getUserInitials } from '../utils/userCache';
 
 interface UserMenuProps {
   // Mock user state - in a real app, this would come from auth context
@@ -12,7 +13,7 @@ interface UserMenuProps {
 
 export function UserMenu({ 
   isLoggedIn = false, 
-  userName = 'Andrew Truong',
+  userName: userNameProp = '',
   userInitials = 'AT'
 }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,6 +22,7 @@ export function UserMenu({
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
+  const [cachedUser, setCachedUser] = useState<any>(() => getUserCache());
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -43,9 +45,17 @@ export function UserMenu({
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login:', { username, password });
     // TODO: Implement actual login logic
-    alert(`Login attempted with username: ${username}`);
+    // Simulate login success and cache user data
+    const userData = {
+      id: '1',
+      username,
+      first_name: username,
+      last_name: '',
+      email: email || 'user@example.com'
+    };
+    setUserCache(userData as any);
+    setCachedUser(getUserCache());
     setUsername('');
     setPassword('');
     setIsOpen(false);
@@ -54,9 +64,17 @@ export function UserMenu({
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Signup:', { username, email, password });
     // TODO: Implement actual signup logic
-    alert(`Signup attempted with username: ${username}`);
+    // Simulate signup success and cache user data
+    const userData = {
+      id: '1',
+      username,
+      first_name: username,
+      last_name: '',
+      email: email || 'user@example.com'
+    };
+    setUserCache(userData as any);
+    setCachedUser(getUserCache());
     setUsername('');
     setEmail('');
     setPassword('');
@@ -65,47 +83,42 @@ export function UserMenu({
   };
 
   const handleLogout = () => {
-    console.log('Logout');
-    // Clear user data from localStorage
-    localStorage.removeItem('user');
-    // Close menu
+    // Clear user data from cache and localStorage
+    clearUserCache();
+    setCachedUser(null);
     setIsOpen(false);
-    // Navigate to home
     window.location.href = '/';
   };
 
   return (
     <div className="relative" ref={menuRef}>
       {/* User Avatar / Login Button */}
-      {isLoggedIn ? (
+      {(isLoggedIn || cachedUser) ? (
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-9 h-9 rounded-full bg-white/8 border border-white/30 flex items-center justify-center text-white text-xs hover:bg-white/15 transition-all"
+          className="w-9 h-9 rounded-full bg-gray-200 text-gray-800 border border-gray-300 dark:bg-[#1f1f1f] dark:text-white dark:border-white/30 flex items-center justify-center text-xs hover:bg-gray-300 dark:hover:bg-[#2a2a2a] transition-all"
         >
-          {userInitials}
+          {cachedUser ? getUserInitials() : userInitials}
         </button>
       ) : null}
 
       {/* Dropdown Menu */}
       {isOpen && (
         <div 
-          className="absolute right-0 top-12 w-[280px] rounded-3xl shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden"
+          className="absolute right-0 top-12 w-[280px] rounded-3xl shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden border border-gray-200 dark:border-white/20"
           style={{
-            boxShadow: '0 0 60px rgba(0, 0, 0, 0.5), 0 20px 50px rgba(0, 0, 0, 0.8)',
+            background: 'var(--ss-glass-bg, rgba(255,255,255,0.9))',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
           }}
         >
-          <div 
-            className="bg-[#0a0a0a] border border-white/20 rounded-3xl"
-            style={{
-              boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
-            }}
-          >
-          {isLoggedIn ? (
+          {(isLoggedIn || cachedUser) ? (
             /* Logged In Menu */
             <div className="p-4">
               <div className="mb-4 pb-4 border-b border-white/10">
-                <p className="text-white text-sm font-medium">{userName}</p>
-                <p className="text-white/50 text-xs mt-1">user@example.com</p>
+                <p className="text-gray-900 dark:text-white text-sm font-medium">{cachedUser ? getUserDisplayName() : (userNameProp || 'User')}</p>
+                <p className="text-gray-500 dark:text-white/60 text-xs mt-1">{cachedUser?.email || 'user@example.com'}</p>
               </div>
               
               <button
@@ -113,14 +126,14 @@ export function UserMenu({
                   console.log('Settings clicked');
                   alert('Settings page (not implemented)');
                 }}
-                className="w-full text-left px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all text-sm"
+                className="w-full text-left px-4 py-2.5 text-gray-700 dark:text-white/70 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-all text-sm"
               >
                 ⚙️ Settings
               </button>
               
               <button
                 onClick={handleLogout}
-                className="w-full text-left px-4 py-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all text-sm mt-1"
+                className="w-full text-left px-4 py-2.5 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/40 rounded-lg transition-all text-sm mt-1"
               >
                 🚪 Logout
               </button>
@@ -140,8 +153,8 @@ export function UserMenu({
                   
                   <button
                     onClick={() => setShowSignupForm(true)}
-                    className="w-full px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all text-sm mt-2"
-                  >
+                    className="w-full px-4 py-2.5 text-gray-700 dark:text-white/70 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-all text-sm mt-2"
+                    >
                     Sign Up
                   </button>
                 </>
@@ -163,13 +176,13 @@ export function UserMenu({
                       placeholder="Enter username"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
+                        className="bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 h-9 text-sm dark:bg-[#111111] dark:border-white/10 dark:text-white dark:placeholder:text-white/30"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-white/90 text-xs">
+                    <Label htmlFor="login-password" className="text-gray-700 dark:text-white/90 text-xs">
                       Password
                     </Label>
                     <Input
@@ -178,7 +191,7 @@ export function UserMenu({
                       placeholder="Enter password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
+                        className="bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 h-9 text-sm dark:bg-[#111111] dark:border-white/10 dark:text-white dark:placeholder:text-white/30"
                       required
                     />
                   </div>
@@ -188,7 +201,7 @@ export function UserMenu({
                       type="button"
                       variant="outline"
                       onClick={() => setShowLoginForm(false)}
-                      className="flex-1 bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white h-9 text-sm"
+                        className="flex-1 border border-gray-300 text-gray-700 hover:bg-gray-100 dark:flex-1 dark:bg-[#111111] dark:border-white/10 dark:text-white/70 dark:hover:bg-[#1a1a1a] dark:hover:text-white h-9 text-sm"
                     >
                       Back
                     </Button>
@@ -200,27 +213,27 @@ export function UserMenu({
                     </Button>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowLoginForm(false);
-                      setShowSignupForm(true);
-                    }}
-                    className="w-full text-center text-white/50 hover:text-white/70 text-xs mt-2"
-                  >
-                    Don't have an account? Sign up
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowLoginForm(false);
+                        setShowSignupForm(true);
+                      }}
+                      className="w-full text-center text-gray-600 hover:text-gray-800 dark:text-white/50 dark:hover:text-white/70 text-xs mt-2"
+                    >
+                      Don't have an account? Sign up
+                    </button>
                 </form>
               ) : (
                 /* Signup Form */
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="mb-4">
-                    <h3 className="text-white text-base font-semibold">Sign Up</h3>
-                    <p className="text-white/50 text-xs mt-1">Create a new account</p>
+                    <h3 className="text-gray-900 dark:text-white text-base font-semibold">Sign Up</h3>
+                    <p className="text-gray-600 dark:text-white/50 text-xs mt-1">Create a new account</p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signup-username" className="text-white/90 text-xs">
+                    <Label htmlFor="signup-username" className="text-gray-700 dark:text-white/90 text-xs">
                       Username
                     </Label>
                     <Input
@@ -229,13 +242,13 @@ export function UserMenu({
                       placeholder="Choose username"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
+                      className="bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 h-9 text-sm dark:bg-[#111111] dark:border-white/10 dark:text-white dark:placeholder:text-white/30"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-white/90 text-xs">
+                    <Label htmlFor="signup-email" className="text-gray-700 dark:text-white/90 text-xs">
                       Email
                     </Label>
                     <Input
@@ -244,13 +257,13 @@ export function UserMenu({
                       placeholder="Enter email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
+                      className="bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 h-9 text-sm dark:bg-[#111111] dark:border-white/10 dark:text-white dark:placeholder:text-white/30"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-white/90 text-xs">
+                    <Label htmlFor="signup-password" className="text-gray-700 dark:text-white/90 text-xs">
                       Password
                     </Label>
                     <Input
@@ -259,7 +272,7 @@ export function UserMenu({
                       placeholder="Choose password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
+                      className="bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 h-9 text-sm dark:bg-[#111111] dark:border-white/10 dark:text-white dark:placeholder:text-white/30"
                       required
                     />
                   </div>
@@ -269,7 +282,7 @@ export function UserMenu({
                       type="button"
                       variant="outline"
                       onClick={() => setShowSignupForm(false)}
-                      className="flex-1 bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white h-9 text-sm"
+                      className="flex-1 border border-gray-300 text-gray-700 hover:bg-gray-100 dark:bg-[#111111] dark:border-white/10 dark:text-white/70 dark:hover:bg-[#1a1a1a] dark:hover:text-white h-9 text-sm"
                     >
                       Back
                     </Button>
@@ -287,7 +300,7 @@ export function UserMenu({
                       setShowSignupForm(false);
                       setShowLoginForm(true);
                     }}
-                    className="w-full text-center text-white/50 hover:text-white/70 text-xs mt-2"
+                  className="w-full text-center text-gray-600 hover:text-gray-800 dark:text-white/50 dark:hover:text-white/70 text-xs mt-2"
                   >
                     Already have an account? Login
                   </button>
@@ -295,7 +308,6 @@ export function UserMenu({
               )}
             </div>
           )}
-          </div>
         </div>
       )}
     </div>

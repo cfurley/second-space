@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ContentCard } from './ContentCard';
+import { CardEditModal } from './CardEditModal';
 import { FilterBar } from './FilterBar';
 
 interface ContentAreaProps {
@@ -8,102 +9,31 @@ interface ContentAreaProps {
   onFilterChange: (filter: string) => void;
   spaceContent: any[];
   searchQuery?: string;
-  isDeleteMode?: boolean;
-  selectedItemIds?: string[];
-  onToggleItemSelection?: (itemId: string) => void;
-  isEditMode?: boolean;
-  onItemEdit?: (item: any, itemType: 'text' | 'image' | 'link') => void;
 }
 
-export function ContentArea({ 
-  activeSpace, 
-  activeFilter, 
-  onFilterChange, 
-  spaceContent, 
-  searchQuery = '',
-  isDeleteMode = false,
-  selectedItemIds = [],
-  onToggleItemSelection,
-  isEditMode = false,
-  onItemEdit
-}: ContentAreaProps) {
+export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceContent, searchQuery = '' }: ContentAreaProps) {
   const [localContent, setLocalContent] = useState<any[]>([]);
+  const [addedContent, setAddedContent] = useState<any[]>([]);
 
-  const sampleContent = [
-    {
-      type: 'image' as const,
-      content: {
-        title: 'Design Inspiration',
-        image: 'https://images.unsplash.com/photo-1718220216044-006f43e3a9b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBvZmZpY2UlMjB3b3Jrc3BhY2V8ZW58MXx8fHwxNzU2MzE3NTE3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        timestamp: '2 hours ago',
-      },
-    },
-    {
-      type: 'text' as const,
-      content: {
-        text: 'App idea: A mood board platform that doesn\'t require social features and focuses on personal organization. Users can drag and drop content from anywhere on the web into organized spaces.',
-        timestamp: '1 day ago',
-      },
-    },
-    {
-      type: 'link' as const,
-      content: {
-        title: 'Dribbble Design',
-        text: 'Beautiful UI design inspiration for dark themed applications with glassmorphism effects',
-        domain: 'dribbble.com',
-        timestamp: '3 days ago',
-      },
-    },
-    {
-      type: 'image' as const,
-      content: {
-        title: 'UI Screenshot',
-        image: 'https://images.unsplash.com/photo-1734009617600-ff7b688d4a72?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwZGVzaWduJTIwaW5zcGlyYXRpb258ZW58MXx8fHwxNzU2Mzk5NzE5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        timestamp: '5 days ago',
-      },
-    },
-    {
-      type: 'text' as const,
-      content: {
-        text: 'Color palette ideas: Dark backgrounds with high contrast white text and subtle glass effects for depth. Consider using rgba values for transparency.',
-        timestamp: '1 week ago',
-      },
-    },
-    {
-      type: 'link' as const,
-      content: {
-        title: 'GitHub Repository',
-        text: 'SwiftUI design system with golden ratio spacing and modern component library',
-        domain: 'github.com',
-        timestamp: '1 week ago',
-      },
-    },
-    {
-      type: 'image' as const,
-      content: {
-        title: 'Creative Workspace',
-        image: 'https://images.unsplash.com/photo-1559028012-481c04fa702d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkYXJrJTIwdWklMjBkZXNpZ258ZW58MXx8fHwxNzU2Mzk5NzE5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        timestamp: '2 weeks ago',
-      },
-    },
-    {
-      type: 'text' as const,
-      content: {
-        text: 'Browser extension concept: Allow users to drag any content from web pages directly into their organized spaces. Should work with images, text, links, and even entire page sections.',
-        timestamp: '2 weeks ago',
-      },
-    },
-  ];
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editorIndex, setEditorIndex] = useState<number | null>(null);
+  const [editorType, setEditorType] = useState<'image' | 'text' | 'link' | 'ad'>('text');
+  const [editorInitial, setEditorInitial] = useState<Record<string, any>>({});
 
-  // Combine user-created content with sample content and local modifications
-  const allContent = [...spaceContent, ...sampleContent].map((item, index) => {
+  // Use only actual space content (no default/sample cards)
+  const allContent = spaceContent.map((item, index) => {
     const localItem = localContent.find(l => l.index === index);
-    return localItem ? { ...item, content: { ...item.content, isBookmarked: localItem.isBookmarked } } : item;
+    if (!localItem) return item;
+    const edited = localItem.editedFields || {};
+    return { ...item, content: { ...item.content, ...edited, isBookmarked: localItem.isBookmarked } };
   });
+
+  // Append any locally added cards (not yet persisted)
+  const composedContent = [...allContent, ...addedContent];
 
   // Apply search filter if query exists - preserve original index
   const filteredContent = searchQuery 
-    ? allContent
+    ? composedContent
         .map((item, index) => ({ item, index }))
         .filter(({ item }) => {
           const title = item.content?.title?.toLowerCase() || '';
@@ -111,25 +41,55 @@ export function ContentArea({
           const query = searchQuery.toLowerCase();
           return title.includes(query) || text.includes(query);
         })
-    : allContent.map((item, index) => ({ item, index }));
+    : composedContent.map((item, index) => ({ item, index }));
 
-  // Separate pinned and unpinned content
-  const pinnedContent = filteredContent.filter(({ item }) => item.content?.isBookmarked);
-  const unpinnedContent = filteredContent.filter(({ item }) => !item.content?.isBookmarked);
+  // (Pinned/unpinned handling not needed here)
 
   const handleToggleBookmark = (index: number) => {
-    const item = allContent[index];
+    const item = composedContent[index];
     const currentBookmarkState = item.content?.isBookmarked || false;
     
     setLocalContent(prev => {
       const existing = prev.findIndex(l => l.index === index);
       if (existing >= 0) {
         const updated = [...prev];
-        updated[existing] = { index, isBookmarked: !currentBookmarkState };
+        updated[existing] = { ...updated[existing], index, isBookmarked: !currentBookmarkState };
         return updated;
       }
       return [...prev, { index, isBookmarked: !currentBookmarkState }];
     });
+  };
+
+  const handleEdit = (index: number, fields: Record<string, any>) => {
+    setLocalContent(prev => {
+      const existing = prev.findIndex(l => l.index === index);
+      if (existing >= 0) {
+        const updated = [...prev];
+        const prevEntry = updated[existing];
+        updated[existing] = { ...prevEntry, index, editedFields: { ...(prevEntry.editedFields || {}), ...fields } };
+        return updated;
+      }
+      return [...prev, { index, editedFields: { ...fields } }];
+    });
+  };
+
+  const openEditor = (index: number | null, type: 'image'|'text'|'link'|'ad', initial: Record<string, any> = {}) => {
+    setEditorIndex(index);
+    setEditorType(type);
+    setEditorInitial(initial || {});
+    setEditorOpen(true);
+  };
+
+  const handleSaveFromModal = (fields: Record<string, any>) => {
+    if (editorIndex === null) {
+      // create a new local card
+      const now = new Date().toLocaleString();
+      const newItem = { type: editorType, content: { ...fields, timestamp: now } };
+      setAddedContent(prev => [...prev, newItem]);
+    } else {
+      // edit existing composed item
+      handleEdit(editorIndex, fields);
+    }
   };
 
   return (
@@ -140,7 +100,7 @@ export function ContentArea({
         </h1>
       </div>
 
-      <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4 mt-8">
+      <div className="grid grid-cols-4 gap-4 mt-8">
         {/* No results message */}
         {searchQuery && filteredContent.length === 0 && (
           <div className="col-span-full flex flex-col items-center justify-center py-20">
@@ -152,99 +112,42 @@ export function ContentArea({
           </div>
         )}
         
-        {/* Pinned Section */}
-        {pinnedContent.length > 0 && (
-          <>
-            <div className="col-span-full mb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                  <h2 className="text-white/70 text-sm font-semibold uppercase tracking-wider">
-                    Pinned ({pinnedContent.length})
-                  </h2>
-                </div>
-                <div className="flex-1 h-px bg-gradient-to-r from-yellow-400/30 to-transparent"></div>
-              </div>
-            </div>
-            {pinnedContent.map(({ item, index }, idx) => {
-              const itemId = item.content?.id || `${item.type}-${index}`;
-              return (
-                <ContentCard
-                  key={`pinned-${idx}`}
-                  type={item.type}
-                  content={item.content}
-                  onToggleBookmark={() => handleToggleBookmark(index)}
-                  isDeleteMode={isDeleteMode}
-                  isSelected={selectedItemIds.includes(itemId)}
-                  onToggleSelect={() => onToggleItemSelection?.(itemId)}
-                  isEditMode={isEditMode}
-                  onEdit={() => onItemEdit?.(item.content, item.type)}
-                />
-              );
-            })}
-          </>
-        )}
-
-        {/* Unpinned Section */}
-        {pinnedContent.length > 0 && unpinnedContent.length > 0 && (
-          <div className="col-span-full mt-6 mb-4">
-            <div className="flex items-center gap-3">
-              <h2 className="text-white/50 text-sm font-semibold uppercase tracking-wider">
-                All Posts ({unpinnedContent.length})
-              </h2>
-              <div className="flex-1 h-px bg-white/10"></div>
-            </div>
-          </div>
-        )}
-        
-        {unpinnedContent.map(({ item, index }, idx) => {
-          const itemId = item.content?.id || `${item.type}-${index}`;
-          return (
+        {/* Content Cards in Grid Layout (4 per row on md+). Render placeholders to fill the last row so cards don't stretch. */}
+        {filteredContent.map(({ item, index }) => (
+          <div key={`content-${index}`} className="col-span-1 w-full">
             <ContentCard
-              key={`unpinned-${idx}`}
               type={item.type}
               content={item.content}
               onToggleBookmark={() => handleToggleBookmark(index)}
-              isDeleteMode={isDeleteMode}
-              isSelected={selectedItemIds.includes(itemId)}
-              onToggleSelect={() => onToggleItemSelection?.(itemId)}
-              isEditMode={isEditMode}
-              onEdit={() => onItemEdit?.(item.content, item.type)}
+              onEdit={(fields: Record<string, any>) => handleEdit(index, fields)}
+              onRequestEdit={() => openEditor(index, item.type, item.content)}
             />
-          );
-        })}
+          </div>
+        ))}
+
+        {/* Add empty placeholders to ensure exactly 4 columns appear on larger viewports */}
+        {(() => {
+          const columns = 4; // desired columns on md+
+          const count = filteredContent.length;
+          const remainder = count % columns;
+          const placeholders = remainder === 0 ? 0 : columns - remainder;
+          return Array.from({ length: placeholders }).map((_, i) => (
+            <div key={`placeholder-${i}`} className="col-span-1">
+              <div className="h-56" />
+            </div>
+          ));
+        })()}
       </div>
       
-      {/* Floating Action Buttons */}
-      <div className="fixed bottom-8 right-8 flex items-center gap-3">
-        <button 
-          className="w-14 h-14 rounded-full bg-white dark:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/15 backdrop-blur-md border border-gray-200 dark:border-white/20 flex items-center justify-center transition-all group shadow-md"
-          aria-label="Edit"
-        >
-          <svg className="w-5 h-5 text-gray-700 dark:text-white/80 group-hover:text-gray-900 dark:group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-        </button>
-        <button 
-          className="w-14 h-14 rounded-full bg-white dark:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/15 backdrop-blur-md border border-gray-200 dark:border-white/20 flex items-center justify-center transition-all group shadow-md"
-          aria-label="Add"
-        >
-          <svg className="w-6 h-6 text-gray-700 dark:text-white/80 group-hover:text-gray-900 dark:group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-        </button>
-        <button 
-          className="w-14 h-14 rounded-full bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-white/90 flex items-center justify-center transition-all shadow-lg"
-          aria-label="Search"
-        >
-          <svg className="w-5 h-5 text-white dark:text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-4.35-4.35"></path>
-          </svg>
-        </button>
-      </div>
+      <CardEditModal
+        open={editorOpen}
+        onOpenChange={setEditorOpen}
+        type={editorType}
+        initial={editorInitial}
+        onSave={handleSaveFromModal}
+      />
+      
+      {/* Floating Action Buttons removed per request */}
     </div>
   );
 }

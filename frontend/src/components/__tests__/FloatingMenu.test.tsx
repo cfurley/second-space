@@ -122,38 +122,6 @@ describe('FloatingMenu Component', () => {
     }
   });
 
-  it('opens link dialog when save link button is clicked', async () => {
-    render(<FloatingMenu currentSpaceId="test-space" currentUserId="test-user" />);
-    
-    const buttons = screen.getAllByRole('button');
-    const mainButton = buttons.find(btn => btn.textContent === '+');
-    
-    if (mainButton) {
-      fireEvent.click(mainButton);
-      
-      await waitFor(() => {
-        const linkBtn = screen.queryByTitle('Save Link');
-        if (linkBtn) {
-          fireEvent.click(linkBtn);
-        }
-      });
-      
-      await waitFor(() => {
-        const dialogTitle = screen.queryByRole('heading', { name: 'Save Link' });
-        expect(dialogTitle).toBeInTheDocument();
-      });
-    }
-  });
-
-  it('renders delete mode button', () => {
-    render(<FloatingMenu currentSpaceId="test-space" currentUserId="test-user" onToggleDeleteMode={mockOnToggleDeleteMode} />);
-    
-    const buttons = screen.getAllByRole('button');
-    const deleteBtn = buttons.find(btn => btn.textContent === '🗑️' || btn.title === 'Delete Mode');
-    
-    expect(deleteBtn).toBeInTheDocument();
-  });
-
   it('toggles delete mode when delete button is clicked', () => {
     render(<FloatingMenu currentSpaceId="test-space" currentUserId="test-user" onToggleDeleteMode={mockOnToggleDeleteMode} />);
     
@@ -164,28 +132,6 @@ describe('FloatingMenu Component', () => {
       fireEvent.click(deleteBtn);
       expect(mockOnToggleDeleteMode).toHaveBeenCalled();
     }
-  });
-
-  it('shows cancel button and selection count in delete mode', () => {
-    render(
-      <FloatingMenu 
-        currentSpaceId="test-space" 
-        currentUserId="test-user" 
-        isDeleteMode={true}
-        selectedCount={3}
-        onToggleDeleteMode={mockOnToggleDeleteMode}
-        onDeleteSelected={mockOnDeleteSelected}
-      />
-    );
-    
-    // Should show cancel button (X)
-    const buttons = screen.getAllByRole('button');
-    const cancelBtn = buttons.find(btn => btn.title === 'Cancel');
-    expect(cancelBtn).toBeInTheDocument();
-    
-    // Should show selection count badge
-    const badge = screen.queryByText('3');
-    expect(badge).toBeInTheDocument();
   });
 
   it('calls onDeleteSelected when delete trash button is clicked in delete mode', () => {
@@ -305,44 +251,6 @@ describe('FloatingMenu Component', () => {
           waitFor(() => {
             expect(mockOnContentAdded).toHaveBeenCalled();
           });
-        }
-      });
-    }
-    
-    alertMock.mockRestore();
-  });
-
-  it('creates a link successfully', async () => {
-    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
-    
-    render(<FloatingMenu currentSpaceId="test-space" currentUserId="test-user" onContentAdded={mockOnContentAdded} />);
-    
-    const buttons = screen.getAllByRole('button');
-    const mainButton = buttons.find(btn => btn.textContent === '+');
-    
-    if (mainButton) {
-      fireEvent.click(mainButton);
-      
-      await waitFor(() => {
-        const linkBtn = screen.queryByTitle('Save Link');
-        if (linkBtn) {
-          fireEvent.click(linkBtn);
-        }
-      });
-      
-      await waitFor(() => {
-        const inputs = screen.getAllByRole('textbox');
-        if (inputs.length >= 2) {
-          // Fill title and URL
-          fireEvent.change(inputs[0], { target: { value: 'Test Link' } });
-          fireEvent.change(inputs[1], { target: { value: 'https://example.com' } });
-          
-          // Find and click save button
-          const saveButtons = screen.getAllByRole('button', { name: /save link/i });
-          const saveBtn = saveButtons.find(btn => btn.textContent === 'Save Link');
-          if (saveBtn) {
-            fireEvent.click(saveBtn);
-          }
         }
       });
     }

@@ -10,6 +10,7 @@ import { EditContentDialog } from './components/EditContentDialog';
 import AnimatedBackground from './components/AnimatedBackground';
 import { api } from './utils/api';
 import { ThemeToggleButton } from './components/ThemeToggleButton';
+import { getDefaultSpaceContent } from './utils/demo';
 
 export default function App() {
   const [activeNav, setActiveNav] = useState('Spaces');
@@ -24,11 +25,7 @@ export default function App() {
   const [currentSpaceId, setCurrentSpaceId] = useState<string>('space-my-ideas');
   
   // Content items stored by space
-  const [spaceContent, setSpaceContent] = useState<{[key: string]: any[]}>({
-    'My Ideas': [],
-    'Work': [],
-    'Personal': [],
-  });
+  const [spaceContent, setSpaceContent] = useState<{[key: string]: any[]}>(getDefaultSpaceContent());
   
   // Search query state
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -142,7 +139,15 @@ export default function App() {
           }
         });
         
-        setSpaceContent(contentBySpace);
+        {
+          const defaultContent = getDefaultSpaceContent();
+          const mergedContent: {[key: string]: any[]} = {
+            'My Ideas': (contentBySpace['My Ideas'] && contentBySpace['My Ideas'].length) ? contentBySpace['My Ideas'] : defaultContent['My Ideas'],
+            'Work': (contentBySpace['Work'] && contentBySpace['Work'].length) ? contentBySpace['Work'] : defaultContent['Work'],
+            'Personal': (contentBySpace['Personal'] && contentBySpace['Personal'].length) ? contentBySpace['Personal'] : defaultContent['Personal'],
+          };
+          setSpaceContent(mergedContent);
+        }
       } catch (error) {
         console.error('Error loading content from localStorage:', error);
       }
@@ -262,7 +267,15 @@ export default function App() {
         }
       });
       
-      setSpaceContent(contentBySpace);
+      {
+        const defaultContent = getDefaultSpaceContent();
+        const mergedContent: {[key: string]: any[]} = {
+          'My Ideas': (contentBySpace['My Ideas'] && contentBySpace['My Ideas'].length) ? contentBySpace['My Ideas'] : defaultContent['My Ideas'],
+          'Work': (contentBySpace['Work'] && contentBySpace['Work'].length) ? contentBySpace['Work'] : defaultContent['Work'],
+          'Personal': (contentBySpace['Personal'] && contentBySpace['Personal'].length) ? contentBySpace['Personal'] : defaultContent['Personal'],
+        };
+        setSpaceContent(mergedContent);
+      }
       setSelectedItemIds([]);
       setIsDeleteMode(false);
       
@@ -352,7 +365,15 @@ export default function App() {
           }
         });
         
-        setSpaceContent(contentBySpace);
+        {
+          const defaultContent = getDefaultSpaceContent();
+          const mergedContent: {[key: string]: any[]} = {
+            'My Ideas': (contentBySpace['My Ideas'] && contentBySpace['My Ideas'].length) ? contentBySpace['My Ideas'] : defaultContent['My Ideas'],
+            'Work': (contentBySpace['Work'] && contentBySpace['Work'].length) ? contentBySpace['Work'] : defaultContent['Work'],
+            'Personal': (contentBySpace['Personal'] && contentBySpace['Personal'].length) ? contentBySpace['Personal'] : defaultContent['Personal'],
+          };
+          setSpaceContent(mergedContent);
+        }
       } catch (error) {
         console.error('Error loading content:', error);
       }
@@ -386,7 +407,7 @@ export default function App() {
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              background: 'radial-gradient(circle, rgba(10, 10, 10, 1) 0%, rgba(10, 10, 10, 0.85) 20%, rgba(10, 10, 10, 0.4) 50%, rgba(10, 10, 10, 0.1) 75%, transparent 100%)',
+              background: 'radial-gradient(circle, var(--landing-spot-strong) 0%, var(--landing-spot-mid) 20%, var(--landing-spot-soft) 50%, rgba(0,0,0,0.04) 75%, transparent 100%)',
               WebkitMaskImage: 'radial-gradient(circle, black 0%, black 50%, transparent 100%)',
               maskImage: 'radial-gradient(circle, black 0%, black 50%, transparent 100%)',
               borderRadius: '50%',
@@ -432,8 +453,8 @@ export default function App() {
             style={{
               fontSize: '4rem',
               fontWeight: 700,
-              color: 'white',
-              textShadow: '0 0 40px rgba(255, 255, 255, 0.3)',
+              color: 'var(--landing-text)',
+              textShadow: '0 0 40px var(--landing-text-glow)',
               letterSpacing: '0.02em',
               position: 'relative',
               zIndex: 2,
@@ -447,24 +468,24 @@ export default function App() {
             className="rounded-full transition-all duration-300"
             style={{
               padding: '18px 60px',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              color: 'white',
+              backgroundColor: 'var(--landing-button-bg)',
+              border: `1px solid var(--landing-button-border)`,
+              color: 'var(--landing-button-text)',
               fontSize: '1.1rem',
               fontWeight: 500,
               backdropFilter: 'blur(10px)',
-              boxShadow: '0 4px 20px rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 4px 20px var(--landing-button-border)',
               letterSpacing: '0.05em',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+              e.currentTarget.style.backgroundColor = 'var(--landing-button-hover)';
               e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 8px 30px rgba(255, 255, 255, 0.2)';
+              e.currentTarget.style.boxShadow = '0 8px 30px var(--landing-button-border)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.backgroundColor = 'var(--landing-button-bg)';
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 20px rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.boxShadow = '0 4px 20px var(--landing-button-border)';
             }}
           >
             Open Login
@@ -486,27 +507,26 @@ export default function App() {
 
   return (
     <div className="h-screen w-screen bg-gray-100 dark:bg-black overflow-hidden relative">
-      {/* Theme Selector Button - Fixed on far left */}
-      <ThemeToggleButton />
+      {/* Theme Selector Button is now embedded in the Sidebar */}
       
       <FloatingMenu 
         currentSpaceId={currentSpaceId} 
         currentUserId={currentUserId}
         onContentAdded={addContentToSpace}
         onSearchChange={setSearchQuery}
-        isDeleteMode={isDeleteMode}
-        onToggleDeleteMode={toggleDeleteMode}
-        selectedCount={selectedItemIds.length}
-        onDeleteSelected={deleteSelectedItems}
-        isEditMode={isEditMode}
-        onToggleEditMode={toggleEditMode}
-      />
-      <EditContentDialog
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-        contentType={editingItem?.itemType || 'text'}
-        contentData={editingItem}
-        onSave={handleContentSave}
+      //   isDeleteMode={isDeleteMode}
+      //   onToggleDeleteMode={toggleDeleteMode}
+      //   selectedCount={selectedItemIds.length}
+      //   onDeleteSelected={deleteSelectedItems}
+      //   isEditMode={isEditMode}
+      //   onToggleEditMode={toggleEditMode}
+      // />
+      // <EditContentDialog
+      //   open={showEditDialog}
+      //   onOpenChange={setShowEditDialog}
+      //   contentType={editingItem?.itemType || 'text'}
+      //   contentData={editingItem}
+      //   onSave={handleContentSave}
       />
       <div className="w-full h-full flex flex-col relative z-10">
         <Header 
@@ -523,11 +543,11 @@ export default function App() {
             onFilterChange={setActiveFilter}
             spaceContent={spaceContent[activeSpace] || []}
             searchQuery={searchQuery}
-            isDeleteMode={isDeleteMode}
-            selectedItemIds={selectedItemIds}
-            onToggleItemSelection={toggleItemSelection}
-            isEditMode={isEditMode}
-            onItemEdit={handleItemEdit}
+            // isDeleteMode={isDeleteMode}
+            // selectedItemIds={selectedItemIds}
+            // onToggleItemSelection={toggleItemSelection}
+            // isEditMode={isEditMode}
+            // onItemEdit={handleItemEdit}
           />
         </div>
       </div>

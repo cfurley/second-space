@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export function ThemeToggleButton() {
+export function ThemeToggleButton({ embedded = false }: { embedded?: boolean }) {
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<'dark' | 'light'>('dark');
 
@@ -30,29 +30,32 @@ export function ThemeToggleButton() {
     }
   };
 
+  const containerStyle: React.CSSProperties = embedded
+    ? { position: 'relative', zIndex: 10 }
+    : { position: 'fixed', left: '16px', bottom: '16px', zIndex: 50 };
+
   return (
-    <div className="fixed left-6 top-1/2 -translate-y-1/2 z-50">
+    <div style={containerStyle}>
       <div className="relative">
         <button
           onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
           aria-label="Toggle theme"
           aria-expanded={themeDropdownOpen}
-          className="w-14 h-14 flex items-center justify-center rounded-full bg-black/10 dark:bg-white/10 backdrop-blur-xl text-black dark:text-white cursor-pointer hover:bg-black/15 dark:hover:bg-white/15 hover:scale-110 transition-all duration-300 border border-black/30 dark:border-white/30 shadow-lg"
-          style={{ backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
+          className="w-12 h-12 aspect-square bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-2xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300"
         >
           <span className="text-2xl" aria-hidden="true">{currentTheme === 'dark' ? '🌙' : '☀️'}</span>
         </button>
 
         {/* Dropdown Menu */}
         {themeDropdownOpen && (
-          <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 bg-white/95 dark:bg-black/95 backdrop-blur-xl rounded-lg border border-black/30 dark:border-white/30 overflow-hidden shadow-lg min-w-[140px]" role="menu">
+          <div className="absolute bottom-full mb-4 left-0 bg-popover rounded-lg border border-border overflow-hidden shadow-lg min-w-[140px]" role="menu">
             <button
               onClick={() => handleThemeChange('dark')}
               role="menuitem"
               aria-label="Switch to dark theme"
-              className={`w-full flex items-center gap-3 px-4 py-3 text-black dark:text-white hover:bg-black/10 dark:hover:bg-white/10 transition-all ${
-                currentTheme === 'dark' ? 'bg-black/10 dark:bg-white/10' : ''
-              }`}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-black dark:text-white hover:bg-card transition-all ${
+                  currentTheme === 'dark' ? 'bg-card' : ''
+                }`}
             >
               <span className="text-lg" aria-hidden="true">🌙</span>
               <span className="text-sm">Dark</span>
@@ -66,9 +69,9 @@ export function ThemeToggleButton() {
               onClick={() => handleThemeChange('light')}
               role="menuitem"
               aria-label="Switch to light theme"
-              className={`w-full flex items-center gap-3 px-4 py-3 text-black dark:text-white hover:bg-black/10 dark:hover:bg-white/10 transition-all ${
-                currentTheme === 'light' ? 'bg-black/10 dark:bg-white/10' : ''
-              }`}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-black dark:text-white hover:bg-card transition-all ${
+                  currentTheme === 'light' ? 'bg-card' : ''
+                }`}
             >
               <span className="text-lg" aria-hidden="true">☀️</span>
               <span className="text-sm">Light</span>

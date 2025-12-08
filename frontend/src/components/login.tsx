@@ -20,6 +20,7 @@ import {
   getTimeoutMinutes,
   getNextTimeoutMinutes,
 } from "../utils/loginTimeout";
+import { setUserCache } from "../utils/userCache";
 
 interface LoginProps {
   isOpen: boolean;
@@ -169,7 +170,12 @@ export default function Login({ isOpen, onClose }: LoginProps) {
       setIsTimedOut(false);
       
       console.log("Login successful:", data);
+      
+      // Store user data in cache
+      setUserCache(data);
+      
       alert(`Welcome back, ${data.display_name || data.username}!`);
+      
       // Persist or remove remembered username according to the checkbox
       try {
         if (remember && username && username.trim().length > 0) {
@@ -180,7 +186,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
       } catch (e) {
         // Ignore storage errors
       }
-      // TODO: Store user data in state/context for app use
+      
       onClose(true); // Pass true to indicate successful authentication
     } catch (error) {
       console.error("Login error:", error);
@@ -468,6 +474,10 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 try {
                   const data = await api.createUser(payload);
                   console.log("Account created:", data);
+                  
+                  // Store user data in cache for newly created account
+                  setUserCache(data);
+                  
                   alert(
                     `Account created successfully! Welcome, ${data.username}!`
                   );
