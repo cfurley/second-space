@@ -85,7 +85,9 @@ describe("Header Component", () => {
       }
 
       await waitFor(() => {
-        expect(localStorage.getItem('user')).toBeNull();
+        // Check that userCache localStorage keys are cleared (not 'user')
+        expect(localStorage.getItem('ss_user_data')).toBeNull();
+        expect(localStorage.getItem('ss_user_data_expiry')).toBeNull();
       });
     });
   });
