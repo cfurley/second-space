@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { setUserCache, getUserCache, clearUserCache, getUserDisplayName, getUserInitials } from '../utils/userCache';
 
 interface UserMenuProps {
   // Mock user state - in a real app, this would come from auth context
@@ -12,7 +13,7 @@ interface UserMenuProps {
 
 export function UserMenu({ 
   isLoggedIn = false, 
-  userName = 'Andrew Truong',
+  userName: userNameProp = '',
   userInitials = 'AT'
 }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,6 +22,7 @@ export function UserMenu({
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
+  const [cachedUser, setCachedUser] = useState<any>(() => getUserCache());
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -43,9 +45,17 @@ export function UserMenu({
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login:', { username, password });
     // TODO: Implement actual login logic
-    alert(`Login attempted with username: ${username}`);
+    // Simulate login success and cache user data
+    const userData = {
+      id: '1',
+      username,
+      first_name: username,
+      last_name: '',
+      email: email || 'user@example.com'
+    };
+    setUserCache(userData as any);
+    setCachedUser(getUserCache());
     setUsername('');
     setPassword('');
     setIsOpen(false);
@@ -54,9 +64,17 @@ export function UserMenu({
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Signup:', { username, email, password });
     // TODO: Implement actual signup logic
-    alert(`Signup attempted with username: ${username}`);
+    // Simulate signup success and cache user data
+    const userData = {
+      id: '1',
+      username,
+      first_name: username,
+      last_name: '',
+      email: email || 'user@example.com'
+    };
+    setUserCache(userData as any);
+    setCachedUser(getUserCache());
     setUsername('');
     setEmail('');
     setPassword('');
@@ -65,24 +83,22 @@ export function UserMenu({
   };
 
   const handleLogout = () => {
-    console.log('Logout');
-    // Clear user data from localStorage
-    localStorage.removeItem('user');
-    // Close menu
+    // Clear user data from cache and localStorage
+    clearUserCache();
+    setCachedUser(null);
     setIsOpen(false);
-    // Navigate to home
     window.location.href = '/';
   };
 
   return (
     <div className="relative" ref={menuRef}>
       {/* User Avatar / Login Button */}
-      {isLoggedIn ? (
+      {(isLoggedIn || cachedUser) ? (
         <button
           onClick={() => setIsOpen(!isOpen)}
             className="w-9 h-9 rounded-full bg-[#1f1f1f] border border-white/30 flex items-center justify-center text-white text-xs hover:bg-[#2a2a2a] transition-all"
         >
-          {userInitials}
+          {cachedUser ? getUserInitials() : userInitials}
         </button>
       ) : null}
 
@@ -100,12 +116,12 @@ export function UserMenu({
                  boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
                }}
           >
-          {isLoggedIn ? (
+          {(isLoggedIn || cachedUser) ? (
             /* Logged In Menu */
             <div className="p-4">
               <div className="mb-4 pb-4 border-b border-white/10">
-                <p className="text-white text-sm font-medium">{userName}</p>
-                <p className="text-white/50 text-xs mt-1">user@example.com</p>
+                <p className="text-white text-sm font-medium">{cachedUser ? getUserDisplayName() : (userNameProp || 'User')}</p>
+                <p className="text-white/50 text-xs mt-1">{cachedUser?.email || 'user@example.com'}</p>
               </div>
               
               <button
