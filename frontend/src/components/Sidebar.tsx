@@ -66,10 +66,10 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
               <span className="text-lg">{space.icon}</span>
               <span className="text-sm">{space.name}</span>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center justify-end w-8">
               <button
                 onClick={(e) => { e.stopPropagation(); toggleStart(space.name); }}
-                className="-mr-3 text-sm px-2 py-1 rounded hover:bg-white/5 dark:hover:bg-white/5"
+                className="text-sm p-1 rounded hover:bg-white/5 dark:hover:bg-white/5"
                 aria-label={`Unstart ${space.name}`}
               >
                 ⭐
@@ -97,10 +97,10 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
               <span className="text-lg">{space.icon}</span>
               <span className="text-sm">{space.name}</span>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center justify-end w-8">
               <button
                 onClick={(e) => { e.stopPropagation(); toggleStart(space.name); }}
-                className="-mr-3 text-sm px-2 py-1 rounded hover:bg-white/5 dark:hover:bg-white/5"
+                className="text-sm p-1 rounded hover:bg-white/5 dark:hover:bg-white/5"
                 aria-label={`Start ${space.name}`}
               >
                 ☆
@@ -116,7 +116,7 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
         <ThemeToggleButton embedded />
       </div>
       <div className="absolute right-4 bottom-6">
-        <CreateSpaceDialog buttonClassName="flex items-center justify-center w-12 h-12 rounded-full bg-gray-300 dark:bg-purple-600 text-gray-800 dark:text-white text-2xl shadow-lg hover:scale-110 transition-all" onCreateSpace={(spaceData) => {
+        <CreateSpaceDialog buttonClassName="flex items-center justify-center w-10 h-10 rounded-full bg-gray-300 dark:bg-purple-600 text-gray-800 dark:text-white text-xl shadow-lg hover:scale-110 transition-all border-none" onCreateSpace={(spaceData) => {
           // add new spaces to All Spaces by default
           setAllSpaces(prev => [{ icon: spaceData.icon, name: spaceData.title }, ...prev]);
         }} />
