@@ -124,8 +124,6 @@ describe('CardEditModal Component', () => {
   });
 
   it('calls onSave with form data when Save is clicked', async () => {
-    const user = userEvent.setup();
-    
     render(
       <CardEditModal 
         open={true} 
@@ -135,16 +133,19 @@ describe('CardEditModal Component', () => {
       />
     );
 
-    const titleInput = screen.getByLabelText('Title');
-    const textInput = screen.getByLabelText('Text');
+    const titleInput = screen.getByLabelText('Title') as HTMLInputElement;
+    const textInput = screen.getByLabelText('Text') as HTMLTextAreaElement;
     
-    await user.clear(titleInput);
-    await user.type(titleInput, 'New Title');
-    await user.clear(textInput);
-    await user.type(textInput, 'New Text');
+    // Use fireEvent which is more reliable for this case
+    fireEvent.change(titleInput, { target: { value: 'New Title' } });
+    fireEvent.change(textInput, { target: { value: 'New Text' } });
+    
+    // Verify the values were updated in the inputs
+    expect(titleInput.value).toBe('New Title');
+    expect(textInput.value).toBe('New Text');
     
     const saveButton = screen.getByText('Save');
-    await user.click(saveButton);
+    fireEvent.click(saveButton);
 
     await waitFor(() => {
       expect(mockOnSave).toHaveBeenCalledWith({
