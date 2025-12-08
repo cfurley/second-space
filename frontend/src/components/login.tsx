@@ -20,6 +20,7 @@ import {
   getTimeoutMinutes,
   getNextTimeoutMinutes,
 } from "../utils/loginTimeout";
+import { setUserCache } from "../utils/userCache";
 
 interface LoginProps {
   isOpen: boolean;
