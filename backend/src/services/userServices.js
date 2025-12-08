@@ -9,14 +9,6 @@ import logger from "../utils/logger.js";
  * @param {string} password
  */
 const authenticateLogin = async (username, password) => {
-  if (username == null || username == undefined) {
-    logger.error(`Authentication attempt with null username`);
-    return { success: false, status: 500, error: "Username is null." };
-  }
-  if (password == null || password == undefined) {
-    logger.error(`Authentication attempt with null password for username: ${username}`);
-    return { success: false, status: 500, error: "Password is null." };
-  }
 
   // Step 1: Fetch user by username only (not password)
   const selectQuery = `
@@ -93,7 +85,7 @@ const authenticateLogin = async (username, password) => {
       data: userWithoutPassword,
     };
   } catch (error) {
-    logger.error(`Database error during authentication`, {
+    logger.error(`Authentication failed`, {
       username: username,
       error: error.message,
       stack: error.stack,
@@ -108,14 +100,6 @@ const authenticateLogin = async (username, password) => {
  * @param {string} password
  */
 const updatePassword = async (userId, password) => {
-  if (userId == null || userId == undefined) {
-    logger.warn(`Password update attempted with null userId`);
-    return { success: false, status: 500, error: "No user id provided" };
-  }
-  if (password == null || password == undefined) {
-    logger.warn(`Password update attempted with null password for userId: ${userId}`);
-    return { success: false, status: 500, error: "No password provided" };
-  }
 
   // Hash the password before storing
   let hashedPassword;
@@ -156,12 +140,12 @@ const updatePassword = async (userId, password) => {
       };
     }
   } catch (error) {
-    logger.error(`Database error during password update`, {
+    logger.error(`Password update failed`, {
       userId: userId,
       error: error.message,
       stack: error.stack,
     });
-    return { success: false, status: 500, erorr: "Database Error" };
+    return { success: false, status: 500, error: "Database Error" };
   }
 };
 
