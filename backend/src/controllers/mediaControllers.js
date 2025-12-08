@@ -25,6 +25,7 @@
 
 import mediaService from "../services/mediaServices.js";
 import mediaModel from "../models/mediaModel.js";
+import logger from "../utils/logger.js";
 
 const getAllMedia = async (req, res) => {
   let userId;
@@ -82,7 +83,6 @@ const createMedia = async (req, res) => {
   try {
     mediaModel.fromJson(req.body);
   } catch (error) {
-    // keep filename-related messages minimal
     if (error && error.message === "Invalid filename") {
       return res.status(400).json({ error: "Invalid filename" });
     }
@@ -106,12 +106,19 @@ const createMedia = async (req, res) => {
     }
     return res.status(result.status).json({ message: result.message });
   } catch (error) {
+    logger.error(`Media creation failed`, {
+      filename: req.body.filename,
+      error: error.message,
+      stack: error.stack,
+      ip: req.ip,
+    });
     return res.status(500).json({ error: "Database Error." });
   }
 };
 
 const updateMedia = async (req, res) => {
   const mediaId = req.params.id;
+  
   // validate filename if provided
   if (req.body && req.body.filename) {
     try {
@@ -137,12 +144,19 @@ const updateMedia = async (req, res) => {
     }
     return res.status(result.status).json({ message: result.message });
   } catch (error) {
+    logger.error(`Media update failed`, {
+      mediaId: mediaId,
+      error: error.message,
+      stack: error.stack,
+      ip: req.ip,
+    });
     return res.status(500).json({ error: "Database Error." });
   }
 };
 
 const deleteMedia = async (req, res) => {
   const mediaId = req.params.id;
+
   try {
     const result = await mediaService.deleteMediaFromDatabase(mediaId);
     if (!result.success) {
@@ -150,6 +164,12 @@ const deleteMedia = async (req, res) => {
     }
     return res.status(result.status).json({ message: result.message });
   } catch (error) {
+    logger.error(`Media deletion failed`, {
+      mediaId: mediaId,
+      error: error.message,
+      stack: error.stack,
+      ip: req.ip,
+    });
     return res.status(500).json({ error: "Server Error" });
   }
 };

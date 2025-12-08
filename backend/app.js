@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import logger from "./src/utils/logger.js";
 import spaceRouter from "./src/routes/spacesRoutes.js";
 import mediaRouter from "./src/routes/mediaRoutes.js";
 import userRouter from "./src/routes/userRoutes.js";
@@ -12,7 +13,8 @@ const HOST = "0.0.0.0";
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
   : [
-      "http://localhost:5173", // Vite dev server
+      "http://localhost:5173", // Vite dev server (default)
+      "http://localhost:3001", // Vite dev server (alternate port)
       "http://localhost:80", // Docker frontend with port
       "http://localhost", // Docker frontend without port
       "https://cfurley.github.io", // GitHub Pages
@@ -27,7 +29,7 @@ app.use(
       if (allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
-        console.warn(`CORS blocked request from origin: ${origin}`);
+        logger.warn(`CORS blocked request from origin: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
@@ -40,14 +42,25 @@ app.use(
 // Explicitly handle preflight for all routes (some proxies/CDNs require this)
 app.options('*', cors());
 
-// Middleware for JSON support
-app.use(express.json());
+// Middleware for JSON support with increased size limit for base64 media uploads
+// 50MB limit to accommodate base64-encoded files (base64 increases size by ~33%)
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Request logging middleware
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  const timestamp = new Date().toISOString();
+  logger.info(`Incoming request`, {
+    method: req.method,
+    path: req.path,
+    ip: req.ip,
+    userAgent: req.get("user-agent"),
+  });
   next();
 });
+
+// Serve uploaded files statically
+app.use('/uploads', express.static('uploads'));
 
 /****** SETUP ROUTERS HERE ******/
 app.use("/spaces", spaceRouter);
@@ -71,12 +84,22 @@ app.get("/", (req, res) => {
 
 // 404 handler
 app.use((req, res) => {
+  logger.warn(`Route not found`, {
+    method: req.method,
+    path: req.path,
+  });
   res.status(404).json({ message: "Route not found" });
 });
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error("Error:", err);
+  logger.error(`Request error`, {
+    method: req.method,
+    path: req.path,
+    status: err.status || 500,
+    message: err.message,
+    stack: err.stack,
+  });
   res.status(err.status || 500).json({
     message: err.message || "Internal server error",
     ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
@@ -85,7 +108,7 @@ app.use((err, req, res, next) => {
 
 // Start the server and listen for connections
 app.listen(PORT, HOST, () => {
-  console.log(`🚀 Server is running on http://${HOST}:${PORT}`);
-  console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
-  console.log(`🌐 CORS enabled for: ${allowedOrigins.join(", ")}`);
+  logger.info(`🚀 Server is running on http://${HOST}:${PORT}`);
+  logger.info(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
+  logger.info(`🌐 CORS enabled for: ${allowedOrigins.join(", ")}`);
 });

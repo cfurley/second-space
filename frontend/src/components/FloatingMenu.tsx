@@ -10,6 +10,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
+import { MediaUploadDialog } from "./MediaUploadDialog";
 import { api } from "../utils/api";
 
 type FloatingMenuProps = {
@@ -17,15 +18,32 @@ type FloatingMenuProps = {
   currentUserId?: string;
   onContentAdded?: (content: any) => void;
   onSearchChange?: (searchQuery: string) => void;
+  isDeleteMode?: boolean;
+  onToggleDeleteMode?: () => void;
+  selectedCount?: number;
+  onDeleteSelected?: () => void;
+  isEditMode?: boolean;
+  onToggleEditMode?: () => void;
 };
 
-export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, onSearchChange }: FloatingMenuProps) {
+export function FloatingMenu({ 
+  currentSpaceId, 
+  currentUserId, 
+  onContentAdded, 
+  onSearchChange,
+  isDeleteMode = false,
+  onToggleDeleteMode,
+  selectedCount = 0,
+  onDeleteSelected,
+  isEditMode = false,
+  onToggleEditMode
+}: FloatingMenuProps) {
   const [open, setOpen] = useState(false);
   const [showTextPostDialog, setShowTextPostDialog] = useState(false);
   const [showMediaDialog, setShowMediaDialog] = useState(false);
   const [showBookmarkDialog, setShowBookmarkDialog] = useState(false);
   const [showSearchDialog, setShowSearchDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [editMode, setEditMode] = useState<'text' | 'media' | 'bookmark' | null>(null);
   
@@ -33,32 +51,14 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
   const [postTitle, setPostTitle] = useState("");
   const [postContent, setPostContent] = useState("");
   
-  // Form states for Media Upload
-  const [mediaTitle, setMediaTitle] = useState("");
-  const [mediaDescription, setMediaDescription] = useState("");
-  const [mediaFile, setMediaFile] = useState<File | null>(null);
-  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
-  
   // Form states for Bookmark
   const [bookmarkTitle, setBookmarkTitle] = useState("");
   const [bookmarkUrl, setBookmarkUrl] = useState("");
   const [bookmarkNotes, setBookmarkNotes] = useState("");
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setMediaFile(file);
-    
-    // Create preview for images
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setMediaPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setMediaPreview(null);
-    }
-  };
+  
+  // Delete dialog state
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [availableItems, setAvailableItems] = useState<any[]>([]);
 
   const handleTextPostSubmit = async () => {
     if (!currentSpaceId) {
@@ -68,29 +68,28 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
 
     try {
       const postData = {
-        type: 'text',
         title: postTitle,
         content: postContent,
         spaceId: currentSpaceId,
-        userId: currentUserId,
-        createdAt: new Date().toISOString(),
-        timestamp: 'Just Now'
+        userId: currentUserId
       };
       
       console.log("Creating text post:", postData);
       
-      // Add to local state
-      if (onContentAdded) {
+      // Save to API (localStorage)
+      const result = await api.createPost(postData);
+      
+      // Add to local state for immediate UI update
+      if (onContentAdded && result.success) {
         onContentAdded({
           type: 'text',
           content: {
+            id: result.data.id,
             text: `${postTitle}\n\n${postContent}`,
             timestamp: 'Just Now'
           }
         });
       }
-      
-      // TODO: When backend is ready, call: await api.createPost(postData);
       
       alert("Text post created successfully!");
       setShowTextPostDialog(false);
@@ -98,68 +97,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
       setPostContent("");
     } catch (error) {
       console.error("Error creating text post:", error);
-      alert("Failed to create text post");
-    }
-  };
-
-  const handleMediaSubmit = async () => {
-    if (!currentSpaceId) {
-      alert("Please select a space first");
-      return;
-    }
-    
-    if (!mediaFile) {
-      alert("Please select a file to upload");
-      return;
-    }
-
-    try {
-      const formData = new FormData();
-      formData.append('file', mediaFile);
-      formData.append('title', mediaTitle);
-      formData.append('description', mediaDescription);
-      formData.append('spaceId', currentSpaceId);
-      if (currentUserId) {
-        formData.append('userId', currentUserId);
-      }
-      formData.append('fileType', mediaFile.type);
-      formData.append('fileName', mediaFile.name);
-      formData.append('fileSize', mediaFile.size.toString());
-      formData.append('createdAt', new Date().toISOString());
-      
-      console.log("Uploading media:", {
-        title: mediaTitle,
-        description: mediaDescription,
-        fileName: mediaFile.name,
-        fileType: mediaFile.type,
-        fileSize: mediaFile.size,
-        spaceId: currentSpaceId
-      });
-      
-      // Add to local state with preview
-      if (onContentAdded && mediaPreview) {
-        onContentAdded({
-          type: 'image',
-          content: {
-            title: mediaTitle,
-            description: mediaDescription,
-            image: mediaPreview,
-            timestamp: 'Just Now'
-          }
-        });
-      }
-      
-      // TODO: When backend is ready, call: await api.uploadMedia(formData);
-      
-      alert(`Media "${mediaTitle}" uploaded successfully!`);
-      setShowMediaDialog(false);
-      setMediaTitle("");
-      setMediaDescription("");
-      setMediaFile(null);
-      setMediaPreview(null);
-    } catch (error) {
-      console.error("Error uploading media:", error);
-      alert("Failed to upload media");
+      alert("Failed to create text post. Please try again.");
     }
   };
 
@@ -171,19 +109,20 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
 
     try {
       const bookmarkData = {
-        type: 'bookmark',
         title: bookmarkTitle,
         url: bookmarkUrl,
         notes: bookmarkNotes,
         spaceId: currentSpaceId,
-        userId: currentUserId,
-        createdAt: new Date().toISOString()
+        userId: currentUserId
       };
       
       console.log("Creating bookmark:", bookmarkData);
       
-      // Add to local state
-      if (onContentAdded) {
+      // Save to API (localStorage)
+      const result = await api.createBookmark(bookmarkData);
+      
+      // Add to local state for immediate UI update
+      if (onContentAdded && result.success) {
         // Extract domain from URL
         let domain = '';
         try {
@@ -196,27 +135,117 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
         onContentAdded({
           type: 'link',
           content: {
+            id: result.data.id,
             title: bookmarkTitle,
             text: bookmarkNotes || 'No description provided',
             domain: domain,
             timestamp: 'Just Now',
             url: bookmarkUrl,
-            isBookmarked: true
+            isBookmarked: false
           }
         });
       }
       
-      // TODO: When backend is ready, call: await api.createBookmark(bookmarkData);
-      
-      alert("Bookmark saved successfully!");
+      alert("Link saved successfully!");
       setShowBookmarkDialog(false);
       setBookmarkTitle("");
       setBookmarkUrl("");
       setBookmarkNotes("");
     } catch (error) {
       console.error("Error creating bookmark:", error);
-      alert("Failed to save bookmark");
+      alert("Failed to save link. Please try again.");
     }
+  };
+
+  const handleDelete = async () => {
+    if (!currentSpaceId) {
+      alert("Please select a space first");
+      return;
+    }
+    
+    if (selectedItems.length === 0) {
+      alert("Please select at least one item to delete");
+      return;
+    }
+
+    try {
+      const allPosts = JSON.parse(localStorage.getItem('ss_posts') || '[]');
+      const allMedia = JSON.parse(localStorage.getItem('ss_media') || '[]');
+      const allBookmarks = JSON.parse(localStorage.getItem('ss_bookmarks') || '[]');
+      
+      // Filter out selected items
+      const updatedPosts = allPosts.filter((item: any) => !selectedItems.includes(item.id));
+      const updatedMedia = allMedia.filter((item: any) => !selectedItems.includes(item.id));
+      const updatedBookmarks = allBookmarks.filter((item: any) => !selectedItems.includes(item.id));
+      
+      localStorage.setItem('ss_posts', JSON.stringify(updatedPosts));
+      localStorage.setItem('ss_media', JSON.stringify(updatedMedia));
+      localStorage.setItem('ss_bookmarks', JSON.stringify(updatedBookmarks));
+      
+      alert(`Successfully deleted ${selectedItems.length} item(s)!`);
+      setShowDeleteDialog(false);
+      setSelectedItems([]);
+      
+      // Notify parent to refresh UI after deletion
+      if (onDeleteSelected) {
+        onDeleteSelected();
+      }
+    } catch (error) {
+      console.error('Error deleting:', error);
+      alert('Failed to delete. Please try again.');
+    }
+  };
+  
+  // Load available items when delete dialog opens
+  const loadAvailableItems = () => {
+    if (!currentSpaceId) return;
+    
+    try {
+      const allPosts = JSON.parse(localStorage.getItem('ss_posts') || '[]');
+      const allMedia = JSON.parse(localStorage.getItem('ss_media') || '[]');
+      const allBookmarks = JSON.parse(localStorage.getItem('ss_bookmarks') || '[]');
+      // Filter by current space and combine
+      const items = [
+        ...allPosts.filter((item: any) => item.spaceId === currentSpaceId).map((item: any) => ({
+          ...item,
+          itemType: 'post',
+          displayTitle: item.title || 'Text Post',
+          displayDescription: item.content?.length > 50 ? item.content.substring(0, 50) + '...' : item.content || ''
+        })),
+        ...allMedia.filter((item: any) => item.spaceId === currentSpaceId).map((item: any) => ({
+          ...item,
+          itemType: 'media',
+          displayTitle: item.title || item.fileName,
+          displayDescription: item.description || `${item.fileType} - ${(item.fileSize / 1024).toFixed(2)} KB`
+        })),
+        ...allBookmarks.filter((item: any) => item.spaceId === currentSpaceId).map((item: any) => ({
+          ...item,
+          itemType: 'bookmark',
+          displayTitle: item.title,
+          displayDescription: item.url
+        }))
+      ];
+      
+      setAvailableItems(items);
+    } catch (error) {
+      console.error('Error loading items:', error);
+    }
+  };
+  
+  const toggleSelectAll = () => {
+    if (selectedItems.length === availableItems.length) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(availableItems.map(item => item.id));
+    }
+  };
+  
+  const toggleItem = (itemId: string) => {
+    setSelectedItems(prev => 
+      prev.includes(itemId) 
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    );
   };
 
   return (
@@ -285,24 +314,259 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
               minWidth: '48px',
               minHeight: '48px'
             }}
-            title="Save Bookmark"
+            title="Save Link"
           >
             🔖
+          </button>
+
+          <button
+            onClick={() => {
+              onToggleEditMode?.();
+              setOpen(false);
+            }}
+            style={{
+              width: '48px',
+              height: '48px',
+              backgroundColor: '#2C2C2C',
+              color: 'white',
+              borderRadius: '50%',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '20px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+              animation: 'popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.15s backwards',
+              transition: 'transform 0.2s, box-shadow 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.1)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+            }}
+            title="Edit Mode"
+          >
+            ✏️
           </button>
         </div>
       )}
       <div style={{ display: 'flex', flexDirection: 'row', gap: '12px' }}>
-        <button
-          onClick={() => setOpen(prev => !prev)}
-          className={`w-12 h-12 aspect-square bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-2xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300 ${open ? 'rotate-45' : 'rotate-0'}`}
-          style={{
-            minWidth: '48px',
-            minHeight: '48px'
-          }}
-        >
-          +
-        </button>
-      </div>
+        {isEditMode ? (
+          <button
+            onClick={onToggleEditMode}
+            style={{
+              width: '48px',
+              height: '48px',
+              backgroundColor: '#2C2C2C',
+              color: 'white',
+              borderRadius: '50%',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '24px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+              transition: 'transform 0.2s, box-shadow 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.1)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+            }}
+            title="Exit Edit Mode"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M15 5L5 15M5 5L15 15" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round"/>
+            </svg>
+          </button>
+        ) : isDeleteMode ? (
+          <>
+            <button
+              onClick={onDeleteSelected}
+              disabled={selectedCount === 0}
+              style={{
+                width: '48px',
+                height: '48px',
+                backgroundColor: selectedCount > 0 ? '#2C2C2C' : '#6B7280',
+                color: 'white',
+                borderRadius: '50%',
+                border: 'none',
+                cursor: selectedCount > 0 ? 'pointer' : 'not-allowed',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '20px',
+                boxShadow: selectedCount > 0 ? '0 4px 12px rgba(0, 0, 0, 0.3)' : '0 4px 12px rgba(0, 0, 0, 0.2)',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                opacity: selectedCount > 0 ? 1 : 0.5
+              }}
+              onMouseEnter={(e) => {
+                if (selectedCount > 0) {
+                  e.currentTarget.style.transform = 'scale(1.1)';
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = selectedCount > 0 ? '0 4px 12px rgba(0, 0, 0, 0.3)' : '0 4px 12px rgba(0, 0, 0, 0.2)';
+              }}
+              title={`Delete ${selectedCount} item(s)`}
+            >
+              🗑️
+              {selectedCount > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '-5px',
+                  right: '-5px',
+                  backgroundColor: '#EF4444',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '20px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '10px',
+                  fontWeight: 'bold',
+                  border: '2px solid #1F2937'
+                }}>
+                  {selectedCount}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={onToggleDeleteMode}
+              style={{
+                width: '48px',
+                height: '48px',
+                backgroundColor: '#2C2C2C',
+                color: 'white',
+                borderRadius: '50%',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '24px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                transition: 'transform 0.2s, box-shadow 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.1)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+              }}
+              title="Cancel"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M15 5L5 15M5 5L15 15" stroke="#DC2626" strokeWidth="2.5" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={onToggleDeleteMode}
+              style={{
+                width: '48px',
+                height: '48px',
+                backgroundColor: '#2C2C2C',
+                color: 'white',
+                borderRadius: '50%',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '20px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                transition: 'transform 0.2s, box-shadow 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.1)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+              }}
+              title="Delete Mode"
+            >
+              🗑️
+            </button>
+          </>
+        )}
+
+      <button
+        onClick={() => setOpen(prev => !prev)}
+        style={{
+          width: '48px',
+          height: '48px',
+          backgroundColor: '#2C2C2C',
+          color: 'white',
+          borderRadius: '50%',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '24px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+          transition: 'transform 0.3s, box-shadow 0.2s',
+          transform: open ? 'rotate(45deg)' : 'rotate(0deg)'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = open ? 'rotate(45deg) scale(1.1)' : 'scale(1.1)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = open ? 'rotate(45deg)' : 'rotate(0deg)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+        }}
+      >
+        +
+      </button>
+
+      <button
+        onClick={() => setShowSearchDialog(true)}
+        style={{
+          width: '48px',
+          height: '48px',
+          backgroundColor: '#2C2C2C',
+          color: 'white',
+          borderRadius: '50%',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '20px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+          transition: 'transform 0.2s, box-shadow 0.2s'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.1)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+        }}
+      >
+        🔍
+      </button>
+    </div>
 
       {/* Add CSS animation keyframes */}
       <style>{`
@@ -362,132 +626,19 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
       </Dialog>
 
       {/* Upload Media Dialog */}
-      <Dialog open={showMediaDialog} onOpenChange={setShowMediaDialog}>
-        <DialogContent className="max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">Upload Media</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-6 py-4">
-            {/* Title Input */}
-            <div className="space-y-2">
-              <Label htmlFor="mediaTitle">Title</Label>
-              <Input
-                id="mediaTitle"
-                value={mediaTitle}
-                onChange={(e) => setMediaTitle(e.target.value)}
-                placeholder="Enter media title"
-                className="w-full"
-              />
-            </div>
+      <MediaUploadDialog
+        open={showMediaDialog}
+        onOpenChange={setShowMediaDialog}
+        currentSpaceId={currentSpaceId}
+        currentUserId={currentUserId}
+        onMediaUploaded={onContentAdded}
+      />
 
-            {/* Description Input */}
-            <div className="space-y-2">
-              <Label htmlFor="mediaDescription">Description</Label>
-              <Input
-                id="mediaDescription"
-                value={mediaDescription}
-                onChange={(e) => setMediaDescription(e.target.value)}
-                placeholder="Enter media description"
-                className="w-full"
-              />
-            </div>
-
-            {/* Drag and Drop File Area */}
-            <div className="space-y-2">
-              <Label>File</Label>
-              <div 
-                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors cursor-pointer bg-gray-50/50"
-                onClick={() => document.getElementById('mediaFile')?.click()}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  e.currentTarget.classList.add('border-blue-400', 'bg-blue-50/30');
-                }}
-                onDragLeave={(e) => {
-                  e.preventDefault();
-                  e.currentTarget.classList.remove('border-blue-400', 'bg-blue-50/30');
-                }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  e.currentTarget.classList.remove('border-blue-400', 'bg-blue-50/30');
-                  const files = e.dataTransfer.files;
-                  if (files.length > 0) {
-                    const event = { target: { files } } as any;
-                    handleFileChange(event);
-                  }
-                }}
-              >
-                <div className="flex flex-col items-center gap-2">
-                  <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">
-                      {mediaFile ? mediaFile.name : 'Drag and drop your file here'}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      or click to browse
-                    </p>
-                  </div>
-                  <p className="text-xs text-gray-400 mt-2">
-                    Supports: Images, Videos, Audio, PDF, Documents
-                  </p>
-                </div>
-                <Input
-                  id="mediaFile"
-                  type="file"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
-                />
-              </div>
-            </div>
-
-            {/* Preview Section */}
-            {mediaPreview && (
-              <div className="space-y-2">
-                <Label>Preview</Label>
-                <div className="rounded-lg overflow-hidden border border-gray-200 bg-gray-50 p-4">
-                  <img 
-                    src={mediaPreview} 
-                    alt="Preview" 
-                    className="max-w-full max-h-[300px] mx-auto rounded"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* File Info for non-images */}
-            {mediaFile && !mediaFile.type.startsWith('image/') && (
-              <div className="space-y-2">
-                <Label>File Information</Label>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-1 text-sm border border-gray-200">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Name:</span>
-                    <span className="font-medium">{mediaFile.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Type:</span>
-                    <span className="font-medium">{mediaFile.type || 'Unknown'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Size:</span>
-                    <span className="font-medium">{(mediaFile.size / 1024).toFixed(2)} KB</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button onClick={handleMediaSubmit} className="w-full sm:w-auto">Upload Media</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Save Bookmark Dialog */}
+      {/* Save Link Dialog */}
       <Dialog open={showBookmarkDialog} onOpenChange={setShowBookmarkDialog}>
         <DialogContent className="max-w-[600px]">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">Save Bookmark</DialogTitle>
+            <DialogTitle className="text-2xl font-bold">Save Link</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -524,7 +675,95 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleBookmarkSubmit}>Save Bookmark</Button>
+            <Button onClick={handleBookmarkSubmit}>Save Link</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={(open) => {
+        setShowDeleteDialog(open);
+        if (open) loadAvailableItems();
+        else setSelectedItems([]);
+      }}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-red-600">Delete Content</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto py-4 space-y-4">
+            {availableItems.length === 0 ? (
+              <p className="text-center text-gray-500 py-8">No content in this space to delete</p>
+            ) : (
+              <>
+                <div className="flex items-center justify-between border-b pb-3">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Select items to delete ({selectedItems.length} selected)
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={toggleSelectAll}
+                  >
+                    {selectedItems.length === availableItems.length ? 'Deselect All' : 'Select All'}
+                  </Button>
+                </div>
+                
+                <div className="space-y-2">
+                  {availableItems.map((item) => (
+                    <label 
+                      key={item.id}
+                      className="flex items-start space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.includes(item.id)}
+                        onChange={() => toggleItem(item.id)}
+                        className="mt-1 w-4 h-4"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-700">
+                            {item.itemType === 'post' ? '📝 Post' : 
+                             item.itemType === 'media' ? '📷 Media' : 
+                             '🔖 Bookmark'}
+                          </span>
+                          <span className="font-medium truncate">{item.displayTitle}</span>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1 truncate">
+                          {item.displayDescription}
+                        </div>
+                        <div className="text-xs text-gray-400 mt-1">
+                          {new Date(item.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
+            
+            {selectedItems.length > 0 && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mt-4">
+                <p className="text-sm text-red-800 dark:text-red-200 font-medium">
+                  ⚠️ Warning: You are about to delete {selectedItems.length} item(s). This action cannot be undone!
+                </p>
+              </div>
+            )}
+          </div>
+          <DialogFooter className="gap-2">
+            <Button 
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleDelete}
+              disabled={selectedItems.length === 0}
+              className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Delete Selected ({selectedItems.length})
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -567,109 +806,6 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
               }}
             >
               Clear Search
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Dialog */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">Edit Content</DialogTitle>
-          </DialogHeader>
-          <div className="py-4 space-y-4">
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Select a content type to edit:
-            </p>
-            <div className="grid grid-cols-3 gap-3">
-              <Button 
-                onClick={() => setEditMode('text')}
-                variant={editMode === 'text' ? 'default' : 'outline'}
-                className="flex flex-col items-center gap-2 h-auto py-6"
-              >
-                <span className="text-2xl">📝</span>
-                <span className="text-xs">Text Post</span>
-              </Button>
-              <Button 
-                onClick={() => setEditMode('media')}
-                variant={editMode === 'media' ? 'default' : 'outline'}
-                className="flex flex-col items-center gap-2 h-auto py-6"
-              >
-                <span className="text-2xl">📷</span>
-                <span className="text-xs">Media</span>
-              </Button>
-              <Button 
-                onClick={() => setEditMode('bookmark')}
-                variant={editMode === 'bookmark' ? 'default' : 'outline'}
-                className="flex flex-col items-center gap-2 h-auto py-6"
-              >
-                <span className="text-2xl">🔖</span>
-                <span className="text-xs">Bookmark</span>
-              </Button>
-            </div>
-
-            {editMode === 'text' && (
-              <div className="space-y-3 mt-6 pt-4 border-t">
-                <Label htmlFor="editPostTitle">Post Title</Label>
-                <Input
-                  id="editPostTitle"
-                  placeholder="Enter post title to search for..."
-                  className="w-full"
-                />
-                <p className="text-xs text-gray-500">
-                  Enter the title of the post you want to edit. Search will find matching posts in your current space.
-                </p>
-              </div>
-            )}
-
-            {editMode === 'media' && (
-              <div className="space-y-3 mt-6 pt-4 border-t">
-                <Label htmlFor="editMediaTitle">Media Title</Label>
-                <Input
-                  id="editMediaTitle"
-                  placeholder="Enter media title to search for..."
-                  className="w-full"
-                />
-                <p className="text-xs text-gray-500">
-                  Enter the title of the media file you want to edit or delete.
-                </p>
-              </div>
-            )}
-
-            {editMode === 'bookmark' && (
-              <div className="space-y-3 mt-6 pt-4 border-t">
-                <Label htmlFor="editBookmarkTitle">Bookmark Title</Label>
-                <Input
-                  id="editBookmarkTitle"
-                  placeholder="Enter bookmark title to search for..."
-                  className="w-full"
-                />
-                <p className="text-xs text-gray-500">
-                  Enter the title of the bookmark you want to edit or remove.
-                </p>
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button 
-              variant="outline"
-              onClick={() => {
-                setEditMode(null);
-                setShowEditDialog(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={() => {
-                alert(`Search mode for ${editMode} content activated. You can now find and edit your ${editMode} posts.`);
-                setEditMode(null);
-                setShowEditDialog(false);
-              }}
-              disabled={!editMode}
-            >
-              Search & Edit
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -12,7 +12,14 @@ import {
 import ReactDOM from "react-dom";
 import { api } from "../utils/api";
 import CaptchaType67 from "./CaptchaType67";
-import { setUserCache } from "../utils/userCache";
+import {
+  checkTimeout,
+  recordFailedAttempt,
+  resetAttempts,
+  formatTimeRemaining,
+  getTimeoutMinutes,
+  getNextTimeoutMinutes,
+} from "../utils/loginTimeout";
 
 interface LoginProps {
   isOpen: boolean;
@@ -38,6 +45,11 @@ export default function Login({ isOpen, onClose }: LoginProps) {
   const [verified, setVerified] = useState(false);
   // Remember-me state: persist username to localStorage when true
   const [remember, setRemember] = useState(false);
+  
+  // Login timeout state
+  const [isTimedOut, setIsTimedOut] = useState(false);
+  const [timeoutRemaining, setTimeoutRemaining] = useState(0);
+  const [showWarning, setShowWarning] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
@@ -53,6 +65,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
       setConfirmPassword("");
       setConfirmValid(null);
       setRemember(false);
+      setShowWarning(false);
     } else {
       // When opening, populate username from localStorage if available
       try {
@@ -64,8 +77,32 @@ export default function Login({ isOpen, onClose }: LoginProps) {
       } catch (e) {
         // localStorage may be unavailable (private mode); ignore
       }
+      
+      // Check timeout status
+      const timeoutStatus = checkTimeout();
+      setIsTimedOut(timeoutStatus.isTimedOut);
+      setTimeoutRemaining(timeoutStatus.remainingSeconds);
     }
   }, [isOpen]);
+  
+  // Countdown timer for timeout
+  useEffect(() => {
+    if (!isTimedOut || timeoutRemaining <= 0) {
+      return;
+    }
+    
+    const timer = setInterval(() => {
+      const timeoutStatus = checkTimeout();
+      setTimeoutRemaining(timeoutStatus.remainingSeconds);
+      
+      if (!timeoutStatus.isTimedOut) {
+        setIsTimedOut(false);
+        setTimeoutRemaining(0);
+      }
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [isTimedOut, timeoutRemaining]);
 
   // helper to compute username validity from the validator functions
   const computeUsernameValidity = (u: string) => {
@@ -115,11 +152,22 @@ export default function Login({ isOpen, onClose }: LoginProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if user is in timeout
+    const timeoutStatus = checkTimeout();
+    if (timeoutStatus.isTimedOut) {
+      alert(`Too many failed attempts. Please wait ${formatTimeRemaining(timeoutStatus.remainingSeconds)} before trying again.`);
+      return;
+    }
 
     try {
       const data = await api.login(username, password);
       
-      // Login successful
+      // Login successful - reset attempts
+      resetAttempts();
+      setShowWarning(false);
+      setIsTimedOut(false);
+      
       console.log("Login successful:", data);
       
       // Store user data in cache
@@ -141,7 +189,33 @@ export default function Login({ isOpen, onClose }: LoginProps) {
       onClose(true); // Pass true to indicate successful authentication
     } catch (error) {
       console.error("Login error:", error);
-      alert("Login failed. Please check your credentials and try again.");
+      
+      // Record failed attempt
+      const attemptResult = recordFailedAttempt();
+      
+      if (attemptResult.shouldTimeout) {
+        // Get the timeout duration (progressive)
+        const timeoutMinutes = getTimeoutMinutes();
+        const timeoutSeconds = timeoutMinutes * 60;
+        
+        // Start timeout
+        setIsTimedOut(true);
+        setTimeoutRemaining(timeoutSeconds);
+        
+        if (timeoutMinutes === 1) {
+          alert(`Too many failed attempts. You are locked out for 1 minute.`);
+        } else {
+          alert(`Too many failed attempts. You are locked out for ${timeoutMinutes} minutes.`);
+        }
+      } else if (attemptResult.shouldShowWarning) {
+        // Show warning on 4th attempt
+        setShowWarning(true);
+        const nextTimeoutMinutes = getNextTimeoutMinutes();
+        const minuteText = nextTimeoutMinutes === 1 ? '1 minute' : `${nextTimeoutMinutes} minutes`;
+        alert(`Warning: This is your ${attemptResult.attemptCount}th failed attempt. After ${attemptResult.remainingAttempts} more failed attempt(s), you will be locked out for ${minuteText}.`);
+      } else {
+        alert("Login failed. Please check your credentials and try again.");
+      }
     }
   };
 
@@ -184,6 +258,50 @@ export default function Login({ isOpen, onClose }: LoginProps) {
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Timeout Warning */}
+              {isTimedOut && (
+                <div
+                  style={{
+                    padding: '16px',
+                    borderRadius: '8px',
+                    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                    border: '1px solid rgba(239, 68, 68, 0.5)',
+                    marginBottom: '16px',
+                  }}
+                >
+                  <div style={{ color: '#fca5a5', fontSize: '14px', fontWeight: 600, marginBottom: '4px' }}>
+                    🔒 Account Temporarily Locked
+                  </div>
+                  <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: '13px' }}>
+                    Too many failed login attempts. Please wait {formatTimeRemaining(timeoutRemaining)} before trying again.
+                  </div>
+                </div>
+              )}
+              
+              {/* Warning on 4th attempt */}
+              {showWarning && !isTimedOut && (() => {
+                const nextTimeoutMinutes = getTimeoutMinutes();
+                const minuteText = nextTimeoutMinutes === 1 ? '1 minute' : `${nextTimeoutMinutes} minutes`;
+                return (
+                  <div
+                    style={{
+                      padding: '16px',
+                      borderRadius: '8px',
+                      backgroundColor: 'rgba(251, 191, 36, 0.15)',
+                      border: '1px solid rgba(251, 191, 36, 0.5)',
+                      marginBottom: '16px',
+                    }}
+                  >
+                    <div style={{ color: '#fcd34d', fontSize: '14px', fontWeight: 600, marginBottom: '4px' }}>
+                      ⚠️ Warning
+                    </div>
+                    <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: '13px' }}>
+                      One more failed attempt will lock you out for {minuteText}.
+                    </div>
+                  </div>
+                );
+              })()}
+              
               <div style={{ marginBottom: 12 }}>
                 <label
                   htmlFor="modal-username"
@@ -268,18 +386,21 @@ export default function Login({ isOpen, onClose }: LoginProps) {
               <div style={{ marginTop: 20 }}>
                 <button
                   type="submit"
+                  disabled={isTimedOut}
                   style={{
                     width: "100%",
                     height: 56,
                     borderRadius: 12,
-                    background: "#2563eb",
+                    background: isTimedOut ? "#6b7280" : "#2563eb",
                     border: "none",
                     color: "white",
                     fontSize: 16,
                     fontWeight: 600,
+                    cursor: isTimedOut ? "not-allowed" : "pointer",
+                    opacity: isTimedOut ? 0.6 : 1,
                   }}
                 >
-                  Submit
+                  {isTimedOut ? `Locked (${formatTimeRemaining(timeoutRemaining)})` : "Submit"}
                 </button>
               </div>
 

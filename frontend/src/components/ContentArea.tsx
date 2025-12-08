@@ -9,9 +9,25 @@ interface ContentAreaProps {
   onFilterChange: (filter: string) => void;
   spaceContent: any[];
   searchQuery?: string;
+  isDeleteMode?: boolean;
+  selectedItemIds?: string[];
+  onToggleItemSelection?: (itemId: string) => void;
+  isEditMode?: boolean;
+  onItemEdit?: (item: any, itemType: 'text' | 'image' | 'link') => void;
 }
 
-export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceContent, searchQuery = '' }: ContentAreaProps) {
+export function ContentArea({ 
+  activeSpace, 
+  activeFilter, 
+  onFilterChange, 
+  spaceContent, 
+  searchQuery = '',
+  isDeleteMode = false,
+  selectedItemIds = [],
+  onToggleItemSelection,
+  isEditMode = false,
+  onItemEdit
+}: ContentAreaProps) {
   const [localContent, setLocalContent] = useState<any[]>([]);
   const [addedContent, setAddedContent] = useState<any[]>([]);
 
@@ -112,31 +128,69 @@ export function ContentArea({ activeSpace, activeFilter, onFilterChange, spaceCo
           </div>
         )}
         
-        {/* Content Cards in Grid Layout (4 per row on md+). Render placeholders to fill the last row so cards don't stretch. */}
-        {filteredContent.map(({ item, index }) => (
-          <div key={`content-${index}`} className="col-span-1 w-full">
+        {/* Pinned Section */}
+        {pinnedContent.length > 0 && (
+          <>
+            <div className="col-span-full mb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                  <h2 className="text-white/70 text-sm font-semibold uppercase tracking-wider">
+                    Pinned ({pinnedContent.length})
+                  </h2>
+                </div>
+                <div className="flex-1 h-px bg-gradient-to-r from-yellow-400/30 to-transparent"></div>
+              </div>
+            </div>
+            {pinnedContent.map(({ item, index }, idx) => {
+              const itemId = item.content?.id || `${item.type}-${index}`;
+              return (
+                <ContentCard
+                  key={`pinned-${idx}`}
+                  type={item.type}
+                  content={item.content}
+                  onToggleBookmark={() => handleToggleBookmark(index)}
+                  isDeleteMode={isDeleteMode}
+                  isSelected={selectedItemIds.includes(itemId)}
+                  onToggleSelect={() => onToggleItemSelection?.(itemId)}
+                  isEditMode={isEditMode}
+                  onEdit={() => onItemEdit?.(item.content, item.type)}
+                />
+              );
+            })}
+          </>
+        )}
+
+        {/* Unpinned Section */}
+        {pinnedContent.length > 0 && unpinnedContent.length > 0 && (
+          <div className="col-span-full mt-6 mb-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-white/50 text-sm font-semibold uppercase tracking-wider">
+                All Posts ({unpinnedContent.length})
+              </h2>
+              <div className="flex-1 h-px bg-white/10"></div>
+            </div>
+          </div>
+        )}
+        
+        {unpinnedContent.map(({ item, index }, idx) => {
+          const itemId = item.content?.id || `${item.type}-${index}`;
+          return (
             <ContentCard
+              key={`unpinned-${idx}`}
               type={item.type}
               content={item.content}
               onToggleBookmark={() => handleToggleBookmark(index)}
-              onEdit={(fields: Record<string, any>) => handleEdit(index, fields)}
-              onRequestEdit={() => openEditor(index, item.type, item.content)}
+              isDeleteMode={isDeleteMode}
+              isSelected={selectedItemIds.includes(itemId)}
+              onToggleSelect={() => onToggleItemSelection?.(itemId)}
+              isEditMode={isEditMode}
+              onEdit={() => onItemEdit?.(item.content, item.type)}
             />
-          </div>
-        ))}
-
-        {/* Add empty placeholders to ensure exactly 4 columns appear on larger viewports */}
-        {(() => {
-          const columns = 4; // desired columns on md+
-          const count = filteredContent.length;
-          const remainder = count % columns;
-          const placeholders = remainder === 0 ? 0 : columns - remainder;
-          return Array.from({ length: placeholders }).map((_, i) => (
-            <div key={`placeholder-${i}`} className="col-span-1">
-              <div className="h-56" />
-            </div>
-          ));
-        })()}
+          );
+        })}
       </div>
       
       <CardEditModal
