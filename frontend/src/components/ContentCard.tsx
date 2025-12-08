@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
 
 interface ContentCardProps {
   type: 'image' | 'text' | 'link';
@@ -43,7 +42,7 @@ export function ContentCard({ type, content, onToggleBookmark, onEdit, onRequest
               >
                 {content.image ? (
                   <div className="relative">
-                    <ImageWithFallback
+                    <img
                       src={content.image}
                       alt={content.title || 'Content image'}
                       className="w-full h-40 rounded-2xl object-cover"
