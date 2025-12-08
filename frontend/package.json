@@ -1,6 +1,7 @@
 {
       "name": "second-space-docs",
       "version": "0.1.0",
+      "type": "module",
       "private": true,
       "dependencies": {
             "@radix-ui/react-dialog": "^1.1.6",
