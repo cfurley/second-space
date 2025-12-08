@@ -59,7 +59,7 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
     setProfileMenuOpen(false);
     setShowLogoutDialog(false);
     // Navigate to home/login
-    window.location.href = '/';
+    window.location.reload();
   };
 
   const handleCancelLogout = () => {
