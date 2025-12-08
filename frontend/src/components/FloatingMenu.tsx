@@ -247,9 +247,11 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
               setShowTextPostDialog(true);
               setOpen(false);
             }}
-            className="w-12 h-12 bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-200"
+            className="w-12 h-12 aspect-square bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-200"
             style={{
-              animation: 'popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) backwards'
+              animation: 'popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) backwards',
+              minWidth: '48px',
+              minHeight: '48px'
             }}
             title="Create Text Post"
           >
@@ -261,9 +263,11 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
               setShowMediaDialog(true);
               setOpen(false);
             }}
-            className="w-12 h-12 bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-200"
+            className="w-12 h-12 aspect-square bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-200"
             style={{
-              animation: 'popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.05s backwards'
+              animation: 'popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.05s backwards',
+              minWidth: '48px',
+              minHeight: '48px'
             }}
             title="Upload Media"
           >
@@ -275,9 +279,11 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
               setShowBookmarkDialog(true);
               setOpen(false);
             }}
-            className="w-12 h-12 bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-200"
+            className="w-12 h-12 aspect-square bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-200"
             style={{
-              animation: 'popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.1s backwards'
+              animation: 'popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.1s backwards',
+              minWidth: '48px',
+              minHeight: '48px'
             }}
             title="Save Bookmark"
           >
@@ -288,7 +294,11 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
       <div style={{ display: 'flex', flexDirection: 'row', gap: '12px' }}>
         <button
           onClick={() => setOpen(prev => !prev)}
-          className={`w-12 h-12 bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-2xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300 ${open ? 'rotate-45' : 'rotate-0'}`}
+          className={`w-12 h-12 aspect-square bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-2xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300 ${open ? 'rotate-45' : 'rotate-0'}`}
+          style={{
+            minWidth: '48px',
+            minHeight: '48px'
+          }}
         >
           +
         </button>
