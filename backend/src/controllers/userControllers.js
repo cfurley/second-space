@@ -1,6 +1,7 @@
 import userService from "../services/userServices.js";
 import authenticationService from "../services/authenticationServices.js";
 import userModel from "../models/userModel.js";
+import logger from "../utils/logger.js";
 
 /**
  * Authenticate a user login
@@ -10,6 +11,10 @@ const authenticate = async (req, res) => {
 
   // Validate input first - no point in recording attempts for null username
   if (!username || !password) {
+    logger.warn(`Login attempt with missing credentials`, {
+      ip: req.ip,
+      timestamp: new Date().toISOString(),
+    });
     return res.status(400).json({ error: "Missing username or password." });
   }
 
@@ -52,6 +57,12 @@ const authenticate = async (req, res) => {
     }
 
     const user = result.data;
+    logger.info(`Successful login`, {
+      userId: user.id,
+      username: user.username,
+      ip: req.ip,
+      timestamp: new Date().toISOString(),
+    });
     // Set cache headers to cache the user data in the browser
     res.set({
       "Cache-Control": "private, max-age=3600", // Cache for 1 hour
@@ -71,20 +82,40 @@ const updatePassword = async (req, res) => {
     userId = req.params.userId;
     password = req.params.password;
   } catch (error) {
+    logger.warn(`Invalid parameters for password update`, {
+      error: error.message,
+      ip: req.ip,
+    });
     return res.status(400).json({ error: "Invalid Parameters" });
   }
 
   // Validate user's password
   const validation = await userService.validatePassword(password);
   if (!validation.success) {
+    logger.warn(`Password validation failed during update`, {
+      userId: userId,
+      error: validation.error,
+      ip: req.ip,
+    });
     return res.status(400).json({ error: validation.error });
   }
 
   // Update the password
   const update = await userService.updatePassword(userId, password);
   if (!update.success) {
+    logger.error(`Password update failed`, {
+      userId: userId,
+      status: update.status,
+      error: update.error,
+      ip: req.ip,
+    });
     return res.status(update.status).json({ error: update.error });
   } else {
+    logger.info(`Password updated successfully`, {
+      userId: userId,
+      ip: req.ip,
+      timestamp: new Date().toISOString(),
+    });
     return res.status(update.status).json({ message: update.message });
   }
 };
@@ -97,6 +128,10 @@ const createUser = async (req, res) => {
   try {
     user = userModel.fromJson(req.body);
   } catch (error) {
+    logger.warn(`Invalid user creation parameters`, {
+      error: error.message,
+      ip: req.ip,
+    });
     return res.status(400).json({ error: "Invalid parameters given" });
   }
 
@@ -107,6 +142,10 @@ const createUser = async (req, res) => {
     false
   );
   if (!validFirst.success) {
+    logger.warn(`Invalid first name in user creation`, {
+      error: validFirst.error,
+      ip: req.ip,
+    });
     return res.status(400).json({ error: validFirst.error });
   }
 
@@ -117,6 +156,10 @@ const createUser = async (req, res) => {
     false
   );
   if (!validLast.success) {
+    logger.warn(`Invalid last name in user creation`, {
+      error: validLast.error,
+      ip: req.ip,
+    });
     return res.status(400).json({ error: validLast.error });
   }
 
@@ -127,13 +170,30 @@ const createUser = async (req, res) => {
     false
   );
   if (!usernameValid.success) {
+    logger.warn(`Invalid username in user creation`, {
+      error: usernameValid.error,
+      ip: req.ip,
+    });
     return res.status(400).json({ error: usernameValid.error });
   }
 
   const userCreated = await userService.createUser(user);
   if (!userCreated.success) {
+    logger.error(`User creation failed`, {
+      username: user.username,
+      status: userCreated.status,
+      error: userCreated.error,
+      ip: req.ip,
+    });
     return res.status(userCreated.status).json(userCreated.error);
   }
+
+  logger.info(`New user created successfully`, {
+    userId: userCreated.data.id,
+    username: userCreated.data.username,
+    ip: req.ip,
+    timestamp: new Date().toISOString(),
+  });
 
   // Set cache headers to cache the user data in the browser
   res.set({

@@ -1,6 +1,7 @@
 import pool from "../db/index.js";
 import userModel from "../models/userModel.js";
 import passwordService from "./passwordService.js";
+import logger from "../utils/logger.js";
 
 /**
  * Authenticates user using name and password; Uses bcrypt for secure password validation.
@@ -9,9 +10,11 @@ import passwordService from "./passwordService.js";
  */
 const authenticateLogin = async (username, password) => {
   if (username == null || username == undefined) {
+    logger.error(`Authentication attempt with null username`);
     return { success: false, status: 500, error: "Username is null." };
   }
   if (password == null || password == undefined) {
+    logger.error(`Authentication attempt with null password for username: ${username}`);
     return { success: false, status: 500, error: "Password is null." };
   }
 
@@ -46,7 +49,10 @@ const authenticateLogin = async (username, password) => {
     if (result.rows.length === 0) {
       // Call validatePassword with dummy hash to maintain constant timing
       await passwordService.validatePassword(password, dummyHash);
-      console.log("Invalid Login");
+      logger.warn(`Failed login attempt: user not found`, {
+        username: username,
+        timestamp: new Date().toISOString(),
+      });
       return { success: false, status: 404, error: "Invalid Login" };
     }
 
@@ -56,7 +62,11 @@ const authenticateLogin = async (username, password) => {
     const isPasswordValid = await passwordService.validatePassword(password, user.password);
     
     if (!isPasswordValid) {
-      console.log("Invalid Login");
+      logger.warn(`Failed login attempt: invalid password`, {
+        userId: user.id,
+        username: user.username,
+        timestamp: new Date().toISOString(),
+      });
       return { success: false, status: 404, error: "Invalid Login" };
     }
 
@@ -66,6 +76,12 @@ const authenticateLogin = async (username, password) => {
       WHERE id = $1;
     `;
     await pool.query(updateQuery, [user.id]);
+
+    logger.info(`User authenticated successfully`, {
+      userId: user.id,
+      username: user.username,
+      timestamp: new Date().toISOString(),
+    });
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
@@ -77,7 +93,11 @@ const authenticateLogin = async (username, password) => {
       data: userWithoutPassword,
     };
   } catch (error) {
-    console.log(error.stack);
+    logger.error(`Database error during authentication`, {
+      username: username,
+      error: error.message,
+      stack: error.stack,
+    });
     return { success: false, status: 500, error: "Database Error" };
   }
 };
@@ -89,9 +109,11 @@ const authenticateLogin = async (username, password) => {
  */
 const updatePassword = async (userId, password) => {
   if (userId == null || userId == undefined) {
+    logger.warn(`Password update attempted with null userId`);
     return { success: false, status: 500, error: "No user id provided" };
   }
   if (password == null || password == undefined) {
+    logger.warn(`Password update attempted with null password for userId: ${userId}`);
     return { success: false, status: 500, error: "No password provided" };
   }
 
@@ -100,6 +122,10 @@ const updatePassword = async (userId, password) => {
   try {
     hashedPassword = await passwordService.hashPassword(password);
   } catch (error) {
+    logger.error(`Password hashing failed during update`, {
+      userId: userId,
+      error: error.message,
+    });
     return { success: false, status: error.statusCode || 500, error: error.message };
   }
 
@@ -113,9 +139,16 @@ const updatePassword = async (userId, password) => {
   try {
     const result = await pool.query(query, values);
     if (result.rows.length === 0) {
-      console.log("Update failed");
+      logger.warn(`Password update failed: user not found`, {
+        userId: userId,
+        timestamp: new Date().toISOString(),
+      });
       return { success: false, status: 500, error: "Update failed" };
     } else {
+      logger.info(`Password updated successfully`, {
+        userId: userId,
+        timestamp: new Date().toISOString(),
+      });
       return {
         success: true,
         status: 200,
@@ -123,7 +156,11 @@ const updatePassword = async (userId, password) => {
       };
     }
   } catch (error) {
-    console.log(error.stack);
+    logger.error(`Database error during password update`, {
+      userId: userId,
+      error: error.message,
+      stack: error.stack,
+    });
     return { success: false, status: 500, erorr: "Database Error" };
   }
 };
@@ -138,6 +175,10 @@ const createUser = async (user) => {
   try {
     hashedPassword = await passwordService.hashPassword(user.password);
   } catch (error) {
+    logger.error(`Password hashing failed during user creation`, {
+      username: user.username,
+      error: error.message,
+    });
     return { success: false, status: error.statusCode || 500, error: error.message };
   }
 
@@ -157,11 +198,24 @@ const createUser = async (user) => {
   try {
     const result = await pool.query(query, values);
     if (result.rows.length === 0) {
+      logger.warn(`User creation failed: no rows returned`, {
+        username: user.username,
+        timestamp: new Date().toISOString(),
+      });
       return { success: false, status: 400, error: "User not created" };
     }
+    logger.info(`New user created in database`, {
+      userId: result.rows[0].id,
+      username: result.rows[0].username,
+      timestamp: new Date().toISOString(),
+    });
     return { success: true, status: 200, data: result.rows[0] };
   } catch (error) {
-    console.error("Database error creating user:", error);
+    logger.error(`Database error during user creation`, {
+      username: user.username,
+      error: error.message,
+      stack: error.stack,
+    });
     return { success: false, status: 500, error: "Database error" };
   }
 };

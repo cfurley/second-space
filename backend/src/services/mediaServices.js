@@ -4,6 +4,7 @@ import path from "path";
 import crypto from "crypto";
 import { fileTypeFromBuffer } from "file-type";
 import { sanitizeFilename } from "../utils/pathSecurity.js";
+import logger from "../utils/logger.js";
 
 // maximum file size allowed (bytes). 20 MB default.
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
@@ -38,6 +39,9 @@ async function validateMimeType(buffer, ext) {
 
   // Verify extension is whitelisted
   if (!ALLOWED_EXTENSIONS[extLower]) {
+    logger.warn(`MIME validation failed: extension not whitelisted`, {
+      extension: ext,
+    });
     throw new Error(`File extension "${ext}" is not allowed.`);
   }
 
@@ -48,8 +52,14 @@ async function validateMimeType(buffer, ext) {
     // For plain text and JSON files, magic bytes detection might not work
     // Fallback to allowing .txt and .json if no MIME type detected
     if ([".txt", ".json"].includes(extLower)) {
+      logger.info(`MIME validation: text/json file detected`, {
+        extension: ext,
+      });
       return true;
     }
+    logger.warn(`MIME validation failed: could not determine file type`, {
+      extension: ext,
+    });
     throw new Error(
       `Could not determine MIME type for file with extension "${ext}".`
     );
@@ -58,12 +68,21 @@ async function validateMimeType(buffer, ext) {
   // Check if detected MIME type is in the whitelist for this extension
   const allowedMimes = ALLOWED_EXTENSIONS[extLower];
   if (!allowedMimes.includes(fileType.mime)) {
+    logger.warn(`MIME validation failed: detected MIME type not allowed`, {
+      extension: ext,
+      detectedMimeType: fileType.mime,
+      allowedMimeTypes: allowedMimes,
+    });
     throw new Error(
       `File content MIME type "${fileType.mime}" does not match extension "${ext}". ` +
         `Expected one of: ${allowedMimes.join(", ")}`
     );
   }
 
+  logger.info(`MIME validation passed`, {
+    extension: ext,
+    detectedMimeType: fileType.mime,
+  });
   return true;
 }
 
@@ -129,8 +148,13 @@ async function validateMimeType(buffer, ext) {
 const getMediaBySpaceId = async (spaceId) => {
   try {
     if (spaceId == null) {
+      logger.warn(`Media retrieval by space failed: no space id provided`);
       return { success: false, status: 400, error: "No space id provided." };
     }
+
+    logger.info(`Fetching media by space id from database`, {
+      spaceId: spaceId,
+    });
 
     const query = `
       SELECT m.* FROM media m
@@ -141,12 +165,23 @@ const getMediaBySpaceId = async (spaceId) => {
     const result = await pool.query(query, [spaceId]);
 
     if (!result || result.rows.length === 0) {
+      logger.info(`No media found for space`, {
+        spaceId: spaceId,
+      });
       return { success: false, status: 404, error: "No media found." };
     }
 
+    logger.info(`Successfully retrieved media for space`, {
+      spaceId: spaceId,
+      mediaCount: result.rows.length,
+    });
     return { success: true, status: 200, data: result.rows };
   } catch (error) {
-    console.log(error.stack);
+    logger.error(`Database error retrieving media by space id`, {
+      spaceId: spaceId,
+      error: error.message,
+      stack: error.stack,
+    });
     return { success: false, status: 500, error: "Database Error." };
   }
 };
@@ -158,11 +193,15 @@ const getMediaBySpaceId = async (spaceId) => {
 const getMedia = async (userId, mediaId) => {
   try {
     if (userId == null && mediaId == null) {
+      logger.warn(`Media retrieval failed: no user id or media id provided`);
       return { success: false, status: 400, error: "No id provided." };
     }
 
     let result;
     if (userId) {
+      logger.info(`Fetching media by user id from database`, {
+        userId: userId,
+      });
       const query = `
         SELECT m.* FROM media m
         JOIN containers c ON m.container_id = c.id
@@ -171,25 +210,50 @@ const getMedia = async (userId, mediaId) => {
       `;
       result = await pool.query(query, [userId]);
     } else {
+      logger.info(`Fetching media by id from database`, {
+        mediaId: mediaId,
+      });
       const query = `SELECT * FROM media WHERE id = $1 AND deleted = 0`;
       result = await pool.query(query, [mediaId]);
     }
 
     if (!result || result.rows.length === 0) {
+      logger.info(`No media found`, {
+        userId: userId,
+        mediaId: mediaId,
+      });
       return { success: false, status: 404, error: "No media found." };
     }
 
+    logger.info(`Successfully retrieved media`, {
+      userId: userId,
+      mediaId: mediaId,
+      mediaCount: result.rows.length,
+    });
     return { success: true, status: 200, data: result.rows };
   } catch (error) {
-    console.log(error.stack);
+    logger.error(`Database error retrieving media`, {
+      userId: userId,
+      mediaId: mediaId,
+      error: error.message,
+      stack: error.stack,
+    });
     return { success: false, status: 500, error: "Database Error." };
   }
 };
 
 const insertMediaToDatabase = async (media) => {
   if (!media) {
+    logger.warn(`Media insertion failed: no media object provided`);
     return { success: false, status: 400, error: "Media was not given." };
   }
+
+  logger.info(`Attempting to insert media to database`, {
+    filename: media.filename,
+    containerId: media.container_id,
+    fileSize: media.file_size,
+  });
+
   // Generate server-side filepath; do NOT use user-provided filepath
   try {
     const filepath = await generateFilepath(media);
@@ -241,9 +305,17 @@ const insertMediaToDatabase = async (media) => {
               relPath.replace(/\\/g, "/")
             );
             await fs.promises.unlink(absolutePath);
+            logger.info(`Cleaned up orphaned file after failed DB insert`, {
+              filename: media.filename,
+              filepath: filepath,
+            });
           } catch (err) {
             if (err.code !== "ENOENT") {
-              console.log("Failed to cleanup orphaned file");
+              logger.error(`Failed to cleanup orphaned file after DB insert failure`, {
+                filename: media.filename,
+                filepath: filepath,
+                error: err.message,
+              });
               return {
                 success: false,
                 status: 500,
@@ -254,10 +326,19 @@ const insertMediaToDatabase = async (media) => {
           }
         }
 
-        console.log("Media did not insert:", values);
+        logger.error(`Media insert failed: no rows returned`, {
+          filename: media.filename,
+          containerId: media.container_id,
+        });
         return { success: false, status: 500, error: "Media did not insert" };
       }
 
+      logger.info(`Media inserted successfully to database`, {
+        mediaId: result.rows[0].id,
+        filename: media.filename,
+        filepath: filepath,
+        fileSize: media.file_size,
+      });
       return {
         success: true,
         status: 200,
@@ -280,9 +361,17 @@ const insertMediaToDatabase = async (media) => {
             relPath.replace(/\\/g, "/")
           );
           await fs.promises.unlink(absolutePath);
+          logger.info(`Cleaned up file after database error`, {
+            filename: media.filename,
+            filepath: filepath,
+          });
         } catch (err) {
           if (err.code !== "ENOENT") {
-            console.log("Failed to cleanup orphaned file after DB error");
+            logger.error(`Failed to cleanup file after DB error`, {
+              filename: media.filename,
+              filepath: filepath,
+              error: err.message,
+            });
             return {
               success: false,
               status: 500,
@@ -291,11 +380,20 @@ const insertMediaToDatabase = async (media) => {
           }
         }
       }
-      console.log(dbError);
+      logger.error(`Database error during media insertion`, {
+        filename: media.filename,
+        containerId: media.container_id,
+        error: dbError.message,
+        stack: dbError.stack,
+      });
       return { success: false, status: 500, error: "Database Error." };
     }
   } catch (error) {
-    console.log(error);
+    logger.error(`Error during media insertion`, {
+      filename: media.filename,
+      error: error.message,
+      stack: error.stack,
+    });
     return { success: false, status: 400, error: error.message };
   }
 };
@@ -410,14 +508,26 @@ async function generateFilepath(media) {
 
 const updateMediaInDatabase = async (id, media) => {
   if (!id || !media) {
+    logger.warn(`Media update failed: missing parameters`, {
+      mediaId: id,
+    });
     return { success: false, status: 400, error: "Missing parameters." };
   }
+
+  logger.info(`Attempting to update media in database`, {
+    mediaId: id,
+    filename: media.filename,
+    fileSize: media.file_size,
+  });
 
   // Fetch current media row to get filepath and filename
   const selectQuery = `SELECT filename, filepath FROM media WHERE id = $1 AND deleted = 0`;
   try {
     const selectResult = await pool.query(selectQuery, [id]);
     if (!selectResult || selectResult.rows.length === 0) {
+      logger.warn(`Media update failed: media not found`, {
+        mediaId: id,
+      });
       return {
         success: false,
         status: 404,
@@ -448,6 +558,11 @@ const updateMediaInDatabase = async (id, media) => {
     try {
       sanitizedFilename = sanitizeFilename(media.filename);
     } catch (error) {
+      logger.warn(`Media update failed: invalid filename`, {
+        mediaId: id,
+        filename: media.filename,
+        error: error.message,
+      });
       return {
         success: false,
         status: 400,
@@ -490,9 +605,20 @@ const updateMediaInDatabase = async (id, media) => {
       newDbFilepath = `/uploads/${folder}/${newFilename}`;
       try {
         await fs.promises.rename(oldAbsolutePath, newAbsolutePath);
+        logger.info(`Media file renamed on disk`, {
+          mediaId: id,
+          oldPath: oldAbsolutePath,
+          newPath: newAbsolutePath,
+        });
       } catch (err) {
         // If file does not exist, treat as success; otherwise, abort
         if (err.code !== "ENOENT") {
+          logger.error(`Failed to rename file during media update`, {
+            mediaId: id,
+            oldPath: oldAbsolutePath,
+            newPath: newAbsolutePath,
+            error: err.message,
+          });
           return {
             success: false,
             status: 500,
@@ -507,12 +633,27 @@ const updateMediaInDatabase = async (id, media) => {
     if (media.base64 && typeof media.base64 === "string" && newAbsolutePath) {
       const buffer = Buffer.from(media.base64, "base64");
       if (buffer.length > MAX_FILE_SIZE) {
+        logger.warn(`Media update failed: file too large`, {
+          mediaId: id,
+          fileSize: buffer.length,
+          maxSize: MAX_FILE_SIZE,
+        });
         return { success: false, status: 400, error: "File too large" };
       }
       await validateMimeType(buffer, newExt);
       try {
         await fs.promises.writeFile(newAbsolutePath, buffer);
+        logger.info(`Media file content updated on disk`, {
+          mediaId: id,
+          filename: media.filename,
+          fileSize: buffer.length,
+        });
       } catch (err) {
+        logger.error(`Failed to write file during media update`, {
+          mediaId: id,
+          path: newAbsolutePath,
+          error: err.message,
+        });
         return {
           success: false,
           status: 500,
@@ -542,19 +683,31 @@ const updateMediaInDatabase = async (id, media) => {
     ];
     const result = await pool.query(query, values);
     if (!result || result.rows.length === 0) {
+      logger.warn(`Media update failed: database update returned no rows`, {
+        mediaId: id,
+      });
       return {
         success: false,
         status: 404,
         error: "Media not found or not updated.",
       };
     }
+    logger.info(`Media updated successfully in database`, {
+      mediaId: id,
+      filename: newFilename,
+      fileSize: media.file_size,
+    });
     return {
       success: true,
       status: 200,
       message: `Updated media successfully`,
     };
   } catch (error) {
-    console.log(error);
+    logger.error(`Error during media update`, {
+      mediaId: id,
+      error: error.message,
+      stack: error.stack,
+    });
     return { success: false, status: 500, error: "Server Error" };
   }
 };
@@ -562,14 +715,22 @@ const updateMediaInDatabase = async (id, media) => {
 // TODO: Delete the file from disk
 const deleteMediaFromDatabase = async (id) => {
   if (!id) {
+    logger.warn(`Media deletion failed: missing media id`);
     return { success: false, status: 400, error: "Missing media id." };
   }
+
+  logger.info(`Attempting to delete media from database`, {
+    mediaId: id,
+  });
 
   // First, fetch the media row to get the filepath
   const selectQuery = `SELECT filepath FROM media WHERE id = $1 AND deleted = 0`;
   try {
     const selectResult = await pool.query(selectQuery, [id]);
     if (!selectResult || selectResult.rows.length === 0) {
+      logger.warn(`Media deletion failed: media not found`, {
+        mediaId: id,
+      });
       return {
         success: false,
         status: 404,
@@ -598,9 +759,18 @@ const deleteMediaFromDatabase = async (id) => {
     if (absolutePath) {
       try {
         await fs.promises.unlink(absolutePath);
+        logger.info(`Media file deleted from disk`, {
+          mediaId: id,
+          filepath: absolutePath,
+        });
       } catch (err) {
         // If file does not exist, treat as success; otherwise, abort
         if (err.code !== "ENOENT") {
+          logger.error(`Failed to delete file from disk`, {
+            mediaId: id,
+            filepath: absolutePath,
+            error: err.message,
+          });
           return {
             success: false,
             status: 500,
@@ -619,19 +789,29 @@ const deleteMediaFromDatabase = async (id) => {
     `;
     const updateResult = await pool.query(updateQuery, [new Date(), id]);
     if (!updateResult || updateResult.rows.length === 0) {
+      logger.warn(`Media deletion failed: database update returned no rows`, {
+        mediaId: id,
+      });
       return {
         success: false,
         status: 404,
         error: "Media not found or already deleted.",
       };
     }
+    logger.info(`Media deleted successfully from database`, {
+      mediaId: id,
+    });
     return {
       success: true,
       status: 200,
       message: `Deleted media successfully`,
     };
   } catch (error) {
-    console.log(error);
+    logger.error(`Error during media deletion`, {
+      mediaId: id,
+      error: error.message,
+      stack: error.stack,
+    });
     return { success: false, status: 500, error: "Server Error" };
   }
 };
