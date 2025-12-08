@@ -116,6 +116,8 @@ export function ContentArea({
         </h1>
       </div>
 
+      <FilterBar activeFilter={activeFilter} onFilterChange={onFilterChange} />
+
       <div className="grid grid-cols-4 gap-4 mt-8">
         {/* No results message */}
         {searchQuery && filteredContent.length === 0 && (
