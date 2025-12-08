@@ -8,6 +8,7 @@ import Login from './components/login';
 import { FloatingMenu } from './components/FloatingMenu';
 import AnimatedBackground from './components/AnimatedBackground';
 import { ThemeToggleButton } from './components/ThemeToggleButton';
+import { getDefaultSpaceContent } from './utils/demo';
 
 export default function App() {
   const [activeNav, setActiveNav] = useState('Spaces');
@@ -22,11 +23,7 @@ export default function App() {
   const [currentSpaceId, setCurrentSpaceId] = useState<string>('space-my-ideas');
   
   // Content items stored by space
-  const [spaceContent, setSpaceContent] = useState<{[key: string]: any[]}>({
-    'My Ideas': [],
-    'Work': [],
-    'Personal': [],
-  });
+  const [spaceContent, setSpaceContent] = useState<{[key: string]: any[]}>(getDefaultSpaceContent());
   
   // Search query state
   const [searchQuery, setSearchQuery] = useState<string>('');
