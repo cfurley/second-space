@@ -150,6 +150,10 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
           >
             <div 
               className="bg-white dark:bg-[#0a0a0a] border border-black/10 dark:border-white/20 rounded-3xl"
+              style={{
+                backgroundColor: 'var(--background, white)',
+                opacity: 1
+              }}
             >
             <form onSubmit={handleSubmit} className="p-6">
               <div className="mb-6">
