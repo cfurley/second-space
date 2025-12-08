@@ -3,5 +3,3 @@ npm-debug.log
 .env
 .git
 .gitignore
-*.md
-*.txt
