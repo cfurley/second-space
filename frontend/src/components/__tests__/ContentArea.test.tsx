@@ -37,7 +37,7 @@ describe('ContentArea Component', () => {
         spaceContent={[]}
       />
     );
-    expect(screen.getByText('MY IDEAS')).toBeInTheDocument();
+    expect(screen.getByText('My Ideas')).toBeInTheDocument();
   });
 
   it('displays the active space name', () => {
@@ -49,7 +49,7 @@ describe('ContentArea Component', () => {
         spaceContent={[]}
       />
     );
-    expect(screen.getByText('FITNESS PLANS')).toBeInTheDocument();
+    expect(screen.getByText('Fitness Plans')).toBeInTheDocument();
   });
 
   it('renders FilterBar component', () => {
