@@ -119,10 +119,10 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:flex-row sm:justify-end gap-3">
-            <Button variant="secondary" onClick={handleCancelLogout} className="w-full sm:w-auto">
+            <Button variant="outline" onClick={handleCancelLogout} className="w-full sm:w-auto px-6 py-2 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800">
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleConfirmLogout} className="w-full sm:w-auto">
+            <Button variant="destructive" onClick={handleConfirmLogout} className="w-full sm:w-auto px-6 py-2 bg-red-600 hover:bg-red-700">
               Logout
             </Button>
           </DialogFooter>

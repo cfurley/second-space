@@ -92,11 +92,12 @@ export default function CaptchaType67({ onSuccess, onCancel }: CaptchaType67Prop
           }}
           style={{
             flex: 1,
-            height: 44,
+            height: 48,
             borderRadius: 8,
-            background: "rgba(255,255,255,0.03)",
-            color: "white",
-            border: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(239, 68, 68, 0.1)",
+            color: "rgb(252, 165, 165)",
+            border: "2px solid rgba(239, 68, 68, 0.4)",
+            fontWeight: 500,
           }}
         >
           Cancel

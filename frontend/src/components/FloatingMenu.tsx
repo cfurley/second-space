@@ -565,6 +565,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
                 onSearchChange?.("");
                 setShowSearchDialog(false);
               }}
+              className="px-6 py-2 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               Clear Search
             </Button>
@@ -658,6 +659,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
                 setEditMode(null);
                 setShowEditDialog(false);
               }}
+              className="px-6 py-2 border-2 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950"
             >
               Cancel
             </Button>

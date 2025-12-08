@@ -67,8 +67,8 @@ export function CardEditModal({ open, onOpenChange, type, initial = {}, onSave }
 
         <DialogFooter>
           <div className="flex w-full justify-end gap-2">
-            <button onClick={() => onOpenChange(false)} className="px-4 py-2 rounded bg-gray-100">Cancel</button>
-            <button onClick={handleSave} className="px-4 py-2 rounded bg-blue-600 text-white">Save</button>
+            <button onClick={() => onOpenChange(false)} className="px-6 py-2 rounded border-2 border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900">Cancel</button>
+            <button onClick={handleSave} className="px-6 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Save</button>
           </div>
         </DialogFooter>
       </DialogContent>

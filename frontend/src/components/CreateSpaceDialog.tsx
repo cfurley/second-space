@@ -231,7 +231,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
                   type="button"
                   variant="outline"
                   onClick={() => setOpen(false)}
-                  className="flex-1 bg-gray-100 dark:bg-white/5 border-gray-300 dark:border-white/10 text-foreground dark:text-white/70 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-foreground dark:hover:text-white h-9 text-sm"
+                  className="flex-1 bg-red-50 dark:bg-red-950 border-2 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900 h-10 text-sm font-medium"
                 >
                   Cancel
                 </Button>
