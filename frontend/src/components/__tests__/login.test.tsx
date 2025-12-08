@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Login from '../login';
 import { api } from '../../utils/api';
+import { getUserCache, clearUserCache } from '../../utils/userCache';
 
 // Mock the api module
 vi.mock('../../utils/api', () => ({
@@ -29,6 +30,10 @@ describe('Login Component - Authentication Tests', () => {
   beforeEach(() => {
     // Clear all mocks before each test
     vi.clearAllMocks();
+    
+    // Clear localStorage and user cache
+    localStorage.clear();
+    clearUserCache();
     
     // Mock window.alert
     window.alert = mockAlert;
@@ -420,6 +425,105 @@ describe('Login Component - Authentication Tests', () => {
       expect(passwordInput).toHaveAttribute('type', 'password');
       expect(usernameInput).toBeRequired();
       expect(passwordInput).toBeRequired();
+    });
+  });
+
+  /**
+   * User Cache Integration Tests
+   * Expected: Login should store user data in cache for use across the app
+   */
+  describe('User Cache Integration', () => {
+    it('should store user data in cache after successful login', async () => {
+      // Arrange
+      const mockUserData = {
+        id: '123',
+        username: 'testuser',
+        first_name: 'Test',
+        last_name: 'User',
+        display_name: 'Test User',
+      };
+      (api.login as any).mockResolvedValueOnce(mockUserData);
+
+      // Act
+      render(<Login isOpen={true} onClose={mockOnClose} />);
+      
+      fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), {
+        target: { value: 'testuser' },
+      });
+      fireEvent.change(screen.getByLabelText(/password/i), {
+        target: { value: 'ValidPass123!' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+
+      // Assert
+      await waitFor(() => {
+        const cachedUser = getUserCache();
+        expect(cachedUser).not.toBeNull();
+        expect(cachedUser?.username).toBe('testuser');
+        expect(cachedUser?.first_name).toBe('Test');
+        expect(cachedUser?.last_name).toBe('User');
+        expect(cachedUser?.id).toBe('123');
+      });
+    });
+
+    it('should store cache with expiry time', async () => {
+      // Arrange
+      const mockUserData = {
+        id: '456',
+        username: 'johndoe',
+        first_name: 'John',
+        last_name: 'Doe',
+      };
+      (api.login as any).mockResolvedValueOnce(mockUserData);
+
+      // Act
+      render(<Login isOpen={true} onClose={mockOnClose} />);
+      
+      fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), {
+        target: { value: 'johndoe' },
+      });
+      fireEvent.change(screen.getByLabelText(/password/i), {
+        target: { value: 'ValidPass456!' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+
+      // Assert
+      await waitFor(() => {
+        // Verify cache keys exist
+        expect(localStorage.getItem('ss_user_data')).not.toBeNull();
+        expect(localStorage.getItem('ss_user_data_expiry')).not.toBeNull();
+        
+        // Verify expiry is set to future time
+        const expiryStr = localStorage.getItem('ss_user_data_expiry');
+        const expiry = parseInt(expiryStr!, 10);
+        expect(expiry).toBeGreaterThan(Date.now());
+      });
+    });
+
+    it('should not store cache on failed login', async () => {
+      // Arrange
+      (api.login as any).mockRejectedValueOnce(new Error('Invalid credentials'));
+
+      // Act
+      render(<Login isOpen={true} onClose={mockOnClose} />);
+      
+      fireEvent.change(screen.getByLabelText((content) => content.trim().toLowerCase() === 'username'), {
+        target: { value: 'wronguser' },
+      });
+      fireEvent.change(screen.getByLabelText(/password/i), {
+        target: { value: 'wrongpass' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+
+      // Assert
+      await waitFor(() => {
+        expect(mockAlert).toHaveBeenCalled();
+      });
+      
+      // Verify no cache was stored
+      const cachedUser = getUserCache();
+      expect(cachedUser).toBeNull();
+      expect(localStorage.getItem('ss_user_data')).toBeNull();
     });
   });
 });

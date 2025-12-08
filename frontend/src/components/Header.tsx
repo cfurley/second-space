@@ -1,50 +1,35 @@
 import React from 'react';
 import { UserMenu } from './UserMenu';
+import { getUserCache, getUserInitials, clearUserCache } from '../utils/userCache';
 
 interface HeaderProps {
   activeNav: string;
   onNavChange: (nav: string) => void;
 }
 
-interface User {
-  id: string;
-  username: string;
-  first_name: string;
-  last_name: string;
-}
-
-// Helper function to generate initials from first and last name
-function generateInitials(firstName: string, lastName: string): string {
-  const first = firstName?.[0]?.toUpperCase() || '';
-  const last = lastName?.[0]?.toUpperCase() || '';
-  return (first + last).slice(0, 2) || 'US';
-}
-
 export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: HeaderProps & { searchQuery?: string; onSearchChange?: (query: string) => void }) {
   const navItems = ['Spaces', 'Recent', 'Shared'];
   const [profileMenuOpen, setProfileMenuOpen] = React.useState(false);
-  const [user, setUser] = React.useState<User | null>(null);
+  const [username, setUsername] = React.useState<string>('Username');
+  const [userInitials, setUserInitials] = React.useState<string>('US');
 
-  // Fetch user data from localStorage on component mount
+  // Fetch user data from cache on component mount
   React.useEffect(() => {
-    try {
-      const userDataStr = localStorage.getItem('user');
-      if (userDataStr) {
-        const userData = JSON.parse(userDataStr);
-        setUser(userData);
-      }
-    } catch (error) {
-      console.error('Error loading user data from localStorage:', error);
+    const user = getUserCache();
+    if (user) {
+      setUsername(user.username);
+      setUserInitials(getUserInitials());
     }
   }, []);
 
-  const userInitials = user ? generateInitials(user.first_name, user.last_name) : 'US';
-
   const handleLogout = () => {
-    // Clear user data from localStorage
+    // Clear user data from cache
+    clearUserCache();
+    // Clear legacy localStorage key if it exists
     localStorage.removeItem('user');
     // Reset user state
-    setUser(null);
+    setUsername('Username');
+    setUserInitials('US');
     // Close menu
     setProfileMenuOpen(false);
     // Navigate to home
@@ -94,7 +79,7 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
               <div className="absolute right-0 mt-4 w-72 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-white/10 overflow-hidden z-50 transform translate-y-1">
                 <div className="py-1">
                   <div className="px-4 py-2 text-sm text-gray-700 dark:text-white font-medium border-b border-gray-200 dark:border-white/10">
-                    {user?.username || 'Username'}
+                    {username}
                   </div>
                   <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
                     Logout

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { Header } from "../Header";
+import { setUserCache, clearUserCache } from '../../utils/userCache';
 
 describe("Header Component", () => {
   const mockOnNavChange = vi.fn();
@@ -15,6 +16,7 @@ describe("Header Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    clearUserCache();
   });
 
   describe("Rendering", () => {
@@ -32,7 +34,7 @@ describe("Header Component", () => {
     });
 
     it("shows generated initials from stored user data", async () => {
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      setUserCache(mockUser);
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
       await waitFor(() => {
         expect(screen.getByText("JC")).toBeInTheDocument();
@@ -42,7 +44,7 @@ describe("Header Component", () => {
 
   describe("Profile Menu", () => {
     it("displays username when menu is opened", async () => {
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      setUserCache(mockUser);
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
 
       await waitFor(() => {
@@ -55,7 +57,7 @@ describe("Header Component", () => {
     });
 
     it("closes menu when profile button is clicked again", async () => {
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      setUserCache(mockUser);
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
 
       await waitFor(() => {
@@ -106,8 +108,8 @@ describe("Header Component", () => {
   });
 
   describe("Logout Functionality", () => {
-    it("clears localStorage when logout is clicked", async () => {
-      localStorage.setItem('user', JSON.stringify(mockUser));
+    it("clears user cache when logout is clicked", async () => {
+      setUserCache(mockUser);
       
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
 
@@ -123,11 +125,15 @@ describe("Header Component", () => {
       const logoutButton = screen.getByText("Logout");
       fireEvent.click(logoutButton);
 
+      // Verify cache is cleared (both keys)
+      expect(localStorage.getItem('ss_user_data')).toBeNull();
+      expect(localStorage.getItem('ss_user_data_expiry')).toBeNull();
+      // Also check legacy key is cleared
       expect(localStorage.getItem('user')).toBeNull();
     });
 
     it("closes menu after logout", async () => {
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      setUserCache(mockUser);
       
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
 
