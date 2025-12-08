@@ -38,3 +38,17 @@ Object.defineProperty(global, 'localStorage', {
 if (typeof global.fetch === 'undefined') {
   global.fetch = vi.fn();
 }
+
+// Mock ResizeObserver for components that use it
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
+// Mock IntersectionObserver for components that use it
+global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
