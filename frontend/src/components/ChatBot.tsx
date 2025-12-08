@@ -10,6 +10,11 @@ interface ChatBotProps {
   onClose: () => void;
 }
 
+// Use same API base selection as api.ts to avoid localhost calls in production
+const CHAT_API_BASE = (import.meta as any).env.PROD
+  ? (import.meta as any).env.VITE_API_URL || (import.meta as any).env.VITE_API_BASE_URL
+  : (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8080';
+
 export const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -44,8 +49,8 @@ export const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
     setError(null);
 
     try {
-      const API_BASE = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8080';
-      const response = await fetch(`${API_BASE}/ai/chat`, {
+      const apiBase = CHAT_API_BASE || 'http://localhost:8080';
+      const response = await fetch(`${apiBase}/ai/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -99,7 +104,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900">
       <div className="relative w-full max-w-2xl h-[600px] mx-4 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
