@@ -68,9 +68,9 @@ export function ContentCard({
                         )}
                         <p className="text-white/60 text-xs">{content.timestamp}</p>
                       </div>
-                      {onRequestEdit && (
+                      {onEdit && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); onRequestEdit(); }}
+                          onClick={(e) => { e.stopPropagation(); onEdit(); }}
                           className="text-white/80 underline text-xs"
                         >
                           Edit
@@ -284,9 +284,9 @@ export function ContentCard({
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-white/10 text-xs text-gray-500 dark:text-white/50">
           <div className="flex items-center gap-3">
             <span>{getTypeLabel()}</span>
-            {onRequestEdit && (
+            {onEdit && (
               <button
-                onClick={(e) => { e.stopPropagation(); onRequestEdit(); }}
+                onClick={(e) => { e.stopPropagation(); onEdit(); }}
                 aria-label="Edit space"
                 className="underline text-xs text-gray-600 dark:text-white/60 hover:scale-110 transition-transform duration-200 cursor-pointer"
               >

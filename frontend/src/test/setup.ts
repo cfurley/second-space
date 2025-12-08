@@ -46,3 +46,37 @@ globalThis.ResizeObserver = class ResizeObserver {
   observe() {}
   unobserve() {}
 } as any;
+
+// Mock localStorage and sessionStorage
+const createStorageMock = () => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] || null,
+    setItem: (key: string, value: string) => {
+      store[key] = value.toString();
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
+    get length() {
+      return Object.keys(store).length;
+    },
+    key: (index: number) => {
+      const keys = Object.keys(store);
+      return keys[index] || null;
+    },
+  };
+};
+
+Object.defineProperty(window, 'localStorage', {
+  writable: true,
+  value: createStorageMock(),
+});
+
+Object.defineProperty(window, 'sessionStorage', {
+  writable: true,
+  value: createStorageMock(),
+});
