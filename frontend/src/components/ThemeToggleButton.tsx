@@ -32,7 +32,7 @@ export function ThemeToggleButton({ embedded = false }: { embedded?: boolean }) 
 
   const containerStyle: React.CSSProperties = embedded
     ? { position: 'relative', zIndex: 10 }
-    : { position: 'fixed', left: '24px', bottom: '24px', zIndex: 99999 };
+    : { position: 'fixed', left: '16px', bottom: '16px', zIndex: 50 };
 
   return (
     <div style={containerStyle}>
