@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import userEvent from "@testing-library/user-event";
-import { ThemeToggleButton } from "../frontend/src/components/ThemeToggleButton";
+import { ThemeToggleButton } from "../ThemeToggleButton";
 
 describe("ThemeToggleButton", () => {
   beforeEach(() => {

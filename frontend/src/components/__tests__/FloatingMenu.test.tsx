@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { FloatingMenu } from '../frontend/src/components/FloatingMenu';
+import { FloatingMenu } from '../FloatingMenu';
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 

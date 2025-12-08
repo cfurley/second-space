@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { CreateSpaceDialog } from '../frontend/src/components/CreateSpaceDialog';
+import { CreateSpaceDialog } from '../CreateSpaceDialog';
 
 // Mock ReactDOM.createPortal to render in place for testing
 vi.mock('react-dom', async () => {

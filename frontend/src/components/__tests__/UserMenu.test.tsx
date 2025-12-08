@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { UserMenu } from '../frontend/src/components/UserMenu';
-import { clearUserCache, setUserCache } from '../frontend/src/utils/userCache';
+import { UserMenu } from '../UserMenu';
+import { clearUserCache, setUserCache } from '../../utils/userCache';
 
 describe('UserMenu Component', () => {
   beforeEach(() => {

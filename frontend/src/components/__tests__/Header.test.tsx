@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { Header } from "../frontend/src/components/Header";
-import { setUserCache, clearUserCache } from '../frontend/src/utils/userCache';
+import { Header } from "../Header";
+import { setUserCache, clearUserCache } from '../../utils/userCache';
 
 describe("Header Component", () => {
   const mockOnNavChange = vi.fn();

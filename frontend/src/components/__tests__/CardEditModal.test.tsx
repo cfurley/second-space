@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { CardEditModal } from '../frontend/src/components/CardEditModal';
+import { CardEditModal } from '../CardEditModal';
 
 describe('CardEditModal Component', () => {
   const mockOnSave = vi.fn();
