@@ -24,51 +24,67 @@ describe("Header Component", () => {
       expect(screen.getByPlaceholderText("Search spaces...")).toBeInTheDocument();
     });
 
-    it("shows default US initials when no user data", async () => {
+    it("renders logout button in header", () => {
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-      await waitFor(() => {
-        expect(screen.getByText("US")).toBeInTheDocument();
-      });
-    });
-
-    it("shows generated initials from stored user data", async () => {
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-      await waitFor(() => {
-        expect(screen.getByText("JC")).toBeInTheDocument();
-      });
+      expect(screen.getByText("Logout")).toBeInTheDocument();
     });
   });
 
-  describe("Profile Menu", () => {
-    it("displays username when menu is opened", async () => {
-      localStorage.setItem('user', JSON.stringify(mockUser));
+
+  describe("Logout Functionality", () => {
+    it("shows logout confirmation dialog when logout button is clicked", async () => {
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
 
-      await waitFor(() => {
-        const profileButton = screen.getByText("JC");
-        fireEvent.click(profileButton);
-      });
+      const logoutButton = screen.getByText("Logout");
+      fireEvent.click(logoutButton);
 
-      expect(screen.getByText("jackiechen")).toBeInTheDocument();
-      expect(screen.getByText("Logout")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText(/Confirm Logout/)).toBeInTheDocument();
+        expect(screen.getByText("Are you sure you want to logout? You will be taken back to the login screen.")).toBeInTheDocument();
+      });
     });
 
-    it("closes menu when profile button is clicked again", async () => {
-      localStorage.setItem('user', JSON.stringify(mockUser));
+    it("closes dialog when cancel is clicked", async () => {
       render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
 
+      const logoutButton = screen.getByText("Logout");
+      fireEvent.click(logoutButton);
+
       await waitFor(() => {
-        const profileButton = screen.getByText("JC");
-        fireEvent.click(profileButton);
+        expect(screen.getByText(/Confirm Logout/)).toBeInTheDocument();
       });
 
-      expect(screen.getByText("jackiechen")).toBeInTheDocument();
+      const cancelButton = screen.getByRole("button", { name: "Cancel" });
+      fireEvent.click(cancelButton);
 
-      const profileButton = screen.getByText("JC");
-      fireEvent.click(profileButton);
+      expect(screen.queryByText(/Confirm Logout/)).not.toBeInTheDocument();
+    });
 
-      expect(screen.queryByText("jackiechen")).not.toBeInTheDocument();
+    it("clears localStorage when logout is confirmed", async () => {
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      
+      render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
+
+      // Mock window.location.href
+      delete (window as any).location;
+      window.location = { href: '' } as any;
+
+      const logoutButton = screen.getByText("Logout");
+      fireEvent.click(logoutButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Confirm Logout/)).toBeInTheDocument();
+      });
+
+      const buttons = screen.getAllByRole("button");
+      const confirmLogoutButton = buttons.find((btn: HTMLElement) => btn.textContent?.includes("Logout") && btn.className.includes("!bg-amber"));
+      if (confirmLogoutButton) {
+        fireEvent.click(confirmLogoutButton);
+      }
+
+      await waitFor(() => {
+        expect(localStorage.getItem('user')).toBeNull();
+      });
     });
   });
 
@@ -102,48 +118,6 @@ describe("Header Component", () => {
 
       const searchInput = screen.getByPlaceholderText("Search spaces...") as HTMLInputElement;
       expect(searchInput.value).toBe("spaces");
-    });
-  });
-
-  describe("Logout Functionality", () => {
-    it("clears localStorage when logout is clicked", async () => {
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      
-      render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-
-      await waitFor(() => {
-        const profileButton = screen.getByText("JC");
-        fireEvent.click(profileButton);
-      });
-
-      // Mock window.location.href
-      delete (window as any).location;
-      window.location = { href: '' } as any;
-      
-      const logoutButton = screen.getByText("Logout");
-      fireEvent.click(logoutButton);
-
-      expect(localStorage.getItem('user')).toBeNull();
-    });
-
-    it("closes menu after logout", async () => {
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      
-      render(<Header activeNav="Spaces" onNavChange={mockOnNavChange} />);
-
-      await waitFor(() => {
-        const profileButton = screen.getByText("JC");
-        fireEvent.click(profileButton);
-      });
-
-      // Mock window.location.href
-      delete (window as any).location;
-      window.location = { href: '' } as any;
-      
-      const logoutButton = screen.getByText("Logout");
-      fireEvent.click(logoutButton);
-
-      expect(screen.queryByText("jackiechen")).not.toBeInTheDocument();
     });
   });
 });
