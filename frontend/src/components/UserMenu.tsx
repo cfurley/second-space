@@ -111,7 +111,7 @@ export function UserMenu({
           }}
         >
              <div 
-               className="bg-popover border border-border rounded-3xl"
+               className="bg-[#1a1a1a] border border-border rounded-3xl"
                style={{
                  boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
                }}
