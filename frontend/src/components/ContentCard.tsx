@@ -144,7 +144,7 @@ export function ContentCard({ type, content, onToggleBookmark, onEdit, onRequest
       case 'text':
         return 'Text Note';
       case 'link':
-        return content.domain || 'Link';
+        return 'Bookmark';
       default:
         return 'Content';
     }
