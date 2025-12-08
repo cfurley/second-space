@@ -1,4 +1,5 @@
 import userService from "../services/userServices.js";
+import authenticationService from "../services/authenticationServices.js";
 import userModel from "../models/userModel.js";
 
 /**
@@ -7,15 +8,49 @@ import userModel from "../models/userModel.js";
 const authenticate = async (req, res) => {
   const { username, password } = req.body;
 
+  // Validate input first - no point in recording attempts for null username
   if (!username || !password) {
     return res.status(400).json({ error: "Missing username or password." });
+  }
+
+  // identifier used to track attempts: prefer username, fallback to IP
+  const identifier = username || req.ip || req.socket?.remoteAddress || "unknown";
+
+  // Check server-side lockout first
+  try {
+    const lock = authenticationService.checkLockout(identifier);
+    if (lock.locked) {
+      const minutes = Math.ceil(lock.remainingMs / 60000) || 1;
+      return res.status(429).json({ error: `Too many login attempts. Try again in ${minutes} minute(s).` });
+    }
+  } catch (e) {
+    // Lockout system failure - fail securely by blocking authentication
+    return res.status(500).json({ error: "Authentication system error. Please try again later." });
   }
 
   const result = await userService.authenticateLogin(username, password);
 
   if (!result.success) {
+    // record failed attempt and possibly enforce lockout
+    try {
+      const record = authenticationService.recordFailedAttempt(identifier);
+      if (record.shouldLock) {
+        return res.status(429).json({ error: `Too many login attempts. Try again in ${record.timeoutMinutes} minute(s).` });
+      }
+      // If warning, still return same Invalid Login error to avoid revealing info
+    } catch (e) {
+      // Failed to record attempt - log internally only
+      return res.status(500).json({ error: "Authentication system error." });
+    }
     return res.status(result.status).json({ error: result.error });
   } else {
+    // Successful login: reset any counters for this identifier
+    try {
+      authenticationService.resetAttempts(identifier);
+    } catch (e) {
+      // Failed to reset - log internally only, but allow successful login to proceed
+    }
+
     const user = result.data;
     // Set cache headers to cache the user data in the browser
     res.set({
