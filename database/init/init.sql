@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS public.space
 CREATE INDEX idx_space_user_deleted 
     ON public.space (created_by_user_id, deleted);
 
-INSERT INTO space (id, created_by_user_id, title, icon, create_date_utc, 
+INSERT INTO space (created_by_user_id, title, icon, create_date_utc, 
 update_date_utc, delete_date_utc, deleted)
 VALUES
 (1, 'My first space!', '🧡', NOW(), NULL, NULL, 0),
