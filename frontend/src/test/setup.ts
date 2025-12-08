@@ -1,10 +1,16 @@
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
 
 // Cleanup after each test
 afterEach(() => {
   cleanup();
+});
+
+// Clear localStorage and sessionStorage before each test
+beforeEach(() => {
+  localStorage.clear();
+  sessionStorage.clear();
 });
 
 // Mock IntersectionObserver

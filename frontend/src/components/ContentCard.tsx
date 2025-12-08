@@ -18,7 +18,7 @@ interface ContentCardProps {
   isSelected?: boolean;
   onToggleSelect?: () => void;
   isEditMode?: boolean;
-  onEdit?: () => void;
+  onEdit?: (fields?: Record<string, any>) => void;
 }
 
 export function ContentCard({ 
@@ -179,7 +179,7 @@ export function ContentCard({
   const doEdit = () => {
     if (!onEdit) return;
     if (type === 'text') {
-      const newText = prompt('Edit text', content.text || '')
+      const newText = prompt('Edit tetx', content.text || '')
       if (newText !== null) onEdit({ text: newText });
       return;
     }
