@@ -205,9 +205,9 @@ export function ContentCard({ type, content, onToggleBookmark, onEdit, onRequest
               <button
                 onClick={(e) => { e.stopPropagation(); onRequestEdit(); }}
                 aria-label="Edit space"
-                className="underline text-sm text-gray-600 dark:text-white/60 hover:scale-110 transition-transform duration-200 cursor-pointer"
+                className="underline text-xs text-gray-600 dark:text-white/60 hover:scale-110 transition-transform duration-200 cursor-pointer"
               >
-                edit space
+                Edit
               </button>
             )}
           </div>

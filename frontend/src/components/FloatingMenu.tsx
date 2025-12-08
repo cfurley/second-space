@@ -74,7 +74,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
         spaceId: currentSpaceId,
         userId: currentUserId,
         createdAt: new Date().toISOString(),
-        timestamp: 'just now'
+        timestamp: 'Just Now'
       };
       
       console.log("Creating text post:", postData);
@@ -85,7 +85,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
           type: 'text',
           content: {
             text: `${postTitle}\n\n${postContent}`,
-            timestamp: 'just now'
+            timestamp: 'Just Now'
           }
         });
       }
@@ -144,7 +144,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
             title: mediaTitle,
             description: mediaDescription,
             image: mediaPreview,
-            timestamp: 'just now'
+            timestamp: 'Just Now'
           }
         });
       }
@@ -199,7 +199,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
             title: bookmarkTitle,
             text: bookmarkNotes || 'No description provided',
             domain: domain,
-            timestamp: 'just now',
+            timestamp: 'Just Now',
             url: bookmarkUrl,
             isBookmarked: true
           }
