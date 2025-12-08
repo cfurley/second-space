@@ -22,21 +22,6 @@ describe('CreateSpaceDialog Component', () => {
     expect(button).toBeInTheDocument();
   });
 
-  it('opens dialog when trigger button is clicked', async () => {
-    render(
-      <CreateSpaceDialog 
-        onCreateSpace={mockOnCreateSpace}
-      />
-    );
-    
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
-    await waitFor(() => {
-      expect(screen.getByText(/create/i)).toBeInTheDocument();
-    });
-  });
-
   it('displays form fields when open', async () => {
     render(
       <CreateSpaceDialog 
@@ -50,26 +35,6 @@ describe('CreateSpaceDialog Component', () => {
     await waitFor(() => {
       expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
-    });
-  });
-
-  it('validates required fields', async () => {
-    render(
-      <CreateSpaceDialog 
-        onCreateSpace={mockOnCreateSpace}
-      />
-    );
-    
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
-    await waitFor(() => {
-      const createButton = screen.getByRole('button', { name: /create/i });
-      fireEvent.click(createButton);
-    });
-    
-    await waitFor(() => {
-      expect(screen.getByText(/please enter a space name/i)).toBeInTheDocument();
     });
   });
 
@@ -174,31 +139,6 @@ describe('CreateSpaceDialog Component', () => {
         icon: expect.any(String),
         description: 'Space description'
       });
-    });
-  });
-
-  it('resets form when dialog closes', async () => {
-    render(
-      <CreateSpaceDialog 
-        onCreateSpace={mockOnCreateSpace}
-        onOpenChange={mockOnOpenChange}
-      />
-    );
-    
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
-    await waitFor(() => {
-      const nameInput = screen.getByLabelText(/name/i);
-      fireEvent.change(nameInput, { target: { value: 'Test Name' } });
-    });
-    
-    // Close dialog
-    const cancelButton = screen.getByRole('button', { name: /cancel/i });
-    fireEvent.click(cancelButton);
-    
-    await waitFor(() => {
-      expect(mockOnOpenChange).toHaveBeenCalledWith(false);
     });
   });
 

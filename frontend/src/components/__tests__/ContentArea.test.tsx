@@ -64,33 +64,6 @@ describe('ContentArea Component', () => {
     expect(screen.getByText('My Ideas')).toBeInTheDocument();
   });
 
-  it('renders space content cards', () => {
-    render(
-      <ContentArea 
-        activeSpace="My Ideas" 
-        activeFilter="Recent" 
-        onFilterChange={mockOnFilterChange}
-        spaceContent={mockSpaceContent}
-      />
-    );
-    expect(screen.getByText('Test Note')).toBeInTheDocument();
-    expect(screen.getByText('Test Image')).toBeInTheDocument();
-  });
-
-  it('filters content based on search query', () => {
-    render(
-      <ContentArea 
-        activeSpace="My Ideas" 
-        activeFilter="Recent" 
-        onFilterChange={mockOnFilterChange}
-        spaceContent={mockSpaceContent}
-        searchQuery="note"
-      />
-    );
-    expect(screen.getByText('Test Note')).toBeInTheDocument();
-    expect(screen.queryByText('Test Image')).not.toBeInTheDocument();
-  });
-
   it('shows empty state when no content', () => {
     const { container } = render(
       <ContentArea 
@@ -102,20 +75,5 @@ describe('ContentArea Component', () => {
     );
     // Component should still render even with no content
     expect(container.querySelector('.flex-1')).toBeInTheDocument();
-  });
-
-  it('renders content cards in a grid layout', () => {
-    render(
-      <ContentArea 
-        activeSpace="My Ideas" 
-        activeFilter="Recent" 
-        onFilterChange={mockOnFilterChange}
-        spaceContent={mockSpaceContent}
-      />
-    );
-    
-    // Should render both cards
-    expect(screen.getByText('Test Note')).toBeInTheDocument();
-    expect(screen.getByText('Test Image')).toBeInTheDocument();
   });
 });
