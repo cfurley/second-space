@@ -48,7 +48,7 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
   
 
   return (
-    <div className="relative w-[280px] bg-gray-200 dark:bg-[#1a1a1a] border-r border-gray-300 dark:border-white/10 py-8">
+    <div className="relative w-[280px] bg-gray-200 dark:bg-[#1a1a1a] border-r border-gray-300 dark:border-white/10 py-8 pb-24">
       <div className="mb-12 pl-8 pr-4">
         <div className="mb-6">
           <div className="text-gray-500 dark:text-white/50 text-xs uppercase tracking-wider">Starred Spaces</div>
@@ -111,11 +111,11 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
         ))}
       </div>
 
-      {/* Bottom controls positioned at the very bottom of the sidebar */}
-      <div className="absolute left-4 bottom-6">
+      {/* Bottom controls positioned at the very bottom of the page */}
+      <div className="fixed left-4 bottom-6 z-50">
         <ThemeToggleButton embedded />
       </div>
-      <div className="absolute right-4 bottom-6">
+      <div className="fixed left-[244px] bottom-6 z-50">
         <CreateSpaceDialog buttonClassName="w-12 h-12 aspect-square bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-2xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300" onCreateSpace={(spaceData) => {
           // add new spaces to All Spaces by default
           setAllSpaces(prev => [{ icon: spaceData.icon, name: spaceData.title }, ...prev]);
