@@ -34,7 +34,7 @@ export function CardEditModal({ open, onOpenChange, type, initial = {}, onSave }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[520px]">
+      <DialogContent className="max-w-[520px]">
         <DialogHeader>
           <DialogTitle>{type === 'text' ? 'Edit Text' : type === 'image' ? 'Edit Image' : type === 'link' ? 'Edit Link' : 'Create Ad'}</DialogTitle>
         </DialogHeader>

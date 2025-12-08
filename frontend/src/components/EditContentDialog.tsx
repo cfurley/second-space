@@ -265,7 +265,7 @@ export function EditContentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
             Edit {contentType === 'text' ? 'Post' : contentType === 'image' ? 'Media' : 'Bookmark'}
