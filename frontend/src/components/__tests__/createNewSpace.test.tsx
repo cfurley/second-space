@@ -42,7 +42,7 @@ describe('CreateSpaceDialog Component - Comprehensive Tests', () => {
       
       const newSpaceButton = screen.getByLabelText('Create new space');
       expect(newSpaceButton).toBeInTheDocument();
-      expect(newSpaceButton).toHaveTextContent('➕');
+      expect(newSpaceButton).toHaveTextContent('+');
     });
 
     /**
