@@ -247,29 +247,9 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
               setShowTextPostDialog(true);
               setOpen(false);
             }}
+            className="w-12 h-12 bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-200"
             style={{
-              width: '48px',
-              height: '48px',
-              backgroundColor: '#2C2C2C',
-              color: 'white',
-              borderRadius: '50%',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '20px',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-              animation: 'popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) backwards',
-              transition: 'transform 0.2s, box-shadow 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.1)';
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+              animation: 'popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) backwards'
             }}
             title="Create Text Post"
           >
@@ -281,29 +261,9 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
               setShowMediaDialog(true);
               setOpen(false);
             }}
+            className="w-12 h-12 bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-200"
             style={{
-              width: '48px',
-              height: '48px',
-              backgroundColor: '#2C2C2C',
-              color: 'white',
-              borderRadius: '50%',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '20px',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-              animation: 'popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.05s backwards',
-              transition: 'transform 0.2s, box-shadow 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.1)';
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+              animation: 'popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.05s backwards'
             }}
             title="Upload Media"
           >
@@ -315,29 +275,9 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
               setShowBookmarkDialog(true);
               setOpen(false);
             }}
+            className="w-12 h-12 bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-200"
             style={{
-              width: '48px',
-              height: '48px',
-              backgroundColor: '#2C2C2C',
-              color: 'white',
-              borderRadius: '50%',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '20px',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-              animation: 'popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.1s backwards',
-              transition: 'transform 0.2s, box-shadow 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.1)';
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+              animation: 'popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.1s backwards'
             }}
             title="Save Bookmark"
           >
@@ -348,30 +288,7 @@ export function FloatingMenu({ currentSpaceId, currentUserId, onContentAdded, on
       <div style={{ display: 'flex', flexDirection: 'row', gap: '12px' }}>
         <button
           onClick={() => setOpen(prev => !prev)}
-          style={{
-            width: '48px',
-            height: '48px',
-            backgroundColor: '#2C2C2C',
-            color: 'white',
-            borderRadius: '50%',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '24px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-            transition: 'transform 0.3s, box-shadow 0.2s',
-            transform: open ? 'rotate(45deg)' : 'rotate(0deg)'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = open ? 'rotate(45deg) scale(1.1)' : 'scale(1.1)';
-            e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = open ? 'rotate(45deg)' : 'rotate(0deg)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
-          }}
+          className={`w-12 h-12 bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-2xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300 ${open ? 'rotate-45' : 'rotate-0'}`}
         >
           +
         </button>

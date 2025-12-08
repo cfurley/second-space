@@ -112,7 +112,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
       {!open ? (
         <button 
           onClick={() => handleOpenChange(true)}
-          className={`${buttonClassName || 'flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-white/20 text-white/70 hover:text-white hover:bg-white/5 transition-all'}`}
+          className={`${buttonClassName || 'flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-black/20 dark:border-white/20 text-black/70 dark:text-white/70 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all'}`}
           aria-label="Create new space"
         >
           <span className="text-xl">➕</span>
@@ -120,7 +120,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
       ) : (
         <button
           onClick={() => handleOpenChange(false)}
-          className={`${buttonClassName || 'flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-white/20 text-white/70 hover:text-white hover:bg-white/5 transition-all'}`}
+          className={`${buttonClassName || 'flex items-center justify-center w-10 h-10 rounded-full bg-transparent border border-black/20 dark:border-white/20 text-black/70 dark:text-white/70 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all'}`}
           aria-label="Close dialog"
         >
           <span className="text-xl">✕</span>
@@ -149,20 +149,20 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div 
-              className="bg-[#0a0a0a] border border-white/20 rounded-3xl"
+              className="bg-white dark:bg-[#0a0a0a] border border-black/10 dark:border-white/20 rounded-3xl"
               style={{
                 boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
               }}
             >
             <form onSubmit={handleSubmit} className="p-6">
               <div className="mb-6">
-                <h2 className="text-lg font-semibold text-white mb-1">New Space</h2>
-                <p className="text-xs text-white/50">Create a space to organize your content</p>
+                <h2 className="text-lg font-semibold text-foreground dark:text-white mb-1">New Space</h2>
+                <p className="text-xs text-muted-foreground dark:text-white/50">Create a space to organize your content</p>
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="space-name" className="text-white/90 text-xs">
+                  <Label htmlFor="space-name" className="text-foreground dark:text-white/90 text-xs">
                     Name <span className="text-red-400">*</span>
                   </Label>
                   <Input
@@ -173,7 +173,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
                       setTitle(e.target.value);
                       if (touched) validateForm();
                     }}
-                    className={`bg-white/5 border-white/10 text-white placeholder:text-white/30 h-9 text-sm ${
+                    className={`bg-gray-100 dark:bg-white/5 border-gray-300 dark:border-white/10 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-white/30 h-9 text-sm ${
                       touched && errors.name ? 'border-red-500' : ''
                     }`}
                     required
@@ -186,7 +186,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="space-icon" className="text-white/90 text-xs">
+                  <Label htmlFor="space-icon" className="text-foreground dark:text-white/90 text-xs">
                     Icon
                   </Label>
                   <Input
@@ -194,14 +194,14 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
                     placeholder="🏃"
                     value={icon}
                     onChange={(e) => setIcon(e.target.value)}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-9 text-sm"
+                    className="bg-gray-100 dark:bg-white/5 border-gray-300 dark:border-white/10 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-white/30 h-9 text-sm"
                     maxLength={2}
                   />
-                  <p className="text-xs text-white/40">Optional - defaults to 📁</p>
+                  <p className="text-xs text-muted-foreground dark:text-white/40">Optional - defaults to 📁</p>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="space-description" className="text-white/90 text-xs">
+                  <Label htmlFor="space-description" className="text-foreground dark:text-white/90 text-xs">
                     Description
                   </Label>
                   <Textarea
@@ -212,7 +212,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
                       setDescription(e.target.value);
                       if (touched) validateForm();
                     }}
-                    className={`bg-white/5 border-white/10 text-white placeholder:text-white/30 min-h-16 text-sm resize-none ${
+                    className={`bg-gray-100 dark:bg-white/5 border-gray-300 dark:border-white/10 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-white/30 min-h-16 text-sm resize-none ${
                       touched && errors.description ? 'border-red-500' : ''
                     }`}
                     maxLength={200}
@@ -220,7 +220,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
                   {touched && errors.description && (
                     <p className="text-xs text-red-400">{errors.description}</p>
                   )}
-                  <p className="text-xs text-white/40">{description.length}/200 characters</p>
+                  <p className="text-xs text-muted-foreground dark:text-white/40">{description.length}/200 characters</p>
                 </div>
               </div>
 
@@ -229,7 +229,7 @@ export function CreateSpaceDialog({ onCreateSpace, onOpenChange, buttonClassName
                   type="button"
                   variant="outline"
                   onClick={() => setOpen(false)}
-                  className="flex-1 bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white h-9 text-sm"
+                  className="flex-1 bg-gray-100 dark:bg-white/5 border-gray-300 dark:border-white/10 text-foreground dark:text-white/70 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-foreground dark:hover:text-white h-9 text-sm"
                 >
                   Cancel
                 </Button>
