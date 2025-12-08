@@ -133,23 +133,28 @@ describe('CardEditModal Component', () => {
       />
     );
 
-    // Get all inputs to make sure we have the right one
     const titleInput = screen.getByLabelText('Title') as HTMLInputElement;
     const textInput = screen.getByLabelText('Text') as HTMLTextAreaElement;
     
-    // Debug: log to see if element is found
-    console.log('Title input found:', titleInput);
-    console.log('Title input initial value:', titleInput.value);
-    
-    // Use act to wrap state updates
+    // Simulate user input by setting value and triggering events properly
     await act(async () => {
-      fireEvent.input(titleInput, { target: { value: 'New Title' } });
-      fireEvent.input(textInput, { target: { value: 'New Text' } });
+      // For controlled components, we need to set the value descriptor and trigger both input and change
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+      const nativeTextareaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
+      
+      if (nativeInputValueSetter) {
+        nativeInputValueSetter.call(titleInput, 'New Title');
+        titleInput.dispatchEvent(new Event('input', { bubbles: true }));
+        titleInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      
+      if (nativeTextareaValueSetter) {
+        nativeTextareaValueSetter.call(textInput, 'New Text');
+        textInput.dispatchEvent(new Event('input', { bubbles: true }));
+        textInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
     });
     
-    console.log('Title input after change:', titleInput.value);
-    
-    // Don't verify values, just check if onSave gets called with correct data
     const saveButton = screen.getByText('Save');
     
     await act(async () => {
@@ -157,10 +162,10 @@ describe('CardEditModal Component', () => {
     });
 
     await waitFor(() => {
-      expect(mockOnSave).toHaveBeenCalled();
-      const callArgs = mockOnSave.mock.calls[0][0];
-      expect(callArgs).toHaveProperty('title', 'New Title');
-      expect(callArgs).toHaveProperty('text', 'New Text');
+      expect(mockOnSave).toHaveBeenCalledWith({
+        title: 'New Title',
+        text: 'New Text'
+      });
     });
   });
 
