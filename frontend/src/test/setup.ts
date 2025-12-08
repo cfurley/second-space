@@ -33,7 +33,7 @@ class LocalStorageMock {
   }
 }
 
-global.localStorage = new LocalStorageMock() as Storage;
+globalThis.localStorage = new LocalStorageMock() as Storage;
 
 // Mock window.matchMedia for tests that use responsive components
 Object.defineProperty(window, 'matchMedia', {
