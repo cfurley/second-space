@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { UserMenu } from './UserMenu';
 import { getUserCache, getUserInitials, clearUserCache } from '../utils/userCache';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
+import { Button } from './ui/button';
 // Inline accessible dialog used when the separate AlertDialog component
 // is not present in this branch. Keeps tests simple and avoids import errors.
 
@@ -108,32 +110,24 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
       </header>
 
       {/* Logout Confirmation Dialog (inline fallback) */}
-      {showLogoutDialog && (
-        <div role="dialog" aria-modal="true" className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-slate-900 border-2 border-red-600 dark:border-red-500 shadow-2xl rounded-lg p-8 max-w-sm w-full">
-            <h2 className="text-2xl font-bold text-red-600 dark:text-red-400">⚠️ Confirm Logout</h2>
-            <p className="text-gray-800 dark:text-gray-300 mt-4 text-base font-medium leading-relaxed">
+      <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-red-600 dark:text-red-400 flex items-center gap-2">⚠️ Confirm Logout</DialogTitle>
+            <DialogDescription className="text-base text-gray-800 dark:text-gray-200">
               Are you sure you want to logout? You will be taken back to the login screen.
-            </p>
-
-            <div className="flex flex-col gap-3 mt-6">
-              <button
-                onClick={handleConfirmLogout}
-                className="w-3/4 mx-auto bg-amber-500 hover:bg-amber-600 dark:bg-amber-400 dark:hover:bg-amber-500 text-black px-4 py-2 rounded-md font-semibold text-base border border-amber-600 dark:border-amber-300 shadow-md"
-              >
-                Logout
-              </button>
-
-              <button
-                onClick={handleCancelLogout}
-                className="w-3/4 mx-auto bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-md font-medium border border-gray-400 dark:border-gray-600"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:flex-row sm:justify-end gap-3">
+            <Button variant="secondary" onClick={handleCancelLogout} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmLogout} className="w-full sm:w-auto">
+              Logout
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
