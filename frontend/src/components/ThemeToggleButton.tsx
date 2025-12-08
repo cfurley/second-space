@@ -41,7 +41,7 @@ export function ThemeToggleButton({ embedded = false }: { embedded?: boolean }) 
           onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
           aria-label="Toggle theme"
           aria-expanded={themeDropdownOpen}
-          className={`w-14 h-14 flex items-center justify-center rounded-full text-black dark:text-white cursor-pointer hover:scale-110 transition-all duration-300 border shadow-lg ${embedded ? 'bg-transparent border-transparent' : 'bg-popover border border-border'}`}
+          className="w-12 h-12 aspect-square bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-2xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300"
         >
           <span className="text-2xl" aria-hidden="true">{currentTheme === 'dark' ? '🌙' : '☀️'}</span>
         </button>
