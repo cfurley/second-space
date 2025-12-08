@@ -107,7 +107,7 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
         </div>
       </header>
 
-      {/* Logout Confirmation Dialog */}
+     {/* Logout Confirmation Dialog */}
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
         <AlertDialogContent
           className="
@@ -116,38 +116,53 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
             !bg-opacity-100 
             !backdrop-blur-none 
             border-2 border-red-600 dark:border-red-500 
-            shadow-2xl rounded-lg p-8
+            shadow-2xl rounded-lg p-8 pb-10
           "
         >
           <AlertDialogHeader>
             <AlertDialogTitle className="text-2xl font-bold text-red-600 dark:text-red-400">
               ⚠️ Confirm Logout
             </AlertDialogTitle>
-
             <AlertDialogDescription className="text-gray-800 dark:text-gray-300 mt-4 text-base font-medium leading-relaxed">
               Are you sure you want to logout? You will be taken back to the login screen.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <AlertDialogFooter className="flex flex-col gap-3 mt-6">
+
+            {/* Highlighted Amber Action Button */}
             <AlertDialogAction
               onClick={handleConfirmLogout}
               className="
-                w-full bg-red-600 hover:bg-red-700 
-                dark:bg-red-500 dark:hover:bg-red-600 
-                text-white px-4 py-3 rounded-md 
-                font-semibold text-base shadow-lg transition
+                w-3/4 mx-auto
+                !bg-amber-500 !hover:bg-amber-600
+                dark:!bg-amber-400 dark:!hover:bg-amber-500
+                !text-black
+                px-4 py-2
+                rounded-md
+                font-semibold text-base
+                !border !border-amber-600 dark:!border-amber-300
+                shadow-md
+                transition
+                data-[state=open]:!bg-amber-500
               "
             >
               Logout
             </AlertDialogAction>
 
+            {/* Cancel Button  */}
             <AlertDialogCancel
               className="
-                w-full bg-gray-200 dark:bg-gray-700 
-                text-gray-900 dark:text-gray-100 
-                hover:bg-gray-300 dark:hover:bg-gray-600 
-                px-4 py-2 rounded-md font-medium transition border-0
+                w-3/4 mx-auto
+                bg-gray-200 dark:bg-gray-700
+                text-gray-900 dark:text-gray-100
+                hover:bg-gray-300 dark:hover:bg-gray-600
+                px-4 py-2
+                rounded-md
+                font-medium
+                border border-gray-400 dark:border-gray-600
+                transition
+                mb-2
               "
             >
               Cancel
@@ -155,7 +170,6 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
     </>
   );
 }
