@@ -76,7 +76,7 @@ export function Header({ activeNav, onNavChange, searchQuery, onSearchChange }: 
             
             {/* Dropdown Menu */}
             {profileMenuOpen && (
-              <div className="absolute right-0 mt-4 w-72 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-white/10 overflow-hidden z-50 transform translate-y-1">
+              <div className="absolute right-0 mt-4 w-72 rounded-lg shadow-lg border border-gray-200 dark:border-white/10 overflow-hidden z-50 transform translate-y-1" style={{ backgroundColor: '#1a1a1a' }}>
                 <div className="py-1">
                   <div className="px-4 py-2 text-sm text-gray-700 dark:text-white font-medium border-b border-gray-200 dark:border-white/10">
                     {username}
