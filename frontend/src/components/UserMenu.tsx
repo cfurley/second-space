@@ -111,8 +111,9 @@ export function UserMenu({
           }}
         >
              <div 
-               className="bg-[#1a1a1a] border border-border rounded-3xl"
+               className="border border-border rounded-3xl"
                style={{
+                 backgroundColor: '#1a1a1a',
                  boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
                }}
           >
