@@ -52,7 +52,7 @@ describe('ContentArea Component', () => {
     expect(screen.getByText('FITNESS PLANS')).toBeInTheDocument();
   });
 
-  it('renders FilterBar component', () => {
+  it('renders the space title', () => {
     render(
       <ContentArea 
         activeSpace="My Ideas" 
@@ -61,7 +61,7 @@ describe('ContentArea Component', () => {
         spaceContent={[]}
       />
     );
-    expect(screen.getByText('Recent')).toBeInTheDocument();
+    expect(screen.getByText('MY IDEAS')).toBeInTheDocument();
   });
 
   it('renders space content cards', () => {
@@ -104,19 +104,18 @@ describe('ContentArea Component', () => {
     expect(container.querySelector('.flex-1')).toBeInTheDocument();
   });
 
-  it('passes filter change to parent', () => {
+  it('renders content cards in a grid layout', () => {
     render(
       <ContentArea 
         activeSpace="My Ideas" 
         activeFilter="Recent" 
         onFilterChange={mockOnFilterChange}
-        spaceContent={[]}
+        spaceContent={mockSpaceContent}
       />
     );
     
-    const imagesFilter = screen.getByText('Images');
-    fireEvent.click(imagesFilter);
-    
-    expect(mockOnFilterChange).toHaveBeenCalledWith('Images');
+    // Should render both cards
+    expect(screen.getByText('Test Note')).toBeInTheDocument();
+    expect(screen.getByText('Test Image')).toBeInTheDocument();
   });
 });
