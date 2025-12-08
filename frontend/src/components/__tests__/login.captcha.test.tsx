@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Login from '../components/login';
+import Login from '../login';
 
 // Mock ReactDOM.createPortal to render in place for testing
 vi.mock('react-dom', async () => {
