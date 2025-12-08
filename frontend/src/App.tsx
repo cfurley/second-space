@@ -139,7 +139,15 @@ export default function App() {
           }
         });
         
-        setSpaceContent(contentBySpace);
+        {
+          const defaultContent = getDefaultSpaceContent();
+          const mergedContent: {[key: string]: any[]} = {
+            'My Ideas': (contentBySpace['My Ideas'] && contentBySpace['My Ideas'].length) ? contentBySpace['My Ideas'] : defaultContent['My Ideas'],
+            'Work': (contentBySpace['Work'] && contentBySpace['Work'].length) ? contentBySpace['Work'] : defaultContent['Work'],
+            'Personal': (contentBySpace['Personal'] && contentBySpace['Personal'].length) ? contentBySpace['Personal'] : defaultContent['Personal'],
+          };
+          setSpaceContent(mergedContent);
+        }
       } catch (error) {
         console.error('Error loading content from localStorage:', error);
       }
@@ -259,7 +267,15 @@ export default function App() {
         }
       });
       
-      setSpaceContent(contentBySpace);
+      {
+        const defaultContent = getDefaultSpaceContent();
+        const mergedContent: {[key: string]: any[]} = {
+          'My Ideas': (contentBySpace['My Ideas'] && contentBySpace['My Ideas'].length) ? contentBySpace['My Ideas'] : defaultContent['My Ideas'],
+          'Work': (contentBySpace['Work'] && contentBySpace['Work'].length) ? contentBySpace['Work'] : defaultContent['Work'],
+          'Personal': (contentBySpace['Personal'] && contentBySpace['Personal'].length) ? contentBySpace['Personal'] : defaultContent['Personal'],
+        };
+        setSpaceContent(mergedContent);
+      }
       setSelectedItemIds([]);
       setIsDeleteMode(false);
       
@@ -349,7 +365,15 @@ export default function App() {
           }
         });
         
-        setSpaceContent(contentBySpace);
+        {
+          const defaultContent = getDefaultSpaceContent();
+          const mergedContent: {[key: string]: any[]} = {
+            'My Ideas': (contentBySpace['My Ideas'] && contentBySpace['My Ideas'].length) ? contentBySpace['My Ideas'] : defaultContent['My Ideas'],
+            'Work': (contentBySpace['Work'] && contentBySpace['Work'].length) ? contentBySpace['Work'] : defaultContent['Work'],
+            'Personal': (contentBySpace['Personal'] && contentBySpace['Personal'].length) ? contentBySpace['Personal'] : defaultContent['Personal'],
+          };
+          setSpaceContent(mergedContent);
+        }
       } catch (error) {
         console.error('Error loading content:', error);
       }
