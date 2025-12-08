@@ -112,10 +112,10 @@ export function Sidebar({ activeSpace, onSpaceChange }: SidebarProps) {
       </div>
 
       {/* Bottom controls positioned at the very bottom of the page */}
-      <div className="fixed left-4 bottom-6 z-50">
+      <div className="fixed left-4 bottom-4 z-50">
         <ThemeToggleButton embedded />
       </div>
-      <div className="fixed left-[244px] bottom-6 z-50">
+      <div className="fixed left-20 bottom-4 z-50">
         <CreateSpaceDialog buttonClassName="w-12 h-12 aspect-square bg-gray-300 dark:bg-[#2C2C2C] text-gray-800 dark:text-white rounded-full border-none cursor-pointer flex items-center justify-center text-2xl shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300" onCreateSpace={(spaceData) => {
           // add new spaces to All Spaces by default
           setAllSpaces(prev => [{ icon: spaceData.icon, name: spaceData.title }, ...prev]);
