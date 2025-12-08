@@ -149,7 +149,7 @@ describe('UserMenu Component', () => {
     const avatarButton = screen.getByText('JC');
     fireEvent.click(avatarButton);
     
-    expect(screen.getByText(/Jackie Chen/i)).toBeInTheDocument();
+    expect(screen.getByText('jackiechen')).toBeInTheDocument();
   });
 
   it('shows logout option when logged in', () => {
@@ -168,7 +168,7 @@ describe('UserMenu Component', () => {
     const avatarButton = screen.getByText('JC');
     fireEvent.click(avatarButton);
     
-    expect(screen.getByText('Logout')).toBeInTheDocument();
+    expect(screen.getByText(/🚪 Logout/)).toBeInTheDocument();
   });
 
   it('handles logout', () => {
@@ -187,7 +187,7 @@ describe('UserMenu Component', () => {
     const avatarButton = screen.getByText('JC');
     fireEvent.click(avatarButton);
     
-    const logoutButton = screen.getByText('Logout');
+    const logoutButton = screen.getByText(/🚪 Logout/);
     fireEvent.click(logoutButton);
     
     // Should return to default state
