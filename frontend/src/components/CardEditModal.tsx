@@ -40,27 +40,27 @@ export function CardEditModal({ open, onOpenChange, type, initial = {}, onSave }
         </DialogHeader>
 
         <div className="flex flex-col gap-3">
-          <label className="text-sm text-gray-700">Title</label>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-3 py-2 rounded border" />
+          <label htmlFor="card-title" className="text-sm text-gray-700">Title</label>
+          <input id="card-title" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-3 py-2 rounded border" />
 
           {(type === 'text' || type === 'ad' || type === 'link') && (
             <>
-              <label className="text-sm text-gray-700">Text</label>
-              <textarea value={text} onChange={(e) => setText(e.target.value)} rows={4} className="w-full px-3 py-2 rounded border" />
+              <label htmlFor="card-text" className="text-sm text-gray-700">Text</label>
+              <textarea id="card-text" value={text} onChange={(e) => setText(e.target.value)} rows={4} className="w-full px-3 py-2 rounded border" />
             </>
           )}
 
           {type === 'image' && (
             <>
-              <label className="text-sm text-gray-700">Image URL</label>
-              <input value={image} onChange={(e) => setImage(e.target.value)} className="w-full px-3 py-2 rounded border" />
+              <label htmlFor="card-image" className="text-sm text-gray-700">Image URL</label>
+              <input id="card-image" value={image} onChange={(e) => setImage(e.target.value)} className="w-full px-3 py-2 rounded border" />
             </>
           )}
 
           {type === 'link' && (
             <>
-              <label className="text-sm text-gray-700">Target URL</label>
-              <input value={url} onChange={(e) => setUrl(e.target.value)} className="w-full px-3 py-2 rounded border" />
+              <label htmlFor="card-url" className="text-sm text-gray-700">Target URL</label>
+              <input id="card-url" value={url} onChange={(e) => setUrl(e.target.value)} className="w-full px-3 py-2 rounded border" />
             </>
           )}
         </div>
