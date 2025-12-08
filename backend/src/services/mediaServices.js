@@ -5,8 +5,8 @@ import crypto from "crypto";
 import { fileTypeFromBuffer } from "file-type";
 import { sanitizeFilename } from "../utils/pathSecurity.js";
 
-// maximum file size allowed (bytes). 20 MB default.
-const MAX_FILE_SIZE = 20 * 1024 * 1024;
+// maximum file size allowed (bytes). 50 MB to support videos and large images.
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
 /**
  * Whitelist of allowed file extensions with their corresponding MIME types.
@@ -22,6 +22,10 @@ const ALLOWED_EXTENSIONS = {
   ".svg": ["image/svg+xml"],
   ".txt": ["text/plain"],
   ".json": ["application/json"],
+  ".mp4": ["video/mp4"],
+  ".webm": ["video/webm"],
+  ".mov": ["video/quicktime"],
+  ".avi": ["video/x-msvideo", "video/avi", "video/msvideo"],
 };
 
 /**
@@ -332,22 +336,24 @@ async function generateFilepath(media) {
 
   // map extensions to folders
   const imageExts = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg"];
+  const videoExts = [".mp4", ".webm", ".mov", ".avi"];
   const textExts = [".txt"];
   const jsonExts = [".json"];
 
   let folder = "others";
   if (imageExts.includes(ext)) folder = "images";
+  else if (videoExts.includes(ext)) folder = "videos";
   else if (textExts.includes(ext)) folder = "text";
   else if (jsonExts.includes(ext)) folder = "json";
 
   // Determine uploads root:
   // - If process.cwd() ends with 'backend', use process.cwd()/uploads
-  // - Otherwise use <repo-root>/backend/uploads
+  // - Otherwise use process.cwd()/uploads (Docker uses /app as working directory)
   const cwdBase = path.basename(process.cwd());
   const uploadsRoot =
     cwdBase === "backend"
       ? path.join(process.cwd(), "uploads")
-      : path.join(process.cwd(), "backend", "uploads");
+      : path.join(process.cwd(), "uploads");
   const destDir = path.join(uploadsRoot, folder);
   // ensure directory exists
   await fs.promises.mkdir(destDir, { recursive: true });

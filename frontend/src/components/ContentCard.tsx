@@ -11,6 +11,7 @@ interface ContentCardProps {
     timestamp: string;
     description?: string;
     isBookmarked?: boolean;
+    id?: string;
   };
   onToggleBookmark?: () => void;
   onEdit?: (fields: Record<string, any>) => void;
@@ -107,6 +108,18 @@ export function ContentCard({ type, content, onToggleBookmark, onEdit, onRequest
         );
       
       case 'link':
+        // Validate URL to prevent XSS attacks
+        const isValidUrl = (url: string) => {
+          try {
+            const urlObj = new URL(url);
+            return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+          } catch {
+            return false;
+          }
+        };
+        
+        const safeUrl = content.url && isValidUrl(content.url) ? content.url : '#';
+        
         return (
           <div className="p-3 h-56 overflow-y-auto bg-white dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/8 hover:border-gray-300 dark:hover:border-white/20 hover:scale-[1.02] transition-all duration-300 shadow-md hover:shadow-lg">
             <div className="h-full">
