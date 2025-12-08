@@ -105,20 +105,13 @@ export function UserMenu({
       {/* Dropdown Menu */}
       {isOpen && (
         <div 
-          className="absolute right-0 top-12 w-[280px] rounded-3xl shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden"
+          className="absolute right-0 top-12 w-[280px] rounded-3xl shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden border border-white/20"
           style={{
-            boxShadow: '0 0 60px rgba(0, 0, 0, 0.5), 0 20px 50px rgba(0, 0, 0, 0.8)',
+            backgroundColor: '#1a1a1a',
+            boxShadow: '0 0 60px rgba(0, 0, 0, 0.5), 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
           }}
         >
-             <div 
-               className="border border-white/20 rounded-3xl"
-               style={{
-                 backgroundColor: '#1a1a1a',
-                 opacity: 1,
-                 backdropFilter: 'none',
-                 boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
-               }}
-          >
+          <div className="p-4">
           {(isLoggedIn || cachedUser) ? (
             /* Logged In Menu */
             <div className="p-4">
@@ -314,7 +307,6 @@ export function UserMenu({
               )}
             </div>
           )}
-          </div>
         </div>
       )}
     </div>
