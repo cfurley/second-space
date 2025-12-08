@@ -5,6 +5,7 @@ import { Ollama } from 'ollama';
 const app = express();
 const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0';
+let server;
 
 // Initialize Ollama client
 const ollama = new Ollama({
@@ -191,7 +192,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, HOST, () => {
-  console.log(`AI Server running on http://${HOST}:${PORT}`);
-  console.log(`Ollama host: ${process.env.OLLAMA_HOST || 'http://ollama:11434'}`);
-});
+// Only start the listener when not under test to keep unit tests isolated
+if (process.env.NODE_ENV !== 'test') {
+  server = app.listen(PORT, HOST, () => {
+    console.log(`AI Server running on http://${HOST}:${PORT}`);
+    console.log(`Ollama host: ${process.env.OLLAMA_HOST || 'http://ollama:11434'}`);
+  });
+}
+
+export { app, server };
