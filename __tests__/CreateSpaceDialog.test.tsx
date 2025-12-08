@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { CreateSpaceDialog } from '../CreateSpaceDialog';
+import { CreateSpaceDialog } from '../frontend/src/components/CreateSpaceDialog';
 
 describe('CreateSpaceDialog Component', () => {
   const mockOnCreateSpace = vi.fn();

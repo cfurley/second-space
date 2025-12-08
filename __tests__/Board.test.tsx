@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Board from '../Board';
+import Board from '../frontend/src/components/Board';
 
 describe('Board Component', () => {
   it('renders without crashing', () => {

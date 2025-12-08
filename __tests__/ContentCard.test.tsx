@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { ContentCard } from '../ContentCard';
+import { ContentCard } from '../frontend/src/components/ContentCard';
 
 describe('ContentCard Component', () => {
   const mockOnToggleBookmark = vi.fn();

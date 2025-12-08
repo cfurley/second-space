@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Login from '../login';
-import { api } from '../../utils/api';
+import Login from '../frontend/src/components/login';
+import { api } from '../frontend/src/utils/api';
 
 // Mock the api module
 vi.mock('../../utils/api', () => ({
