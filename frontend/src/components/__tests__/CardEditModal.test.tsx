@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { CardEditModal } from '../CardEditModal';
@@ -136,16 +136,21 @@ describe('CardEditModal Component', () => {
     const titleInput = screen.getByLabelText('Title') as HTMLInputElement;
     const textInput = screen.getByLabelText('Text') as HTMLTextAreaElement;
     
-    // Use fireEvent which is more reliable for this case
-    fireEvent.change(titleInput, { target: { value: 'New Title' } });
-    fireEvent.change(textInput, { target: { value: 'New Text' } });
+    // Use act to wrap state updates
+    await act(async () => {
+      fireEvent.change(titleInput, { target: { value: 'New Title' } });
+      fireEvent.change(textInput, { target: { value: 'New Text' } });
+    });
     
     // Verify the values were updated in the inputs
     expect(titleInput.value).toBe('New Title');
     expect(textInput.value).toBe('New Text');
     
     const saveButton = screen.getByText('Save');
-    fireEvent.click(saveButton);
+    
+    await act(async () => {
+      fireEvent.click(saveButton);
+    });
 
     await waitFor(() => {
       expect(mockOnSave).toHaveBeenCalledWith({
