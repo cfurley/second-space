@@ -10,6 +10,8 @@ import { EditContentDialog } from './components/EditContentDialog';
 import AnimatedBackground from './components/AnimatedBackground';
 import { api } from './utils/api';
 import { ThemeToggleButton } from './components/ThemeToggleButton';
+import { ChatBot } from './components/ChatBot';
+import { ChatBotButton } from './components/ChatBotButton';
 
 export default function App() {
   const [activeNav, setActiveNav] = useState('Spaces');
@@ -41,6 +43,9 @@ export default function App() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  
+  // ChatBot state
+  const [isChatBotOpen, setIsChatBotOpen] = useState(false);
   
   // Load content from localStorage and backend on mount
   useEffect(() => {
@@ -508,6 +513,11 @@ export default function App() {
         contentData={editingItem}
         onSave={handleContentSave}
       />
+      
+      {/* ChatBot Components */}
+      <ChatBotButton onClick={() => setIsChatBotOpen(true)} />
+      <ChatBot isOpen={isChatBotOpen} onClose={() => setIsChatBotOpen(false)} />
+      
       <div className="w-full h-full flex flex-col relative z-10">
         <Header 
           activeNav={activeNav} 
