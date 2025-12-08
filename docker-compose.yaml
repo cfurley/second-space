@@ -42,9 +42,46 @@ services:
         - ./database/init:/docker-entrypoint-initdb.d
       networks:
         - app-network
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: second-space-ollama
+    restart: always
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - app-network
+    # Pull a model on startup (llama3.2 is a smaller model, good for testing)
+    # You can change this to other models like llama2, mistral, etc.
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        /bin/ollama serve &
+        sleep 5
+        ollama pull llama3.2
+        wait
+
+  ai-server:
+    build:
+      context: ./ai-server
+      dockerfile: Dockerfile
+    container_name: second-space-ai-server
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - ollama
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - PORT=3000
+    networks:
+      - app-network
       
 volumes:
   second_space_data:
+  ollama_data:
 
 networks:
   app-network:

@@ -4,6 +4,7 @@ import logger from "./src/utils/logger.js";
 import spaceRouter from "./src/routes/spacesRoutes.js";
 import mediaRouter from "./src/routes/mediaRoutes.js";
 import userRouter from "./src/routes/userRoutes.js";
+import aiRouter from "./src/routes/aiRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -66,6 +67,7 @@ app.use('/uploads', express.static('uploads'));
 app.use("/spaces", spaceRouter);
 app.use("/media", mediaRouter);
 app.use("/user", userRouter);
+app.use("/ai", aiRouter);
 //app.use('/containers', containerRouter);
 
 // Handle homepage route - Health check
@@ -78,6 +80,7 @@ app.get("/", (req, res) => {
       users: "/user",
       spaces: "/spaces",
       media: "/media",
+      ai: "/ai",
     },
   });
 });

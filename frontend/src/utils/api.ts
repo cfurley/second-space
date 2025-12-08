@@ -443,3 +443,61 @@ export interface ApiError {
   message: string;
   status?: number;
 }
+
+// ========================
+// AI Chat API
+// ========================
+
+export interface ChatMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+
+export interface ChatRequest {
+  messages: ChatMessage[];
+  model?: string;
+  stream?: boolean;
+}
+
+export interface ChatResponse {
+  message: ChatMessage;
+  model: string;
+  created_at: string;
+  done: boolean;
+}
+
+export const aiApi = {
+  /**
+   * Check AI service health
+   */
+  async checkHealth() {
+    return apiFetch('/ai/health');
+  },
+
+  /**
+   * List available AI models
+   */
+  async listModels() {
+    return apiFetch('/ai/models');
+  },
+
+  /**
+   * Send a chat message to the AI
+   */
+  async chat(request: ChatRequest): Promise<ChatResponse> {
+    return apiFetch('/ai/chat', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  },
+
+  /**
+   * Generate text from a prompt
+   */
+  async generate(prompt: string, model: string = 'llama3.2', stream: boolean = false) {
+    return apiFetch('/ai/generate', {
+      method: 'POST',
+      body: JSON.stringify({ prompt, model, stream }),
+    });
+  },
+};
